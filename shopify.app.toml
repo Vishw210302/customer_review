@@ -1,0 +1,29 @@
+# Learn more about configuring your app at https://shopify.dev/docs/apps/tools/cli/configuration
+
+client_id = "62f639e7df70e5c7c61e8e7bdb75bea9"
+name = "customer-review"
+handle = "customer-review-6"
+application_url = "https://sitemap-wagon-universal-expires.trycloudflare.com"
+embedded = true
+
+[build]
+automatically_update_urls_on_dev = true
+dev_store_url = "vishw-store.myshopify.com"
+include_config_on_deploy = true
+
+[access_scopes]
+# Learn more at https://shopify.dev/docs/apps/tools/cli/configuration#access_scopes
+scopes = "write_products"
+
+[auth]
+redirect_urls = [
+  "https://sitemap-wagon-universal-expires.trycloudflare.com/auth/callback",
+  "https://sitemap-wagon-universal-expires.trycloudflare.com/auth/shopify/callback",
+  "https://sitemap-wagon-universal-expires.trycloudflare.com/api/auth/callback"
+]
+
+[webhooks]
+api_version = "2025-01"
+
+[pos]
+embedded = false
