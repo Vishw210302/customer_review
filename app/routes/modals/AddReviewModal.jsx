@@ -18,7 +18,7 @@ import {
 } from '@shopify/polaris-icons';
 import { useState } from 'react';
 
-const AddReviewModal = ({ isOpen, onClose }) => {
+const AddReviewModal = ({ isOpen, onClose, setModalOpen }) => {
 
     const actionData = useActionData();
     const navigation = useNavigation();
@@ -54,7 +54,7 @@ const AddReviewModal = ({ isOpen, onClose }) => {
             }
         }
         setToastActive(true);
-    };
+    }
 
     if (actionData && !toastActive) {
         handleActionResult(actionData);
@@ -95,6 +95,7 @@ const AddReviewModal = ({ isOpen, onClose }) => {
     };
 
     const handleSubmit = async (event) => {
+
         event.preventDefault();
 
         if (validateForm()) {
@@ -106,28 +107,19 @@ const AddReviewModal = ({ isOpen, onClose }) => {
             formDataa.append('recommend', recommend !== null ? recommend.toString() : '')
             formDataa.append('reviewText', reviewText)
             formDataa.append('productId', productId)
-            const submissionData = {
-                ...formData,
-                rating,
-                recommend: recommend !== null ? recommend.toString() : '',
-                reviewText,
-                productId,
-            };
-
-            console.log(submissionData, "submissionData");
 
             try {
-                const response = await fetch('/app/crudeOperation/submit', {
+                const response = await fetch('https://5605-122-164-16-245.ngrok-free.app/api/addReview', {
                     method: 'POST',
                     body: formDataa,
                 });
-                console.log(response,"response_response")
+                resetForm();
+                setModalOpen(false);
                 if (!response.ok) {
                     throw new Error(`HTTP error! Status: ${response.status}`);
                 }
 
                 const result = await response.json();
-                console.log('Submission successful:', result);
 
             } catch (error) {
                 console.error('Error submitting data:', error);
