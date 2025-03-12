@@ -1,6 +1,9 @@
 import { json } from "@remix-run/node";
 
 export const action = async ({ request }) => {
+
+    const APIURL = process.env.API_URL
+
     try {
         if (request.method === "POST") {
             const formData = await request.formData();
@@ -33,7 +36,7 @@ export const action = async ({ request }) => {
                 }, { status: 400 });
             }
 
-            const response = await fetch("https://5605-122-164-16-245.ngrok-free.app/api/addReview", {
+            const response = await fetch(`${APIURL}/api/addReview`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",

@@ -6,9 +6,10 @@ import { authenticate } from "../shopify.server";
 
 export const loader = async ({ request }) => {
 
-  const { admin, session } = await authenticate.admin(request);
+  const { session } = await authenticate.admin(request);
   const shopDomain = session.shop;
   const accessToken = session.accessToken;
+  const appBlckId = process.env.SHOPIFY_REVIEW_ID;
 
   const getActiveThemeQuery = `
   query {
@@ -55,16 +56,17 @@ export const loader = async ({ request }) => {
     activeTheme,
     session,
     shopDomain,
+    appBlckId
   });
 
 };
 
 export const action = async ({ request }) => {
 
-  const { admin, session } = await authenticate.admin(request);
+  const { session } = await authenticate.admin(request);
   const formData = await request.formData();
   const activeThemeId = formData.get("activeThemeId");
-
+  const appBlckId = process.env.SHOPIFY_REVIEW_ID;
   const accessToken = session.accessToken;
   const shopDomain = session.shop;
 
@@ -101,36 +103,46 @@ export const action = async ({ request }) => {
   );
 
   const appEmbedData = await response.json();
-  const data = appEmbedData.data.theme.files.nodes[0].body.content;
+  const data = appEmbedData?.data?.theme?.files?.nodes[0].body?.content;
 
-  const productSectionBlocks = JSON.parse(
-    data.substring(data.indexOf("{")),
-  ).current;
+  try {
+    const settingsData = JSON.parse(data.substring(data.indexOf('{')));
+    const currentSettings = settingsData.current;
 
-  var checkDisabled = true;
+    let appNeedsToBeEmbedded = true;
 
-  if (typeof productSectionBlocks.blocks == 'undefined') {
-    checkDisabled = true;
-  } else {
-    checkDisabled = Object.values(productSectionBlocks.blocks).find((item) =>
-      item.type.includes("11c1775f-0f8d-4694-9a1a-a376d42343e3")
-    )?.disabled ?? true;
+    if (currentSettings && currentSettings.blocks) {
+      const appBlock = Object.values(currentSettings.blocks).find(
+        (item) => item.type && item.type.includes(appBlckId)
+      );
+
+      if (appBlock && appBlock.disabled !== true) {
+        appNeedsToBeEmbedded = false;
+      }
+    }
+
+    return json({
+      checkDisabled: appNeedsToBeEmbedded,
+    });
+
+  } catch (error) {
+    console.error('Error parsing theme settings:', error);
+    return json({
+      checkDisabled: true,
+      error: 'Failed to parse theme settings',
+    });
   }
 
-  return json({
-    checkDisabled,
-  });
 };
 
 const ThemeStatus = () => {
 
-  const { themeNames, activeTheme, session, shopDomain } = useLoaderData();
+  const { themeNames, activeTheme, session, appBlckId } = useLoaderData();
   const fetcher = useFetcher();
-  const [showError, setShowError] = useState(false);
   const [isThemeSelectionVisible, setIsThemeSelectionVisible] = useState(false);
-  const [showAppEmbed, setshowAppEmbed] = useState(false);
+  const [showAppEmbed, setShowAppEmbed] = useState(true);
   const [selectedTheme, setSelectedTheme] = useState(activeTheme?.id);
-  const linkRef = useRef(null);
+  const [appEmbedStatus, setAppEmbedStatus] = useState(null);
   const refLink = useRef(null);
 
   const styles = {
@@ -152,7 +164,6 @@ const ThemeStatus = () => {
       margin: "0",
       fontSize: "16px",
       fontWeight: "bold",
-      cursor: "pointer",
     },
     subtitle: {
       color: "#666",
@@ -206,6 +217,29 @@ const ThemeStatus = () => {
       height: "24px",
       width: "18px",
     },
+    statusSection: {
+      marginTop: "15px",
+      padding: "15px",
+      backgroundColor: "#f1f1f1",
+      borderRadius: "5px",
+    },
+    statusActive: {
+      color: "green",
+      fontWeight: "bold",
+    },
+    statusInactive: {
+      color: "red",
+      fontWeight: "bold",
+    },
+    liquidCode: {
+      backgroundColor: "#f8f8f8",
+      padding: "15px",
+      border: "1px solid #ddd",
+      borderRadius: "5px",
+      marginTop: "15px",
+      fontFamily: "monospace",
+      whiteSpace: "pre-wrap",
+    }
   };
 
   useEffect(() => {
@@ -213,15 +247,26 @@ const ThemeStatus = () => {
       const storedTheme = localStorage.getItem("Activetheme");
       if (storedTheme) {
         setSelectedTheme(storedTheme);
+        fetcher.submit(
+          { activeThemeId: storedTheme },
+          { method: "post" }
+        );
       } else {
         setSelectedTheme(activeTheme?.id);
+        if (activeTheme?.id) {
+          fetcher.submit(
+            { activeThemeId: activeTheme.id },
+            { method: "post" }
+          );
+        }
       }
     }
   }, []);
 
   useEffect(() => {
     if (fetcher.data?.checkDisabled !== undefined) {
-      setshowAppEmbed(fetcher.data.checkDisabled);
+      setShowAppEmbed(fetcher.data.checkDisabled);
+      setAppEmbedStatus(!fetcher.data.checkDisabled);
     }
   }, [fetcher.data]);
 
@@ -229,9 +274,7 @@ const ThemeStatus = () => {
     (id) => {
       setSelectedTheme(id);
       fetcher.submit(
-        {
-          activeThemeId: id,
-        },
+        { activeThemeId: id },
         { method: "post" },
       );
       localStorage.setItem("Activetheme", id);
@@ -239,16 +282,18 @@ const ThemeStatus = () => {
     [fetcher, setSelectedTheme],
   );
 
-  const handleAddBlock = () => {
-    linkRef.current.click();
-  };
-
   const handleAppembed = () => {
     refLink.current.click();
   };
 
   const toggleThemeSelection = () => {
     setIsThemeSelectionVisible(!isThemeSelectionVisible);
+  };
+
+  const renderLiquidCode = () => {
+    if (appEmbedStatus === null) {
+      return <p>Checking app embed status...</p>;
+    }
   };
 
   return (
@@ -312,12 +357,6 @@ const ThemeStatus = () => {
                   ))}
             </div>
           </div>
-
-          {showError && (
-            <p style={{ color: "red", marginTop: "10px" }}>
-              Please select a theme before adding the block.
-            </p>
-          )}
         </div>
       </div>
 
@@ -349,7 +388,7 @@ const ThemeStatus = () => {
               target="_blank"
               href={
                 selectedTheme
-                  ? `https://${session.shop}/admin/themes/${selectedTheme?.split("/").pop()}/editor?context=apps&activateAppId=11c1775f-0f8d-4694-9a1a-a376d42343e3/embed`
+                  ? `https://${session.shop}/admin/themes/${selectedTheme?.split("/").pop()}/editor?context=apps&activateAppId=${appBlckId}/app-embed`
                   : "#"
               }
               style={{ display: "none" }}
@@ -361,54 +400,27 @@ const ThemeStatus = () => {
       )}
 
       <div style={styles.content}>
-        <div style={styles.appBlockSection}>
-          <div>
+        <div style={styles.statusSection}>
+          <h3 style={styles.title}>App Embed Status</h3>
+          <p style={styles.subtitle}>
+            Current status of the app embed in your selected theme:
+          </p>
 
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "10px",
-                cursor: "pointer",
-              }}
-            >
-              <h3 style={styles.title}>Add App Block On Product Page</h3>
-            </div>
-
-            <p style={styles.subtitle}>
-              Click the button to add the Stock-Info Inventory widget to your
-              product page
+          {fetcher.state === "submitting" ? (
+            <p>Checking status...</p>
+          ) : (
+            <p>
+              Status: {appEmbedStatus === null ? (
+                "Checking..."
+              ) : appEmbedStatus ? (
+                <span style={styles.statusActive}>Active</span>
+              ) : (
+                <span style={styles.statusInactive}>Not Active</span>
+              )}
             </p>
+          )}
 
-          </div>
-
-          <Button
-            onClick={() => {
-              if (!selectedTheme) {
-                setShowError(true);
-                return;
-              }
-              setShowError(false);
-              handleAddBlock();
-            }}
-            style={styles.addBlockButton}
-          >
-            Add Block
-          </Button>
-
-          <a
-            ref={linkRef}
-            target="_blank"
-            href={
-              selectedTheme
-                ? `https://${session.shop}/admin/themes/${selectedTheme?.split("/").pop()}/editor?template=product&addAppBlockId=11c1775f-0f8d-4694-9a1a-a376d42343e3/Stock-info&target=mainSection`
-                : "#"
-            }
-            style={{ display: "none" }}
-          >
-            Add app block
-          </a>
-
+          {renderLiquidCode()}
         </div>
       </div>
 

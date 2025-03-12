@@ -1,4 +1,4 @@
-import { useActionData, useNavigation } from '@remix-run/react';
+/* import { useActionData, useNavigation } from '@remix-run/react';
 import {
     Button,
     ButtonGroup,
@@ -109,7 +109,7 @@ const AddReviewModal = ({ isOpen, onClose, setModalOpen }) => {
             formDataa.append('productId', productId)
 
             try {
-                const response = await fetch('https://5605-122-164-16-245.ngrok-free.app/api/addReview', {
+                const response = await fetch('https://fe86-117-98-157-98.ngrok-free.app/api/addReview', {
                     method: 'POST',
                     body: formDataa,
                 });
@@ -119,7 +119,7 @@ const AddReviewModal = ({ isOpen, onClose, setModalOpen }) => {
                     throw new Error(`HTTP error! Status: ${response.status}`);
                 }
 
-                const result = await response.json();
+                await response.json();
 
             } catch (error) {
                 console.error('Error submitting data:', error);
@@ -157,6 +157,7 @@ const AddReviewModal = ({ isOpen, onClose, setModalOpen }) => {
                 ]}
             >
                 <Modal.Section>
+
                     <Form method="post" onSubmit={handleSubmit}>
                         <input type="hidden" name="productId" value={productId} />
                         <FormLayout>
@@ -242,9 +243,12 @@ const AddReviewModal = ({ isOpen, onClose, setModalOpen }) => {
                             </div>
 
                             <div>
+
                                 <Text variant="headingMd">Would you recommend this product?</Text>
                                 <input type="hidden" name="recommend" value={recommend !== null ? recommend.toString() : ''} />
+
                                 <ButtonGroup segmented fullWidth>
+
                                     <Button
                                         pressed={recommend === true}
                                         onClick={() => setRecommend(true)}
@@ -256,6 +260,7 @@ const AddReviewModal = ({ isOpen, onClose, setModalOpen }) => {
                                             <Icon source={ThumbsUpIcon} />
                                         </div>
                                     </Button>
+
                                     <Button
                                         pressed={recommend === false}
                                         onClick={() => setRecommend(false)}
@@ -267,14 +272,18 @@ const AddReviewModal = ({ isOpen, onClose, setModalOpen }) => {
                                             <Icon source={ThumbsDownIcon} />
                                         </div>
                                     </Button>
+
                                 </ButtonGroup>
+
                             </div>
+
                         </FormLayout>
                     </Form>
+
                 </Modal.Section>
             </Modal>
         </Frame>
     );
 };
 
-export default AddReviewModal;
+export default AddReviewModal; */

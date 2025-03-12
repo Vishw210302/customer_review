@@ -18,8 +18,11 @@ import React, { useState } from 'react';
 import DeleteButtonModal from './modals/DeleteButtonModal';
 
 export async function loader() {
+
+  const APIURL = process.env.API_URL;
+
   try {
-    const response = await fetch("https://5605-122-164-16-245.ngrok-free.app/api/getallReview")
+    const response = await fetch(`${APIURL}/api/getallReview`)
     if (!response.ok) {
       console.error("API error:", response.status, response.statusText);
       return { success: false, reviews: [] };
@@ -30,9 +33,12 @@ export async function loader() {
     console.error("Failed to fetch reviews:", error);
     return { success: false, reviews: [] };
   }
+
 }
 
 export async function action({ request }) {
+
+  const APIURL = process.env.API_URL
   const formData = await request.formData();
   const actionType = formData.get('actionType');
 
@@ -40,7 +46,7 @@ export async function action({ request }) {
     const reviewId = formData.get('reviewId');
 
     try {
-      const response = await fetch(`https://5605-122-164-16-245.ngrok-free.app/api/deleteReview/${reviewId}`, {
+      const response = await fetch(`${APIURL}/api/deleteReview/${reviewId}`, {
         method: 'DELETE',
         headers: { 'ngrok-skip-browser-warning': true }
       });
@@ -64,7 +70,7 @@ export async function action({ request }) {
     const newStatus = formData.get('newStatus') === 'true';
 
     try {
-      const response = await fetch(`https://5605-122-164-16-245.ngrok-free.app/api/updateReview/${reviewId}`, {
+      const response = await fetch(`${APIURL}/api/updateReview/${reviewId}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -90,6 +96,7 @@ export async function action({ request }) {
   }
 
   return { success: false, error: 'Invalid action type' };
+
 }
 
 function CustomerReviewsManager() {
@@ -100,16 +107,16 @@ function CustomerReviewsManager() {
   const [selectedReviewId, setSelectedReviewId] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [toast, setToast] = useState({ active: false, message: '', error: false });
+  const itemsPerPage = 10;
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentReviews = reviews.slice(indexOfFirstItem, indexOfLastItem);
   const [reviewStatuses, setReviewStatuses] = useState(
     reviews.reduce((acc, review) => {
       acc[review._id] = review.isActive;
       return acc;
     }, {})
   );
-  const itemsPerPage = 10;
-  const indexOfLastItem = currentPage * itemsPerPage;
-  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentReviews = reviews.slice(indexOfFirstItem, indexOfLastItem);
 
   const handleDeleteModalOpen = (id) => {
     setSelectedReviewId(id);
@@ -219,7 +226,6 @@ function CustomerReviewsManager() {
   ];
 
   const rows = currentReviews.map((review, index) => {
-    console.log("reviewreviewreviewreviewreviewreviewreviewreview", review)
     const ratingDisplay = getRatingText(review.rating);
 
     return [
@@ -271,6 +277,7 @@ function CustomerReviewsManager() {
   });
 
   return (
+
     <AppProvider>
       <Frame>
         <Page title="Customer Reviews Dashboard">
@@ -312,9 +319,11 @@ function CustomerReviewsManager() {
               onDismiss={toggleToast}
             />
           )}
+
         </Page>
       </Frame>
     </AppProvider>
+
   );
 }
 
