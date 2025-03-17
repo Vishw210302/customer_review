@@ -5,12 +5,8 @@
   <div class="rating-summary">
     <span class="rating-label">{{ 'ratings.stars.label' | t }}</span>
     <div class="stars-container" id="stars-container">
-      {%- for i in (1..rating) -%}
-        <span class="star filled" aria-hidden="true">★</span>
-      {%- endfor -%}
-      {%- assign blank_stars = 5 | minus: rating -%}
-      {%- for i in (1..blank_stars) -%}
-        <span class="star empty" aria-hidden="true">☆</span>
+      {%- for i in (1..5) -%}
+        <span class="star empty" aria-hidden="true" data-star-index="{{ i }}">☆</span>
       {%- endfor -%}
     </div>
     <span class="rating-count" id="rating-count">({{ product.metafields.reviews.rating_count | default: 0 }})</span>
@@ -40,6 +36,7 @@
   .star {
     font-size: 20px;
     padding: 0 2px;
+    position: relative;
   }
 
   .star.filled {
@@ -49,6 +46,21 @@
 
   .star.empty {
     color: #d1d5db;
+  }
+
+  .star.partial {
+    position: relative;
+    color: #d1d5db;
+  }
+
+  .star.partial::before {
+    content: '★';
+    position: absolute;
+    left: 2px;
+    top: 0;
+    color: #ff9d2d;
+    overflow: hidden;
+    width: var(--percent-filled);
   }
 
   .rating-count {
@@ -171,7 +183,7 @@
     const starsContainer = document.getElementById('stars-container');
     const ratingCountElement = document.getElementById('rating-count');
 
-    const GET_REVIEWS_API = `https://fe86-117-98-157-98.ngrok-free.app/api/getReview/{{ product_id }}`;
+    const GET_REVIEWS_API = `https://82ce-117-98-157-98.ngrok-free.app/api/getReview/{{ product_id }}`;
 
     fetchReviews();
 
@@ -192,7 +204,7 @@
         const data = await response.json();
 
         updateRatingSummary(data);
-        renderReviews(data.reviews);
+        {% comment %} renderReviews(data.reviews); {% endcomment %}
       } catch (error) {
         console.error('Error fetching reviews:', error);
       }
@@ -200,53 +212,30 @@
 
     function updateRatingSummary(data) {
       const averageRating = data.averageRating || 0;
-      const displayRating = Math.round(averageRating);
+      const stars = document.querySelectorAll('.star');
 
-      starsContainer.innerHTML = '';
+      stars.forEach((star, index) => {
+        const starValue = index + 1;
 
-      // Create filled stars
-      for (let i = 0; i < displayRating; i++) {
-        const star = document.createElement('span');
-        star.className = 'star filled';
-        star.setAttribute('aria-hidden', 'true');
-        star.textContent = '★';
-        starsContainer.appendChild(star);
-      }
-
-      // Create empty stars
-      for (let i = displayRating; i < 5; i++) {
-        const star = document.createElement('span');
-        star.className = 'star empty';
-        star.setAttribute('aria-hidden', 'true');
-        star.textContent = '☆';
-        starsContainer.appendChild(star);
-      }
+        if (starValue <= Math.floor(averageRating)) {
+          // Full star
+          star.className = 'star filled';
+          star.textContent = '★';
+        } else if (starValue === Math.ceil(averageRating) && averageRating % 1 !== 0) {
+          // Partial star
+          star.className = 'star partial';
+          star.textContent = '☆';
+          const percentFilled = (averageRating % 1) * 100;
+          star.style.setProperty('--percent-filled', `${percentFilled}%`);
+        } else {
+          // Empty star
+          star.className = 'star empty';
+          star.textContent = '☆';
+        }
+      });
 
       const reviewCount = data.totalReviews || data.reviews.length || 0;
       ratingCountElement.textContent = `(${reviewCount})`;
-    }
-
-    function renderReviews(reviews) {
-      let reviewsHTML = '<div class="reviews-list">';
-
-      reviews.forEach((review) => {
-        const date = new Date(review.date).toLocaleDateString();
-        const stars = '★'.repeat(review.rating) + '☆'.repeat(5 - review.rating);
-
-        reviewsHTML += `
-          <div class="review-item">
-            <div class="review-header">
-              <span class="review-author">${review.author || 'Anonymous'}</span>
-              <span class="review-date">${date}</span>
-            </div>
-            <div class="review-rating">${stars}</div>
-            <div class="review-content">${review.content}</div>
-          </div>
-        `;
-      });
-
-      reviewsHTML += '</div>';
-      reviewsHTML += '<a href="#" class="write-review-btn">Write a Review</a>';
     }
   });
 </script>

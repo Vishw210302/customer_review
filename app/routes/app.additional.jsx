@@ -310,6 +310,7 @@ const ThemeStatus = () => {
 
       <div style={styles.content}>
         <div style={styles.contentBackground}>
+
           <div
             style={{
               display: "flex",
@@ -327,6 +328,7 @@ const ThemeStatus = () => {
             />
             <h3 style={styles.title}>Theme Selection</h3>
           </div>
+
           <p style={styles.subtitle}>
             Select a theme you want to activate the product page inventory
             widget on:
@@ -357,12 +359,14 @@ const ThemeStatus = () => {
                   ))}
             </div>
           </div>
+
         </div>
       </div>
 
       {showAppEmbed && (
         <div style={styles.content}>
           <div style={styles.appBlockSection}>
+
             <div>
               <div
                 style={{
@@ -380,9 +384,11 @@ const ThemeStatus = () => {
                 Click the button to Active the Stock-Info App
               </p>
             </div>
+
             <Button onClick={handleAppembed} style={{ background: "#000" }}>
               Activate app embed
             </Button>
+
             <a
               ref={refLink}
               target="_blank"
@@ -395,16 +401,20 @@ const ThemeStatus = () => {
             >
               Add app block
             </a>
+
           </div>
         </div>
       )}
 
       <div style={styles.content}>
         <div style={styles.statusSection}>
-          <h3 style={styles.title}>App Embed Status</h3>
-          <p style={styles.subtitle}>
-            Current status of the app embed in your selected theme:
-          </p>
+
+          <div>
+            <h3 style={styles.title}>App Embed Status</h3>
+            <p style={styles.subtitle}>
+              Current status of the app embed in your selected theme:
+            </p>
+          </div>
 
           {fetcher.state === "submitting" ? (
             <p>Checking status...</p>
@@ -421,6 +431,7 @@ const ThemeStatus = () => {
           )}
 
           {renderLiquidCode()}
+
         </div>
       </div>
 

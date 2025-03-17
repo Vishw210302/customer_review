@@ -8,14 +8,14 @@ import ProductRatingWidget from './modals/ProductRatingWidget';
 
 export const loader = async ({ request }) => {
 
-  const { session } = await authenticate.admin(request);
+  const { session, admin } = await authenticate.admin(request);
   const accessToken = session.accessToken
   const blockId = process.env.SHOPIFY_REVIEW_ID;
   let themeNames = [];
   let activeTheme = null;
+  let shopData = null;
 
-  const getActiveThemeQuery =
-    `query {
+  const getActiveThemeQuery = `query {
       themes(first: 20) {
         edges {
           node {
@@ -27,6 +27,23 @@ export const loader = async ({ request }) => {
       }
     }
   `;
+
+  const getShopDataQuery = `query {
+    shop {
+      id
+      name
+      myshopifyDomain
+      primaryDomain {
+        url
+        host
+      }
+      plan {
+        displayName
+        partnerDevelopment
+        shopifyPlus
+      }
+    }
+  }`;
 
   try {
     const themeResponse = await fetch(
@@ -52,6 +69,53 @@ export const loader = async ({ request }) => {
       )?.node || null;
     }
 
+    const shopResponse = await fetch(
+      `https://${session.shop}/admin/api/2025-01/graphql.json`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-Shopify-Access-Token": accessToken,
+        },
+        body: JSON.stringify({
+          query: getShopDataQuery,
+        }),
+      },
+    );
+
+    const shopDataResponse = await shopResponse.json();
+    const shopData = shopDataResponse?.data?.shop;
+    const blockID = process.env.SHOPIFY_REVIEW_ID;
+
+    const metafieldUpdateResponse = await admin.graphql(`
+      mutation {
+        metafieldsSet(metafields: [
+          {
+             ownerId: "${shopData?.id}",
+             namespace: "accesstoken",
+             key: "token",
+             value: "${accessToken}",
+             type: "string"
+          },
+          {
+             ownerId: "${shopData?.id}",
+             namespace: "blockID",
+             key: "blockID",
+             value: "${blockID}",
+             type: "string"
+          },
+        ]) {
+          metafields {
+            id
+          }
+        }
+      }
+    `);
+
+    if (metafieldUpdateResponse.errors) {
+      console.error("Error updating metafields:", metafieldUpdateResponse.errors);
+    }
+
   } catch (error) {
     console.log("error", error);
   }
@@ -61,6 +125,7 @@ export const loader = async ({ request }) => {
     activeTheme,
     session,
     blockId,
+    shopData,
   });
 };
 

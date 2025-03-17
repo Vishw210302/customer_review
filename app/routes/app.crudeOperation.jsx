@@ -293,6 +293,7 @@ function CustomerReviewsManager() {
                   'Date', 'Review', 'Recommended', 'Status', 'Actions'
                 ]}
                 rows={rows}
+                hideScrollIndicator={true}
               />
               <div style={{ display: 'flex', justifyContent: 'center', marginTop: '1rem' }}>
                 <Pagination
