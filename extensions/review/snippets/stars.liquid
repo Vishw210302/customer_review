@@ -1,4 +1,3 @@
-{% assign rating = 5 %}
 {% assign product_id = product.id %}
 
 <div class="container">
@@ -957,8 +956,8 @@
     const reviewCountElement = document.querySelector('.review-count');
     const ratingBars = document.querySelectorAll('.rating-bar');
 
-    const ADD_REVIEW_API = 'https://82ce-117-98-157-98.ngrok-free.app/api/addReview';
-    const GET_REVIEWS_API = `https://82ce-117-98-157-98.ngrok-free.app/api/getReview/{{ product_id }}`;
+    const ADD_REVIEW_API = 'https://247b-106-215-39-79.ngrok-free.app/api/addReview';
+    const GET_REVIEWS_API = `https://247b-106-215-39-79.ngrok-free.app/api/getReview/{{ product_id }}`;
 
     fetchReviews();
 

@@ -1,0 +1,20 @@
+<span class="main_block_listing">
+  {% render 'store-review-listing' %}
+</span>
+
+<script></script>
+
+{% schema %}
+{
+  "name": "store-review",
+  "target": "section",
+  "settings": [
+    {
+      "type": "color",
+      "id": "star_color",
+      "label": "Star Color",
+      "default": "#ff9d2d"
+    }
+  ]
+}
+{% endschema %}

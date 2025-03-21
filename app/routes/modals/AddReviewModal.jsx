@@ -109,7 +109,7 @@ const AddReviewModal = ({ isOpen, onClose, setModalOpen }) => {
             formDataa.append('productId', productId)
 
             try {
-                const response = await fetch('https://82ce-117-98-157-98.ngrok-free.app/api/addReview', {
+                const response = await fetch('https://247b-106-215-39-79.ngrok-free.app/api/addReview', {
                     method: 'POST',
                     body: formDataa,
                 });

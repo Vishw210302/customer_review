@@ -22,15 +22,15 @@ export default function App() {
         <Link to="/app" rel="home">
           Home
         </Link>
-        <Link to="/app/additional">App Embed</Link>
-        <Link to="/app/crudeOperation">Review Listing</Link>
+        <Link to="/app/mainDashboard">Dashboard</Link>
+        <Link to="/app/crudeOperation">All Reviews</Link>
+        <Link to="/app/additional">Widgets</Link>
       </NavMenu>
       <Outlet />
     </AppProvider>
   );
 }
 
-// Shopify needs Remix to catch some thrown responses, so that their headers are included in the response.
 export function ErrorBoundary() {
   return boundary.error(useRouteError());
 }
