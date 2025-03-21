@@ -1,5 +1,5 @@
 import { json } from "@remix-run/node";
-import { useFetcher, useLoaderData, useNavigate } from "@remix-run/react";
+import { useFetcher, useLoaderData, useNavigation } from "@remix-run/react";
 import {
   Badge,
   BlockStack,
@@ -144,7 +144,7 @@ export const action = async ({ request }) => {
   }
 };
 
-const Index = () => {
+function Index() {
 
   const { themeNames, activeTheme, session, appBlckId } = useLoaderData();
   const fetcher = useFetcher();
@@ -153,8 +153,25 @@ const Index = () => {
   const [selectedTheme, setSelectedTheme] = useState(activeTheme?.id);
   const [appEmbedStatus, setAppEmbedStatus] = useState(null);
   const refLink = useRef(null);
-  const navigate = useNavigate();
+  const navigate = useNavigation();
+  const isPageLoading = false;
   const [showAll, setShowAll] = useState(false);
+
+  if (isPageLoading) {
+    return (
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          background: "#e3e3e3",
+          height: "100vh",
+        }}
+      >
+         <Spinner accessibilityLabel="Loading widgets" size="large" />
+      </div>
+    );
+  }
 
   const appData = [
     {
@@ -460,6 +477,7 @@ const Index = () => {
       </Box>
     </Page>
   );
+
 };
 
 export default Index;

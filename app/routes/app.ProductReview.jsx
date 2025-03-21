@@ -10,13 +10,12 @@ import {
     Page,
     Pagination,
     Select,
-    Spinner,
     Text,
     Toast
 } from '@shopify/polaris';
 import { DeleteIcon } from '@shopify/polaris-icons';
 import '@shopify/polaris/build/esm/styles.css';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import DeleteButtonModal from './modals/DeleteButtonModal';
 
 export async function loader({ request }) {
@@ -138,7 +137,6 @@ function ProductReview() {
     const [deleteModalOpen, setDeleteModalOpen] = useState(false);
     const [selectedReviewId, setSelectedReviewId] = useState(null);
     const [toast, setToast] = useState({ active: false, message: '', error: false });
-    const [isLoading, setIsLoading] = useState(false);
     const [searchQuery, setSearchQuery] = useState("");
     const [ratingFilter, setRatingFilter] = useState("");
     const [statusFilter, setStatusFilter] = useState("");
@@ -148,6 +146,9 @@ function ProductReview() {
             return acc;
         }, {})
     );
+
+    const isInitialMount = useRef(true);
+    const filtersChanged = useRef(false);
 
     useEffect(() => {
         const url = new URL(window.location.href);
@@ -166,15 +167,22 @@ function ProductReview() {
     }, [reviews]);
 
     useEffect(() => {
-        const timeoutId = setTimeout(() => {
-            applyFilters(pagination.currentPage);
-        }, 500);
+        if (isInitialMount.current) {
+            isInitialMount.current = false;
+            return;
+        }
 
-        return () => clearTimeout(timeoutId);
+        if (filtersChanged.current) {
+            const timeoutId = setTimeout(() => {
+                applyFilters(1);
+                filtersChanged.current = false;
+            }, 500);
+
+            return () => clearTimeout(timeoutId);
+        }
     }, [searchQuery, statusFilter, ratingFilter]);
 
     const applyFilters = (page = 1) => {
-        setIsLoading(true);
         const params = new URLSearchParams();
 
         if (searchQuery) {
@@ -197,10 +205,6 @@ function ProductReview() {
             replace: true,
             preventScrollReset: true
         });
-
-        setTimeout(() => {
-            setIsLoading(false);
-        }, 500);
     };
 
     const handlePageChange = (newPage) => {
@@ -218,7 +222,6 @@ function ProductReview() {
     };
 
     const handleDeleteReview = () => {
-        setIsLoading(true);
         const formData = new FormData();
         formData.append('reviewId', selectedReviewId);
         formData.append('actionType', 'deleteReview');
@@ -236,13 +239,11 @@ function ProductReview() {
         handleDeleteModalClose();
 
         setTimeout(() => {
-            setIsLoading(false);
             applyFilters(pagination.currentPage);
         }, 500);
     };
 
     const handleStatusChange = (reviewId, newStatus) => {
-        setIsLoading(true);
         const isActive = newStatus === 'true';
         const formData = new FormData();
         formData.append('reviewId', reviewId);
@@ -263,10 +264,6 @@ function ProductReview() {
             message: `Review status changed to ${isActive ? 'Active' : 'Inactive'}`,
             error: false
         });
-
-        setTimeout(() => {
-            setIsLoading(false);
-        }, 500);
     };
 
     const toggleToast = () => {
@@ -311,6 +308,28 @@ function ProductReview() {
         { label: 'Good', value: '4' },
         { label: 'Excellent', value: '5' },
     ];
+
+    const handleSearchChange = (value) => {
+        setSearchQuery(value);
+        filtersChanged.current = true;
+    };
+
+    const handleStatusFilterChange = (value) => {
+        setStatusFilter(value);
+        filtersChanged.current = true;
+    };
+
+    const handleRatingFilterChange = (value) => {
+        setRatingFilter(value);
+        filtersChanged.current = true;
+    };
+
+    const handleClearAllFilters = () => {
+        setSearchQuery("");
+        setStatusFilter("");
+        setRatingFilter("");
+        applyFilters(1);
+    };
 
     const rows = reviews.map((review, index) => {
         const ratingDisplay = getRatingText(review.rating);
@@ -360,7 +379,6 @@ function ProductReview() {
     });
 
     return (
-
         <AppProvider>
             <Frame>
                 <Page fullWidth title="Product Reviews">
@@ -375,14 +393,12 @@ function ProductReview() {
                                         queryPlaceholder="Search Name, Email and Product here..."
                                         filters={[]}
                                         appliedFilters={[]}
-                                        onQueryChange={(value) => setSearchQuery(value)}
-                                        onQueryClear={() => setSearchQuery("")}
-                                        onClearAll={() => {
+                                        onQueryChange={handleSearchChange}
+                                        onQueryClear={() => {
                                             setSearchQuery("");
-                                            setStatusFilter("");
-                                            setRatingFilter("");
-                                            applyFilters(1);
+                                            filtersChanged.current = true;
                                         }}
+                                        onClearAll={handleClearAllFilters}
                                     />
                                 </div>
 
@@ -390,7 +406,7 @@ function ProductReview() {
                                     <Select
                                         label="Status"
                                         options={statusOptions}
-                                        onChange={(value) => setStatusFilter(value)}
+                                        onChange={handleStatusFilterChange}
                                         value={statusFilter}
                                     />
                                 </div>
@@ -399,52 +415,46 @@ function ProductReview() {
                                     <Select
                                         label="Rating"
                                         options={ratingOptions}
-                                        onChange={(value) => setRatingFilter(value)}
+                                        onChange={handleRatingFilterChange}
                                         value={ratingFilter}
                                     />
                                 </div>
+
+                                <div style={{ marginTop: "20px" }}>
+                                    <Button onClick={() => applyFilters(1)} primary>
+                                        Apply Filters
+                                    </Button>
+                                </div>
                             </div>
 
-                            {isLoading ? (
+                            <div>
+                                <DataTable columnContentTypes={[
+                                    'text', 'text', 'text', 'text', 'text',
+                                    'text', 'text', 'text', 'text', 'text'
+                                ]} headings={[
+                                    'Reviewer', 'Product', 'Email', 'Mobile Number', 'Rating',
+                                    'Date', 'Review', 'Recommended', 'Status', 'Actions'
+                                ]}
+                                    sortable={[false, true, true, true, true, true, false, false]}
+                                    rows={rows}
+                                    hideScrollIndicator={true}
+                                />
+                            </div>
 
-                                <div style={{ display: 'flex', justifyContent: 'center', padding: '40px' }}>
-                                    <Spinner accessibilityLabel="Loading reviews" size="large" />
+                            <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '1rem' }}>
+                                <div style={{ display: 'flex', justifyContent: 'center', marginTop: '0.5rem' }}>
+                                    <Text variant="bodySm" tone="subdued">
+                                        Showing {reviews.length} of {pagination.totalReviews} reviews
+                                    </Text>
                                 </div>
-
-                            ) : (
-                                <>
-
-                                    <div>
-                                        <DataTable columnContentTypes={[
-                                            'text', 'text', 'text', 'text', 'text',
-                                            'text', 'text', 'text', 'text', 'text'
-                                        ]} headings={[
-                                            'Reviewer', 'Product', 'Email', 'Mobile Number', 'Rating',
-                                            'Date', 'Review', 'Recommended', 'Status', 'Actions'
-                                        ]}
-                                            sortable={[false, true, true, true, true, true, false, false]}
-                                            rows={rows}
-                                            hideScrollIndicator={true}
-                                        />
-                                    </div>
-
-                                    <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '1rem' }}>
-                                        <div style={{ display: 'flex', justifyContent: 'center', marginTop: '0.5rem' }}>
-                                            <Text variant="bodySm" tone="subdued">
-                                                Showing {reviews.length} of {pagination.totalReviews} reviews
-                                            </Text>
-                                        </div>
-                                        <Pagination
-                                            label={`Page ${pagination.currentPage} of ${pagination.totalPages}`}
-                                            hasPrevious={pagination.currentPage > 1}
-                                            onPrevious={() => handlePageChange(pagination.currentPage - 1)}
-                                            hasNext={pagination.currentPage < pagination.totalPages}
-                                            onNext={() => handlePageChange(pagination.currentPage + 1)}
-                                        />
-                                    </div>
-
-                                </>
-                            )}
+                                <Pagination
+                                    label={`Page ${pagination.currentPage} of ${pagination.totalPages}`}
+                                    hasPrevious={pagination.currentPage > 1}
+                                    onPrevious={() => handlePageChange(pagination.currentPage - 1)}
+                                    hasNext={pagination.currentPage < pagination.totalPages}
+                                    onNext={() => handlePageChange(pagination.currentPage + 1)}
+                                />
+                            </div>
                         </>
                     </Card>
 
@@ -457,11 +467,9 @@ function ProductReview() {
                             onDismiss={toggleToast}
                         />
                     )}
-
                 </Page>
             </Frame>
         </AppProvider>
-
     );
 }
 

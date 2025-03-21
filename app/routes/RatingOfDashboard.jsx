@@ -1,9 +1,29 @@
-import React, { useState } from 'react'
+import { useNavigation } from '@remix-run/react';
+import { Spinner } from '@shopify/polaris';
+import React, { useState } from 'react';
 
 const RatingOfDashboard = () => {
 
     const [timeframe, setTimeframe] = useState('7d');
     const handleTimeframeChange = (e) => setTimeframe(e.target.value);
+    const navigate = useNavigation();
+    const isPageLoading = navigate.state === "loading";
+
+    if (isPageLoading) {
+        return (
+            <div
+                style={{
+                    display: "flex",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    background: "#e3e3e3",
+                    height: "100vh",
+                }}
+            >
+                <Spinner accessibilityLabel="Loading widgets" size="large" />
+            </div>
+        );
+    }
 
     const metrics = {
         totalReviews: 1248,
@@ -26,7 +46,7 @@ const RatingOfDashboard = () => {
                         ★
                     </span>
                 ))}
-                <span style={{ marginLeft: '4px', fontWeight: '600', fontSize: '14px' }}>{rating.toFixed(1)}</span>
+                <span style={{ marginLeft: '4px', fontWeight: '600', fontSize: '14px' }}>{rating?.toFixed(1)}</span>
             </div>
         );
     };

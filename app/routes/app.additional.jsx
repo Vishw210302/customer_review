@@ -1,11 +1,11 @@
 import { json } from "@remix-run/node";
-import { useLoaderData } from '@remix-run/react';
-import { Card, Grid, Page, Text } from '@shopify/polaris';
+import { useLoaderData, useNavigation } from '@remix-run/react';
+import { Card, Grid, Page, Spinner } from '@shopify/polaris';
 import React, { useEffect, useState } from 'react';
 import { authenticate } from "../shopify.server";
 import GenericPreview from './modals/GenericPreview';
 import ProductRatingWidget from './modals/ProductRatingWidget';
-
+import StoreReviewPreview from "./modals/StoreReviewPreview";
 
 export const loader = async ({ request }) => {
 
@@ -131,8 +131,12 @@ export const loader = async ({ request }) => {
 };
 
 const ThemeStatus = () => {
+
   const { activeTheme, session, blockId } = useLoaderData();
   const [selectedTheme, setSelectedTheme] = useState(null);
+  const navigate = useNavigation();
+  console.log("navigation", navigate.state)
+  const isPageLoading = navigate.state === "loading";
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -140,11 +144,27 @@ const ThemeStatus = () => {
       if (storedTheme) {
         setSelectedTheme(storedTheme);
       } else if (activeTheme?.id) {
-        setSelectedTheme(activeTheme.id);
-        localStorage.setItem("Activetheme", activeTheme.id);
+        setSelectedTheme(activeTheme?.id);
+        localStorage.setItem("Activetheme", activeTheme?.id);
       }
     }
   }, [activeTheme]);
+
+  if (isPageLoading) {
+    return (
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          background: "#e3e3e3",
+          height: "100vh",
+        }}
+      >
+        <Spinner accessibilityLabel="Loading widgets" size="large" />
+      </div>
+    );
+  }
 
   if (!selectedTheme) {
     return (
@@ -171,79 +191,104 @@ const ThemeStatus = () => {
 
   const particularProductUrl = `https://${session.shop}/admin/themes/${themeId}/editor?template=product&addAppBlockId=${blockId}/particular-product&target=mainSection`;
   const starRatingUrl = `https://${session.shop}/admin/themes/${themeId}/editor?template=product&addAppBlockId=${blockId}/star-rating&target=section`;
+  const storeReview = `https://${session.shop}/admin/themes/${themeId}/editor?template=product&addAppBlockId=${blockId}/store-review&target=section`;
+
+  const cardStyle = {
+    height: "100%",
+    display: "flex",
+    flexDirection: "column"
+  };
+
+  const cardContentStyle = {
+    flex: 1,
+    display: "flex",
+    flexDirection: "column",
+    padding: "16px"
+  };
+
+
+  const buttonContainerStyle = {
+    display: "flex",
+    justifyContent: "center",
+    marginTop: "auto",
+    padding: "16px"
+  };
+
+  const buttonStyle = {
+    backgroundColor: "#2c3e50",
+    color: "white",
+    border: "none",
+    borderRadius: "6px",
+    padding: "8px 16px",
+    fontSize: "14px",
+    fontWeight: "500",
+    cursor: "pointer",
+    transition: "background 0.2s",
+    textDecoration: "none",
+    display: "inline-block",
+    textAlign: "center"
+  };
 
   return (
     <Page fullWidth>
       <Card sectioned>
-        <h1 style={{ fontSize: "24px", color: "#333", marginBottom: "25px", fontWeight: "bold" }}>
+        <h1 style={{
+          fontSize: "24px", color: "#333", marginBottom: "25px", fontWeight: "bold",
+        }}
+        >
           Widget Gallery
         </h1>
 
-        <Grid
-          columns={{ xs: 1, sm: 2, md: 2, lg: 2, xl: 2 }}
-          gap="4"
-        >
-
+        <Grid columns={{ xs: 1, sm: 2, md: 2, lg: 2, xl: 2 }} gap="4">
           <Grid.Cell>
-            <Card>
-              <Text>
-                Product Rating Widget
-              </Text>
-              <ProductRatingWidget />
-              <div style={{ display: "flex", justifyContent: "center" }}>
-                <a
-                  target="_blank"
-                  href={particularProductUrl}
-                  style={{
-                    backgroundColor: "#2c3e50",
-                    color: "white",
-                    border: "none",
-                    borderRadius: "6px",
-                    padding: "8px 16px",
-                    fontSize: "14px",
-                    fontWeight: "500",
-                    cursor: "pointer",
-                    transition: "background 0.2s",
-                    textDecoration: "none",
-                    display: "inline-block",
-                    textAlign: "center"
-                  }}
-                >
-                  Install Widget
-                </a>
-              </div>
-            </Card>
+            <div style={cardStyle}>
+              <Card>
+                <div style={cardContentStyle}>
+                  <div style={{ flex: 1 }}>
+                    <ProductRatingWidget />
+                  </div>
+                  <div style={buttonContainerStyle}>
+                    <a target="_blank" href={particularProductUrl} style={buttonStyle}>
+                      Install Widget
+                    </a>
+                  </div>
+                </div>
+              </Card>
+            </div>
           </Grid.Cell>
 
           <Grid.Cell>
+            <div style={cardStyle}>
+              <Card>
+                <div style={cardContentStyle}>
+                  <div style={{ flex: 1 }}>
+                    <GenericPreview />
+                  </div>
+                  <div style={buttonContainerStyle}>
+                    <a target="_blank" href={starRatingUrl} style={buttonStyle}>
+                      Install Widget
+                    </a>
+                  </div>
+                </div>
+              </Card>
+            </div>
+          </Grid.Cell>
 
-            <Card>
-
-              <GenericPreview />
-
-              <div style={{ display: "flex", justifyContent: "center" }}>
-                <a
-                  target="_blank"
-                  href={starRatingUrl}
-                  style={{
-                    backgroundColor: "#2c3e50",
-                    color: "white",
-                    border: "none",
-                    borderRadius: "6px",
-                    padding: "8px 16px",
-                    fontSize: "14px",
-                    fontWeight: "500",
-                    cursor: "pointer",
-                    transition: "background 0.2s",
-                    textDecoration: "none",
-                    display: "inline-block",
-                    textAlign: "center"
-                  }}
-                >
-                  Install Widget
-                </a>
-              </div>
-            </Card>
+          <Grid.Cell>
+            <div style={cardStyle}>
+              <Card>
+                <div style={cardContentStyle}>
+                  <div style={{ flex: 1 }}>
+                    <StoreReviewPreview />
+                  </div>
+                  <div style={buttonContainerStyle}>
+                    <a target="_blank" href={storeReview} style={buttonStyle}>
+                      Install Widget
+                    </a>
+                  </div>
+                </div>
+              </Card>
+            </div>
           </Grid.Cell>
         </Grid>
       </Card>

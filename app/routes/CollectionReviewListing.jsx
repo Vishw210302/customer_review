@@ -1,188 +1,388 @@
+import { useNavigation } from '@remix-run/react';
 import {
+    BlockStack,
     Button,
     DataTable,
+    LegacyCard,
     Page,
+    Pagination,
     Select,
+    Spinner,
     TextField
 } from '@shopify/polaris';
-import React, { useCallback, useState } from 'react';
+import { DeleteIcon } from '@shopify/polaris-icons';
+import React, { useCallback, useEffect, useState } from 'react';
+import DeleteButtonModal from './modals/DeleteButtonModal';
 
 const CollectionReviewListing = () => {
 
-    const initialRows = [
-        ['Emerald Silk Gown', '$875.00', 124689, 140, '$122,500.00'],
-        ['Mauve Cashmere Scarf', '$230.00', 124533, 83, '$19,090.00'],
-        [
-            'Navy Merino Wool Blazer with khaki chinos and yellow belt',
-            '$445.00',
-            124518,
-            32,
-            '$14,240.00',
-        ],
+    const [currentPage, setCurrentPage] = useState(1);
+    const [itemsPerPage] = useState(10);
+    const [searchValue, setSearchValue] = useState('');
+    const [filterCategory, setFilterCategory] = useState('all');
+    const [filterRating, setFilterRating] = useState('all');
+    const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+    const navigate = useNavigation();
+    const isPageLoading = navigate.state === "loading";
+
+    if (isPageLoading) {
+        return (
+            <div style={{
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+                background: "#e3e3e3",
+                height: "100vh",
+            }}
+            >
+                <Spinner accessibilityLabel="Loading widgets" size="large" />
+            </div>
+        );
+    }
+
+    const initialReviews = [
+        {
+            id: 1,
+            product: 'vishwprajapati66@gmail.com',
+            rating: 5,
+            customer: 'John Doe',
+            review: 'API is working',
+            date: '2025-03-15',
+            reviewTitle: 'this is very good API is also working and loader is completethis is very good API is also working and loader is completethis is very good API is also working and loader is completethis is very good API is also working and loader is completethis is very good API is also working and loader is completethis is very good API is also working and loader is complete',
+            images: [
+                'https://picsum.photos/200/300',
+                'https://picsum.photos/200/300',
+                'https://picsum.photos/200/300',
+            ],
+            isActive: true
+        },
+        {
+            id: 2,
+            product: 'vishwprajapati66@gmail.com',
+            rating: 5,
+            customer: 'John Doe',
+            review: 'Amazing product, fits perfectly!',
+            date: '2025-03-15',
+            reviewTitle: 'this is very good API is also working and loader is complete',
+            images: [
+                'https://picsum.photos/200/300',
+                'https://picsum.photos/200/300',
+                'https://picsum.photos/200/300',
+                'https://picsum.photos/200/300',
+            ],
+            isActive: false
+        },
+        {
+            id: 3,
+            product: 'vishwprajapati66@gmail.com',
+            rating: 5,
+            customer: 'John Doe',
+            review: 'Amazing product, fits perfectly!',
+            date: '2025-03-15',
+            reviewTitle: 'this is very good API is also working and loader is complete',
+            images: [
+                'https://picsum.photos/200/300',
+                'https://picsum.photos/200/300',
+            ],
+            isActive: true
+        },
+        {
+            id: 4,
+            product: 'vishwprajapati66@gmail.com',
+            rating: 5,
+            customer: 'John Doe',
+            review: 'Amazing product, fits perfectly!',
+            date: '2025-03-15',
+            reviewTitle: 'this is very good API is also working and loader is complete',
+            images: [
+                'https://picsum.photos/200/300',
+                'https://picsum.photos/200/300',
+                'https://picsum.photos/200/300',
+                'https://picsum.photos/200/300',
+            ],
+            isActive: true
+        },
     ];
 
-    const [sortedRows, setSortedRows] = useState(null);
-    const [searchValue, setSearchValue] = useState('');
-    const [selectedCategoryFilter, setSelectedCategoryFilter] = useState('all');
-    const [selectedPriceFilter, setSelectedPriceFilter] = useState('all');
-    const [currentPage, setCurrentPage] = useState(1);
-    const [itemsPerPage, setItemsPerPage] = useState(2);
+    const [reviews, setReviews] = useState([...initialReviews]);
 
-    const rows = sortedRows || initialRows;
+    const categoryOptions = [
+        { label: 'All Categories', value: 'all' },
+        { label: 'Apparel', value: 'Apparel' },
+        { label: 'Accessories', value: 'Accessories' },
+        { label: 'Electronics', value: 'Electronics' },
+        { label: 'Home', value: 'Home' },
+        { label: 'Fitness', value: 'Fitness' }
+    ];
 
-    const filteredRows = rows.filter(row => {
-        const productName = row[0].toLowerCase();
-        const searchMatch = productName.includes(searchValue.toLowerCase());
+    const ratingOptions = [
+        { label: 'All Ratings', value: 'all' },
+        { label: '5 Stars', value: '5' },
+        { label: '4 Stars', value: '4' },
+        { label: '3 Stars', value: '3' },
+        { label: '2 Stars', value: '2' },
+        { label: '1 Star', value: '1' }
+    ];
 
-        const categoryMatch =
-            selectedCategoryFilter === 'all' ||
-            (selectedCategoryFilter === 'gown' && productName.includes('gown')) ||
-            (selectedCategoryFilter === 'scarf' && productName.includes('scarf')) ||
-            (selectedCategoryFilter === 'blazer' && productName.includes('blazer'));
+    const statusOptions = [
+        { label: 'Active', value: 'true' },
+        { label: 'Inactive', value: 'false' }
+    ];
 
-        const price = parseFloat(row[1].substring(1));
-        const priceMatch =
-            selectedPriceFilter === 'all' ||
-            (selectedPriceFilter === 'low' && price < 300) ||
-            (selectedPriceFilter === 'medium' && price >= 300 && price < 500) ||
-            (selectedPriceFilter === 'high' && price >= 500);
+    useEffect(() => {
+        let filteredReviews = [...initialReviews];
 
-        return searchMatch && categoryMatch && priceMatch;
-    });
+        if (searchValue) {
+            const searchLower = searchValue.toLowerCase();
+            filteredReviews = filteredReviews.filter(review =>
+                review.product.toLowerCase().includes(searchLower) ||
+                review.customer.toLowerCase().includes(searchLower) ||
+                review.review.toLowerCase().includes(searchLower)
+            );
+        }
 
-    const totalPages = Math.ceil(filteredRows.length / itemsPerPage);
+        if (filterCategory !== 'all') {
+            filteredReviews = filteredReviews.filter(review =>
+                review.reviewTitle === filterCategory
+            );
+        }
 
-    const paginatedRows = filteredRows.slice(
-        (currentPage - 1) * itemsPerPage,
-        currentPage * itemsPerPage
-    );
+        if (filterRating !== 'all') {
+            filteredReviews = filteredReviews.filter(review =>
+                review.rating === parseInt(filterRating)
+            );
+        }
 
-    const handleSort = useCallback(
-        (index, direction) => setSortedRows(sortCurrency(rows, index, direction)),
-        [rows],
-    );
+        setReviews(filteredReviews);
+        setCurrentPage(1);
+    }, [searchValue, filterCategory, filterRating]);
 
     const handleSearchChange = useCallback((value) => {
         setSearchValue(value);
-        setCurrentPage(1);
     }, []);
 
-    const handleCategoryFilterChange = useCallback((value) => {
-        setSelectedCategoryFilter(value);
-        setCurrentPage(1);
+    const handleCategoryChange = useCallback((value) => {
+        setFilterCategory(value);
     }, []);
 
-    const handlePriceFilterChange = useCallback((value) => {
-        setSelectedPriceFilter(value);
-        setCurrentPage(1);
+    const handleRatingChange = useCallback((value) => {
+        setFilterRating(value);
     }, []);
 
-    const handlePreviousPage = useCallback(() => {
-        setCurrentPage(prev => Math.max(prev - 1, 1));
+    const handlePaginationChange = useCallback((newPage) => {
+        setCurrentPage(newPage);
     }, []);
 
-    const handleNextPage = useCallback(() => {
-        setCurrentPage(prev => Math.min(prev + 1, totalPages));
-    }, [totalPages]);
+    const handleStatusChange = useCallback((reviewId, newStatus) => {
+        const isActive = newStatus === 'true';
 
-    function sortCurrency(rows, index, direction) {
-        return [...rows].sort((rowA, rowB) => {
-            const amountA = parseFloat((rowA[index] || 0).toString().substring(1));
-            const amountB = parseFloat((rowB[index] || 0).toString().substring(1));
-            return direction === 'descending' ? amountB - amountA : amountA - amountB;
+        setReviews(prevReviews =>
+            prevReviews.map(review =>
+                review.id === reviewId
+                    ? { ...review, isActive: isActive }
+                    : review
+            )
+        );
+
+        initialReviews.forEach(review => {
+            if (review.id === reviewId) {
+                review.isActive = isActive;
+            }
         });
-    }
 
-    const categoryOptions = [
-        { label: 'All Products', value: 'all' },
-        { label: 'Gowns', value: 'gown' },
-        { label: 'Scarves', value: 'scarf' },
-        { label: 'Blazers', value: 'blazer' }
-    ];
+    }, []);
 
-    const priceOptions = [
-        { label: 'All Prices', value: 'all' },
-        { label: 'Under $300', value: 'low' },
-        { label: '$300 - $500', value: 'medium' },
-        { label: 'Over $500', value: 'high' }
-    ];
+    const handleDeleteReview = useCallback(() => {
+        console.log("CLicked By Me")
+    }, []);
+
+    const renderStarRating = (rating) => {
+        return '★'.repeat(rating) + '☆'.repeat(5 - rating);
+    };
+
+    const containerStyle = {
+        display: 'flex',
+        overflowX: 'scroll',
+        gap: '8px',
+        padding: '10px 15px',
+        msOverflowStyle: 'none',
+        scrollbarWidth: 'thin',
+    };
+
+    const imgStyle = {
+        height: '100px',
+        minWidth: '100px',
+        objectFit: 'cover',
+        borderRadius: '6px',
+        boxShadow: '0 2px 5px rgba(0, 0, 0, 0.1)',
+        transition: 'transform 0.2s ease',
+    };
+
+    const handleDeleteModalOpen = () => {
+        setDeleteModalOpen(true);
+    };
+
+    const handleDeleteModalClose = () => {
+        setDeleteModalOpen(false);
+    };
+
+    const indexOfLastItem = currentPage * itemsPerPage;
+    const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+    const currentItems = reviews.slice(indexOfFirstItem, indexOfLastItem);
+
+    const rows = currentItems.map(review => [
+        <div key={`product-${review.id}`}>
+            <div style={{ fontSize: '15px', color: '#637381', fontWeight: 'bold' }}>{review.customer}</div>
+            <div style={{ fontSize: "12px" }}>{review.product}</div>
+        </div>,
+        <div key={`rating-${review.id}`} style={{ color: '#FFB900', fontSize: "18px" }}>
+            {renderStarRating(review.rating)}
+        </div>,
+        <div key={`review-${review.id}`}>
+            {review.review.length > 50 ? `${review.review.substring(0, 50)}...` : review.review}
+        </div>,
+        <div key={`reviewTitle-${review.id}`} style={{ width: "300px", whiteSpace: "normal" }}>
+            {review.reviewTitle}
+        </div>,
+        <div key={`date-${review.id}`}>
+            {new Date(review.date).toLocaleDateString()}
+        </div>,
+        <Select
+            key={`status-${review.id}`}
+            options={statusOptions}
+            onChange={(value) => handleStatusChange(review.id, value)}
+            value={review.isActive ? 'true' : 'false'}
+        />,
+        <Button
+            key={`action-${review.id}`}
+            icon={DeleteIcon}
+            tone="critical"
+            onClick={() => handleDeleteModalOpen(review.id)}
+            accessibilityLabel="Delete review"
+        />
+    ]);
+
+    const handleSort = useCallback(
+        (index, direction) => {
+            const sortedData = [...reviews].sort((a, b) => {
+                let valueA, valueB;
+
+                switch (index) {
+                    case 1:
+                        valueA = a.customer.toLowerCase();
+                        valueB = b.customer.toLowerCase();
+                        break;
+                    case 2:
+                        valueA = a.rating;
+                        valueB = b.rating;
+                        break;
+                    case 3:
+                        valueA = a.review.toLowerCase();
+                        valueB = b.review.toLowerCase();
+                        break;
+                    case 4:
+                        valueA = a.reviewTitle.toLowerCase();
+                        valueB = b.reviewTitle.toLowerCase();
+                        break;
+                    case 5:
+                        valueA = new Date(a.date);
+                        valueB = new Date(b.date);
+                        break;
+                    default:
+                        return 0;
+                }
+
+                if (direction === 'ascending') {
+                    return valueA < valueB ? -1 : valueA > valueB ? 1 : 0;
+                } else {
+                    return valueA > valueB ? -1 : valueA < valueB ? 1 : 0;
+                }
+            });
+
+            setReviews(sortedData);
+        },
+        [reviews]
+    );
 
     return (
-        <Page fullWidth title="Collection Reviews">
-
-            <div style={{ display: "flex", gap: "10px" }}>
-                <div style={{ width: "100%" }}>
-                    <TextField
-                        label="Search products"
-                        value={searchValue}
-                        onChange={handleSearchChange}
-                        placeholder="Search by product name"
-                    />
-                </div>
-                <div style={{ width: "100%" }}>
-                    <Select
-                        label="Category"
-                        options={categoryOptions}
-                        value={selectedCategoryFilter}
-                        onChange={handleCategoryFilterChange}
-                    />
-                </div>
-                <div style={{ width: "100%" }}>
-                    <Select
-                        label="Price Range"
-                        options={priceOptions}
-                        value={selectedPriceFilter}
-                        onChange={handlePriceFilterChange}
-                    />
-                </div>
-            </div>
-
-            <DataTable
-                columnContentTypes={[
-                    'text',
-                    'numeric',
-                    'numeric',
-                    'numeric',
-                    'numeric',
-                ]}
-                headings={[
-                    'Product',
-                    'Price',
-                    'SKU Number',
-                    'Net quantity',
-                    'Net sales',
-                ]}
-                rows={paginatedRows}
-                totals={['', '', '', 255, '$155,830.00']}
-                sortable={[false, true, false, false, true]}
-                defaultSortDirection="descending"
-                initialSortColumnIndex={4}
-                onSort={handleSort}
-                footerContent={
-                    <div style={{ padding: '16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <div>
-                            {`Showing ${Math.min(filteredRows.length, 1 + (currentPage - 1) * itemsPerPage)}-${Math.min(filteredRows.length, currentPage * itemsPerPage)} of ${filteredRows.length} results`}
-                        </div>
-                        <div style={{ display: 'flex', gap: '8px' }}>
-                            <Button
-                                onClick={handlePreviousPage}
-                                disabled={currentPage === 1}
-                            >
-                                Previous
-                            </Button>
-                            <div style={{ padding: '0 8px', display: 'flex', alignItems: 'center' }}>
-                                {`Page ${currentPage} of ${totalPages || 1}`}
+        <Page fullWidth>
+            <LegacyCard>
+                <LegacyCard.Section>
+                    <BlockStack distribution="fillEvenly">
+                        <div style={{ display: "flex", gap: "10px" }}>
+                            <div style={{ width: "100%" }}>
+                                <TextField
+                                    label="Search"
+                                    value={searchValue}
+                                    onChange={handleSearchChange}
+                                    placeholder="Search by product, customer or review"
+                                    clearButton
+                                    onClearButtonClick={() => setSearchValue('')}
+                                />
                             </div>
-                            <Button
-                                onClick={handleNextPage}
-                                disabled={currentPage === totalPages || totalPages === 0}
-                            >
-                                Next
-                            </Button>
+                            <div style={{ width: "100%" }}>
+                                <Select
+                                    label="Review Title"
+                                    options={categoryOptions}
+                                    value={filterCategory}
+                                    onChange={handleCategoryChange}
+                                />
+                            </div>
+                            <div style={{ width: "100%" }}>
+                                <Select
+                                    label="Rating"
+                                    options={ratingOptions}
+                                    value={filterRating}
+                                    onChange={handleRatingChange}
+                                />
+                            </div>
                         </div>
+                    </BlockStack>
+                </LegacyCard.Section>
+
+                <DataTable
+                    columnContentTypes={[
+                        'text',
+                        'text',
+                        'text',
+                        'text',
+                        'text',
+                        'text',
+                        'text',
+                    ]}
+                    headings={[
+                        'Collection Name',
+                        'Avg. Rating',
+                        'Review',
+                        'Review Title',
+                        'Date',
+                        "Status",
+                        "Actions",
+                    ]}
+                    rows={rows}
+                    sortable={[false, true, true, true, true, true, false, false]}
+                    defaultSortDirection="descending"
+                    onSort={handleSort}
+                    hasZebraStripingOnData
+                    increasedTableDensity
+                    hideScrollIndicator={true}
+                />
+
+                <LegacyCard.Section>
+                    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                        <p>{`Showing ${reviews.length > 0 ? indexOfFirstItem + 1 : 0}-${Math.min(reviews.length, indexOfLastItem)} of ${reviews.length} results`}</p>
+
+                        <Pagination
+                            hasPrevious={currentPage > 1}
+                            onPrevious={() => handlePaginationChange(currentPage - 1)}
+                            hasNext={indexOfLastItem < reviews.length}
+                            onNext={() => handlePaginationChange(currentPage + 1)}
+                        />
                     </div>
-                }
-            />
+                </LegacyCard.Section>
+            </LegacyCard>
+
+            <DeleteButtonModal isOpen={deleteModalOpen} onClose={handleDeleteModalClose} onConfirm={handleDeleteReview} />
         </Page>
     );
 };

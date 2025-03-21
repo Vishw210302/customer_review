@@ -1,9 +1,29 @@
+import { useNavigation } from '@remix-run/react';
+import { Spinner } from '@shopify/polaris';
 import React, { useState } from 'react'
 
 const LatestReviewDashboard = () => {
 
     const [selected, setSelected] = useState(0);
     const handleTabChange = (selectedTabIndex) => setSelected(selectedTabIndex);
+    const navigate = useNavigation();
+    const isPageLoading = navigate.state === "loading";
+
+    if (isPageLoading) {
+        return (
+            <div
+                style={{
+                    display: "flex",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    background: "#e3e3e3",
+                    height: "100vh",
+                }}
+            >
+                <Spinner accessibilityLabel="Loading widgets" size="large" />
+            </div>
+        );
+    }
 
     const cardStyles = {
         container: {
@@ -72,7 +92,6 @@ const LatestReviewDashboard = () => {
         { id: 'product-reviews', label: 'Product Reviews' },
         { id: 'store-reviews', label: 'Store Reviews' },
     ];
-
 
     const tabStyles = {
         container: {

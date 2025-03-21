@@ -1,9 +1,29 @@
+import { useNavigation } from '@remix-run/react';
+import { Spinner } from '@shopify/polaris';
 import React, { useEffect, useState } from 'react';
 
 const GenericPreview = () => {
 
     const [isWideScreen, setIsWideScreen] = useState(false);
     const [activeReview, setActiveReview] = useState(0);
+    const navigate = useNavigation();
+    const isPageLoading = navigate.state === "loading";
+
+    if (isPageLoading) {
+        return (
+            <div
+                style={{
+                    display: "flex",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    background: "#e3e3e3",
+                    height: "100vh",
+                }}
+            >
+                <Spinner accessibilityLabel="Loading widgets" size="large" />
+            </div>
+        );
+    }
 
     useEffect(() => {
         const mediaQuery = window.matchMedia("(min-width: 768px)");

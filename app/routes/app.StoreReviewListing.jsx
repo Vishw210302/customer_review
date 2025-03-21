@@ -1,3 +1,4 @@
+import { useNavigation } from '@remix-run/react';
 import {
     BlockStack,
     Button,
@@ -7,11 +8,13 @@ import {
     Page,
     Pagination,
     Select,
+    Spinner,
     Text,
     TextField
 } from '@shopify/polaris';
 import { DeleteIcon } from '@shopify/polaris-icons';
 import React, { useCallback, useEffect, useState } from 'react';
+import DeleteButtonModal from './modals/DeleteButtonModal';
 
 const StoreReviewListing = () => {
 
@@ -22,7 +25,25 @@ const StoreReviewListing = () => {
     const [filterRating, setFilterRating] = useState('all');
     const [selectedImageIndex, setSelectedImageIndex] = useState(null);
     const [selectedImagesArray, setSelectedImagesArray] = useState([]);
+    const [deleteModalOpen, setDeleteModalOpen] = useState(false);
     const [showImageModal, setShowImageModal] = useState(false);
+    const navigate = useNavigation();
+    const isPageLoading = navigate.state === "loading";
+
+    if (isPageLoading) {
+        return (
+            <div style={{
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+                background: "#e3e3e3",
+                height: "100vh",
+            }}
+            >
+                <Spinner accessibilityLabel="Loading widgets" size="large" />
+            </div>
+        );
+    }
 
     const initialReviews = [
         {
@@ -198,10 +219,8 @@ const StoreReviewListing = () => {
 
     }, []);
 
-    const handleDeleteReview = useCallback((reviewId) => {
-        setReviews(prevReviews =>
-            prevReviews.filter(review => review.id !== reviewId)
-        );
+    const handleDeleteReview = useCallback(() => {
+        console.log("CLicked By Me")
     }, []);
 
     const renderStarRating = (rating) => {
@@ -224,6 +243,14 @@ const StoreReviewListing = () => {
         borderRadius: '6px',
         boxShadow: '0 2px 5px rgba(0, 0, 0, 0.1)',
         transition: 'transform 0.2s ease',
+    };
+
+    const handleDeleteModalOpen = () => {
+        setDeleteModalOpen(true);
+    };
+
+    const handleDeleteModalClose = () => {
+        setDeleteModalOpen(false);
     };
 
     const renderImageThumbnails = useCallback((images) => {
@@ -286,7 +313,7 @@ const StoreReviewListing = () => {
             key={`action-${review.id}`}
             icon={DeleteIcon}
             tone="critical"
-            onClick={() => handleDeleteReview(review.id)}
+            onClick={() => handleDeleteModalOpen(review.id)}
             accessibilityLabel="Delete review"
         />
     ]);
@@ -444,6 +471,7 @@ const StoreReviewListing = () => {
                     )}
                 </Modal.Section>
             </Modal>
+            <DeleteButtonModal isOpen={deleteModalOpen} onClose={handleDeleteModalClose} onConfirm={handleDeleteReview} />
         </Page>
     );
 };

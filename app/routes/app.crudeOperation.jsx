@@ -1,18 +1,19 @@
-import { useLoaderData, useSubmit } from '@remix-run/react';
+import { useLoaderData, useNavigation, useSubmit } from '@remix-run/react';
 import {
   AppProvider,
   Card,
   Frame,
   LegacyStack,
   Page,
+  Spinner,
   Tabs,
   Toast
 } from '@shopify/polaris';
 import '@shopify/polaris/build/esm/styles.css';
 import React, { useCallback, useEffect, useState } from 'react';
 import ProductReview from './app.productReview';
-import CollectionReviewListing from './CollectionReviewListing';
 import StoreReviewListing from './app.StoreReviewListing';
+import CollectionReviewListing from './CollectionReviewListing';
 
 export async function loader({ request }) {
 
@@ -152,7 +153,24 @@ function ReviewsManager() {
   const submit = useSubmit();
   const [selectedTab, setSelectedTab] = useState(0);
   const [toast, setToast] = useState({ active: false, message: '', error: false });
-  const [isLoading, setIsLoading] = useState(false);
+  const navigate = useNavigation();
+  const isPageLoading = navigate.state === "loading";
+
+  if (isPageLoading) {
+    return (
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          background: "#e3e3e3",
+          height: "100vh",
+        }}
+      >
+        <Spinner accessibilityLabel="Loading widgets" size="large" />
+      </div>
+    );
+  }
 
   useEffect(() => {
     const tabMap = { 'product': 0, 'collection': 1, 'store': 2 };
@@ -232,8 +250,6 @@ function ReviewsManager() {
                   submit={submit}
                   onDeleteSuccess={handleDeleteSuccess}
                   onStatusChangeSuccess={handleStatusChangeSuccess}
-                  isLoading={isLoading}
-                  setIsLoading={setIsLoading}
                 />
               )}
               {selectedTab === 1 && (

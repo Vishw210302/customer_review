@@ -1,21 +1,11 @@
-import { useNavigate } from '@remix-run/react';
+import { useNavigation } from '@remix-run/react';
+import { Spinner } from '@shopify/polaris';
 import React from 'react';
-
 
 function CardsOfDashboard({ data }) {
 
-    console.log("datadatadatadatadata", data)
-
-    const metrics = {
-        totalReviews: 1248,
-        todayReviews: 24,
-        monthlyReviews: 356,
-        averageRating: 4.7,
-        productReviews: data.pagination.totalReviews,
-        storeReviews: 261,
-        pendingReviews: 18,
-        responseRate: 92
-    };
+    const navigate = useNavigation();
+    const isPageLoading = navigate.state === "loading";
 
     const RatingStars = ({ rating }) => {
         const fullStars = Math.floor(rating);
@@ -27,35 +17,35 @@ function CardsOfDashboard({ data }) {
                         ★
                     </span>
                 ))}
-                <span style={{ marginLeft: '4px', fontWeight: '600', fontSize: '14px' }}>{rating.toFixed(1)}</span>
+                <span style={{ marginLeft: '4px', fontWeight: '600', fontSize: '14px' }}>{rating?.toFixed(1)}</span>
             </div>
         );
     };
 
-    const ProgressBar = ({ progress, color, height = '8px' }) => {
-        const getColor = () => {
-            switch (color) {
-                case 'success': return '#10B981';
-                case 'warning': return '#F59E0B';
-                case 'critical': return '#EF4444';
-                default: return '#2563EB';
-            }
-        };
-
-        return (
-            <div style={{ width: '100%', backgroundColor: '#E5E7EB', borderRadius: '4px', height }}>
-                <div
-                    style={{
-                        width: `${progress}%`,
-                        backgroundColor: getColor(),
-                        height: '100%',
-                        borderRadius: '4px',
-                        transition: 'width 0.3s ease'
-                    }}
-                ></div>
-            </div>
-        );
-    };
+    /*     const ProgressBar = ({ progress, color, height = '8px' }) => {
+            const getColor = () => {
+                switch (color) {
+                    case 'success': return '#10B981';
+                    case 'warning': return '#F59E0B';
+                    case 'critical': return '#EF4444';
+                    default: return '#2563EB';
+                }
+            };
+    
+            return (
+                <div style={{ width: '100%', backgroundColor: '#E5E7EB', borderRadius: '4px', height }}>
+                    <div
+                        style={{
+                            width: `${progress}%`,
+                            backgroundColor: getColor(),
+                            height: '100%',
+                            borderRadius: '4px',
+                            transition: 'width 0.3s ease'
+                        }}
+                    ></div>
+                </div>
+            );
+        }; */
 
     const cardStyles = {
         container: {
@@ -112,11 +102,25 @@ function CardsOfDashboard({ data }) {
         }
     };
 
-    const navigate = useNavigate();
-
     const handleNavigateProductReviewCard = () => {
         navigate("/app/crudeOperation");
     };
+
+    if (isPageLoading) {
+        return (
+            <div
+                style={{
+                    display: "flex",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    background: "#e3e3e3",
+                    height: "100vh",
+                }}
+            >
+                <Spinner accessibilityLabel="Loading widgets" size="large" />
+            </div>
+        );
+    }
 
     return (
         <div style={layoutStyles.row}>
@@ -146,7 +150,7 @@ function CardsOfDashboard({ data }) {
                     <div style={cardStyles.content}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '24px' }}>
                             <div>
-                                <div style={{ fontSize: '20px', fontWeight: '700' }}>{metrics.productReviews}</div>
+                                <div style={{ fontSize: '20px', fontWeight: '700' }}>{data.pagination.totalReviews}</div>
                                 <div style={{ fontSize: '14px', color: '#6B7280' }}>Total Reviews</div>
                             </div>
                             <RatingStars rating={data?.averageRating} />
@@ -212,7 +216,7 @@ function CardsOfDashboard({ data }) {
                     <div style={cardStyles.content}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '24px' }}>
                             <div>
-                                <div style={{ fontSize: '20px', fontWeight: '700' }}>{metrics.storeReviews}</div>
+                                <div style={{ fontSize: '20px', fontWeight: '700' }}>261</div>
                                 <div style={{ fontSize: '14px', color: '#6B7280' }}>Total Reviews</div>
                             </div>
                             <RatingStars rating={4.8} />

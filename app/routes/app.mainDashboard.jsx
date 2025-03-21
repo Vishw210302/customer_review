@@ -1,4 +1,5 @@
-import { useLoaderData } from '@remix-run/react';
+import { useLoaderData, useNavigation } from '@remix-run/react';
+import { Spinner } from '@shopify/polaris';
 import React from 'react';
 import CardsOfDashboard from './app.CardsOfDashboard';
 
@@ -66,7 +67,27 @@ export async function loader({ request }) {
 }
 
 const MainDashboard = () => {
+
+    const navigate = useNavigation();
+    const isPageLoading = navigate.state === "loading";
     const data = useLoaderData();
+
+    if (isPageLoading) {
+        return (
+            <div
+                style={{
+                    display: "flex",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    background: "#e3e3e3",
+                    height: "100vh",
+                }}
+            >
+                <Spinner accessibilityLabel="Loading widgets" size="large" />
+            </div>
+        );
+    }
+
     const headerStyles = {
         container: {
             padding: '24px 32px',
@@ -140,7 +161,6 @@ const MainDashboard = () => {
             <div style={layoutStyles.container}>
 
                 <CardsOfDashboard data={data} />
-
 
             </div>
         </div>

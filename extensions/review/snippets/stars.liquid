@@ -956,8 +956,8 @@
     const reviewCountElement = document.querySelector('.review-count');
     const ratingBars = document.querySelectorAll('.rating-bar');
 
-    const ADD_REVIEW_API = 'https://247b-106-215-39-79.ngrok-free.app/api/addReview';
-    const GET_REVIEWS_API = `https://247b-106-215-39-79.ngrok-free.app/api/getReview/{{ product_id }}`;
+    const ADD_REVIEW_API = 'https://e005-182-65-88-61.ngrok-free.app/api/addReview';
+    const GET_REVIEWS_API = `https://e005-182-65-88-61.ngrok-free.app/api/getReview/{{ product_id }}`;
 
     fetchReviews();
 
@@ -1138,7 +1138,7 @@
     }
 
     function updateReviewSummary(data) {
-      const formattedRating = data.averageRating.toFixed(2);
+      const formattedRating = data.averageRating?.toFixed(2);
 
       starsElement.innerHTML = generateStars(data.averageRating);
 
