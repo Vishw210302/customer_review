@@ -42,7 +42,6 @@ export async function loader({ request }) {
 
   try {
     const filterParams = new URLSearchParams();
-    filterParams.append('reviewType', reviewType);
     if (searchQuery) filterParams.append('searchQuery', searchQuery);
     if (nameSearch) filterParams.append('name', nameSearch);
     if (emailSearch) filterParams.append('email', emailSearch);
@@ -97,7 +96,7 @@ export async function loader({ request }) {
       storeReviewsResponse = {
         success: true,
         storeReviews: storeData.reviews || [],
-        pagination: storeData.pagination || {
+        storePagination: storeData.pagination || {
           currentPage: page,
           totalPages: storeData.totalPages || 1
         },
@@ -192,6 +191,7 @@ function ReviewsManager() {
     pagination,
     reviewType,
     storeReviews,
+    storePagination,
     success,
     APIURL
   } = useLoaderData();
@@ -345,7 +345,7 @@ function ReviewsManager() {
               {selectedTab === 2 && (
                 <StoreReviewListing
                   storeReviews={storeReviews}
-                  pagination={pagination}
+                  pagination={storePagination}
                   reviewType={reviewType}
                   success={success}
                   updateStoreReviewStatus={updateStoreReviewStatus}

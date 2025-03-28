@@ -14,7 +14,8 @@ import {
 } from '@shopify/polaris';
 import { DeleteIcon } from '@shopify/polaris-icons';
 import '@shopify/polaris/build/esm/styles.css';
-import React, { useEffect, useState, useMemo } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
+import { useNavigation, useLoaderData, Form } from '@remix-run/react';
 import DeleteButtonModal from './modals/DeleteButtonModal';
 
 export async function loader({ request }) {
@@ -85,16 +86,11 @@ export async function loader({ request }) {
     }
 }
 
-function ProductReview({
-    reviews,
-    pagination,
-    submit,
-    onDeleteSuccess,
-    onStatusChangeSuccess,
-    searchQuery: initialSearchQuery,
-    status: initialStatus,
-    rating: initialRating
-}) {
+function ProductReview() {
+    const { reviews, pagination, searchQuery: initialSearchQuery, status: initialStatus, rating: initialRating } = useLoaderData();
+    const navigation = useNavigation();
+    const isLoading = navigation.state === 'loading';
+
     const [deleteModalOpen, setDeleteModalOpen] = useState(false);
     const [selectedReviewId, setSelectedReviewId] = useState(null);
     const [toast, setToast] = useState({ active: false, message: '', error: false });
@@ -134,7 +130,11 @@ function ProductReview({
                 return acc;
             }, {})
         );
-    }, [reviews]);
+        setSearchQuery(initialSearchQuery || "");
+        setStatusFilter(initialStatus || "");
+        setRatingFilter(initialRating || "");
+        setLocalSearchQuery(initialSearchQuery || "");
+    }, [reviews, initialSearchQuery, initialStatus, initialRating]);
 
     const handleDeleteModalOpen = (id) => {
         setSelectedReviewId(id);
@@ -151,31 +151,27 @@ function ProductReview({
         formData.append('reviewId', selectedReviewId);
         formData.append('actionType', 'deleteReview');
 
-        submit(formData, {
-            method: 'DELETE',
-        });
-
-        onDeleteSuccess();
-        handleDeleteModalClose();
+        return (
+            <Form method="DELETE" action="/product-reviews">
+                <input type="hidden" name="reviewId" value={selectedReviewId} />
+                <input type="hidden" name="actionType" value="deleteReview" />
+            </Form>
+        );
     };
 
     const handleStatusChange = (reviewId, newStatus) => {
-        const isActive = newStatus === 'true';
         const formData = new FormData();
         formData.append('reviewId', reviewId);
         formData.append('newStatus', newStatus);
         formData.append('actionType', 'updateStatus');
 
-        submit(formData, {
-            method: 'PUT',
-        });
-
-        setReviewStatuses(prev => ({
-            ...prev,
-            [reviewId]: isActive
-        }));
-
-        onStatusChangeSuccess(isActive);
+        return (
+            <Form method="PUT" action="/product-reviews">
+                <input type="hidden" name="reviewId" value={reviewId} />
+                <input type="hidden" name="newStatus" value={newStatus} />
+                <input type="hidden" name="actionType" value="updateStatus" />
+            </Form>
+        );
     };
 
     const toggleToast = () => {
@@ -223,7 +219,6 @@ function ProductReview({
 
     const handleSearchChange = (value) => {
         setLocalSearchQuery(value);
-
         setSearchQuery(value);
 
         const url = new URL(window.location.href);
@@ -247,8 +242,6 @@ function ProductReview({
         }
         url.searchParams.set('page', '1');
         window.history.pushState({}, '', url);
-
-        submit(null, { method: 'GET' });
     };
 
     const handleRatingFilterChange = (value) => {
@@ -262,8 +255,6 @@ function ProductReview({
         }
         url.searchParams.set('page', '1');
         window.history.pushState({}, '', url);
-
-        submit(null, { method: 'GET' });
     };
 
     const handleClearAllFilters = () => {
@@ -274,7 +265,6 @@ function ProductReview({
         url.searchParams.set('page', '1');
 
         window.history.pushState({}, '', url);
-        submit(null, { method: 'GET' });
 
         setLocalSearchQuery("");
         setSearchQuery("");
@@ -286,7 +276,6 @@ function ProductReview({
         const url = new URL(window.location.href);
         url.searchParams.set('page', newPage.toString());
         window.history.pushState({}, '', url);
-        submit(null, { method: 'GET' });
     };
 
     const rows = filteredReviews.map((review, index) => {
@@ -368,7 +357,6 @@ function ProductReview({
                                             url.searchParams.delete('searchQuery');
                                             url.searchParams.set('page', '1');
                                             window.history.pushState({}, '', url);
-                                            submit(null, { method: 'GET' });
                                         }}
                                         onClearAll={handleClearAllFilters}
                                     />
@@ -393,36 +381,44 @@ function ProductReview({
                                 </div>
                             </div>
 
-                            <div>
-                                <DataTable
-                                    columnContentTypes={[
-                                        'text', 'text', 'text', 'text', 'text',
-                                        'text', 'text', 'text', 'text', 'text'
-                                    ]}
-                                    headings={[
-                                        'Reviewer', 'Product', 'Email', 'Mobile Number', 'Rating',
-                                        'Date', 'Review', 'Recommended', 'Status', 'Actions'
-                                    ]}
-                                    sortable={[false, true, true, true, true, true, false, false]}
-                                    rows={rows}
-                                    hideScrollIndicator={true}
-                                />
-                            </div>
-
-                            <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '1rem' }}>
-                                <div style={{ display: 'flex', justifyContent: 'center', marginTop: '0.5rem' }}>
-                                    <Text variant="bodySm" tone="subdued">
-                                        Showing {filteredReviews.length} of {pagination.totalReviews} reviews
-                                    </Text>
+                            {isLoading ? (
+                                <div style={{ textAlign: 'center', padding: '20px' }}>
+                                    <Text>Loading...</Text>
                                 </div>
-                                <Pagination
-                                    label={`Page ${pagination.currentPage} of ${pagination.totalPages}`}
-                                    hasPrevious={pagination.currentPage > 1}
-                                    onPrevious={() => handlePageChange(pagination.currentPage - 1)}
-                                    hasNext={pagination.currentPage < pagination.totalPages}
-                                    onNext={() => handlePageChange(pagination.currentPage + 1)}
-                                />
-                            </div>
+                            ) : (
+                                <>
+                                    <div>
+                                        <DataTable
+                                            columnContentTypes={[
+                                                'text', 'text', 'text', 'text', 'text',
+                                                'text', 'text', 'text', 'text', 'text'
+                                            ]}
+                                            headings={[
+                                                'Reviewer', 'Product', 'Email', 'Mobile Number', 'Rating',
+                                                'Date', 'Review', 'Recommended', 'Status', 'Actions'
+                                            ]}
+                                            sortable={[false, true, true, true, true, true, false, false]}
+                                            rows={rows}
+                                            hideScrollIndicator={true}
+                                        />
+                                    </div>
+
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '1rem' }}>
+                                        <div style={{ display: 'flex', justifyContent: 'center', marginTop: '0.5rem' }}>
+                                            <Text variant="bodySm" tone="subdued">
+                                                Showing {filteredReviews.length} of {pagination.totalReviews} reviews
+                                            </Text>
+                                        </div>
+                                        <Pagination
+                                            label={`Page ${pagination.currentPage} of ${pagination.totalPages}`}
+                                            hasPrevious={pagination.currentPage > 1}
+                                            onPrevious={() => handlePageChange(pagination.currentPage - 1)}
+                                            hasNext={pagination.currentPage < pagination.totalPages}
+                                            onNext={() => handlePageChange(pagination.currentPage + 1)}
+                                        />
+                                    </div>
+                                </>
+                            )}
                         </>
                     </Card>
 
