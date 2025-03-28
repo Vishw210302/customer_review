@@ -29,7 +29,7 @@ const RatingOfDashboard = () => {
         totalReviews: 1248,
         todayReviews: 24,
         monthlyReviews: 356,
-        averageRating: 4.7,
+        averageRating: 3.5,
         productReviews: 987,
         storeReviews: 261,
         pendingReviews: 18,

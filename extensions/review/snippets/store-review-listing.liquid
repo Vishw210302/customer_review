@@ -639,6 +639,7 @@
     padding: 10px 15px;
     -ms-overflow-style: none;
     scrollbar-width: thin;
+    cursor: pointer;
   }
 
   .review-images::-webkit-scrollbar {
@@ -651,11 +652,7 @@
     object-fit: cover;
     border-radius: 6px;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-    transition: transform 0.2s ease;
-  }
-
-  .review-images img:hover {
-    transform: scale(1.05);
+    cursor: 'pointer';
   }
 
   .review-footer {
@@ -671,6 +668,73 @@
   .review-date {
     color: #777;
     font-size: 12px;
+  }
+
+  .loading-reviews {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .review-pagination-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 20px;
+    padding: 10px 0;
+  }
+
+  .review-pagination {
+    display: flex;
+    align-items: center;
+    background-color: #f8f9fa;
+    border-radius: 25px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+  }
+
+  .page-btn {
+    background-color: transparent;
+    border: none;
+    color: #333;
+    padding: 10px 15px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, color 0.3s ease;
+    font-size: 18px;
+    font-weight: bold;
+  }
+
+  .page-btn:hover {
+    background-color: #e9ecef;
+  }
+
+  .page-btn:disabled {
+    color: #aaa;
+    cursor: not-allowed;
+  }
+
+  .page-numbers {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding: 0 15px;
+  }
+
+  .current-page {
+    font-weight: bold;
+    color: #007bff;
+    font-size: 16px;
+  }
+
+  .total-pages {
+    color: #6c757d;
+    font-size: 14px;
+  }
+
+  @media (max-width: 480px) {
+    .review-pagination {
+      scale: 0.9;
+    }
   }
 
   @media (max-width: 1200px) {
@@ -708,7 +772,7 @@
         <span class="store-stars">★</span>
         <span class="store-stars">★</span>
       </div>
-      <span class="rating-store-value">4.7</span>
+      <span class="rating-store-value"></span>
     </div>
   </div>
 </div>
@@ -717,8 +781,8 @@
   <div class="review-store-modal-content">
     <span class="review-close-store-modal" id="closeModal" aria-label="Close modal">&times;</span>
     <h2 class="review-modal-store-title">Customer Reviews</h2>
-    <p class="review-modal-store-description">Based on 7,781 verified reviews</p>
-    <div class="review-rating-store-label">★★★★★</div>
+    <p class="review-modal-store-description"></p>
+    <div class="review-rating-store-label"></div>
 
     <button class="review-add-store-review-btn" id="addReviewBtn">Share Your Experience</button>
 
@@ -831,58 +895,19 @@
 
     <div class="main-card-review-content">
       <div class="card-store-review">
-        <div class="review-container">
-          <div>
-            <div>
-              <div class="reviewer-details">
-                <div class="reviewer-name">John Doe</div>
-                <div class="reviewer-email">john.doe@example.com</div>
-              </div>
-            </div>
-            <div class="review-rating">
-              <div class="stars">★★★★★</div>
-            </div>
-            <h3 class="review-title">Perfect for my hiking trip!</h3>
-            <p class="review-message">
-              This product exceeded all my expectations. It's lightweight, durable, and performed flawlessly during my
-              7-day backpacking trip through the Rockies.
-            </p>
-          </div>
-          <div class="review-images">
-            <img src="https://picsum.photos/200/300" alt="Mountain view with product" width="10" height="10">
-            <img src="https://picsum.photos/200/300" alt="Product in use" width="10" height="10">
-            <img src="https://picsum.photos/200/300" alt="Campsite setup" width="10" height="10">
-          </div>
-          <div class="review-footer">
-            <div class="review-date">March 15, 2025</div>
-          </div>
-        </div>
+        {% comment %} Here All Data Comes {% endcomment %}
       </div>
-      <div class="card-store-review">
-        <div class="review-container">
-          <div>
-            <div>
-              <div class="reviewer-details">
-                <div class="reviewer-name">John Doe</div>
-                <div class="reviewer-email">john.doe@example.com</div>
-              </div>
-            </div>
-            <div class="review-rating">
-              <div class="stars">★★★★★</div>
-            </div>
-            <h3 class="review-title">Perfect for my hiking trip!</h3>
-            <p class="review-message">
-              This product exceeded all my expectations. It's lightweight, durable, and performed flawlessly during my
-              7-day backpacking trip through the Rockies.
-            </p>
-          </div>
-          <div class="review-images">
-            <img src="https://picsum.photos/200/300" alt="Mountain view with product" width="10" height="10">
-          </div>
-          <div class="review-footer">
-            <div class="review-date">March 15, 2025</div>
-          </div>
+    </div>
+    <div class="review-pagination-container">
+      <div class="review-pagination">
+        <button class="page-btn prev-page" aria-label="Previous Page">&lsaquo;</button>
+
+        <div class="page-numbers">
+          <span class="current-page">1</span>
+          <span class="total-pages">of 5</span>
         </div>
+
+        <button class="page-btn next-page" aria-label="Next Page">&rsaquo;</button>
       </div>
     </div>
   </div>
@@ -909,9 +934,9 @@
   const customerEmail = document.getElementById('customerEmail');
   const successCheckmark = document.getElementById('successCheckmark');
   const thumbnailsContainer = document.getElementById('reviewThumbnails');
-
-  const ADD_STORE_REVIEW_API = 'https://e005-182-65-88-61.ngrok-free.app/api/storeReview';
-
+  const mainCardReviewContent = document.querySelector('.main-card-review-content');
+  const API_BASE_URL = 'https://8f16-223-229-149-98.ngrok-free.app';
+  const ADD_STORE_REVIEW_API = `${API_BASE_URL}/api/storeReview`;
   let userRating = 0;
   let formFields = [
     { element: customerName, filled: false },
@@ -921,67 +946,254 @@
   ];
 
   let selectedFiles = [];
+  let currentPage = 1;
+  let totalPages = 1;
+  let isLoading = false;
 
-  updateFormProgress();
+  document.addEventListener('DOMContentLoaded', () => {
+    const cardReviewContent = document.querySelector('.card-store-review');
+    const firstPageBtn = document.querySelector('.first-page');
+    const prevPageBtn = document.querySelector('.prev-page');
+    const nextPageBtn = document.querySelector('.next-page');
+    const lastPageBtn = document.querySelector('.last-page');
+    const currentPageSpan = document.querySelector('.current-page');
+    const totalPagesSpan = document.querySelector('.total-pages');
 
-  formFields.forEach((field) => {
-    field.element.addEventListener('input', () => {
-      field.filled = field.element.value.trim() !== '';
-      updateFormProgress();
-    });
-  });
+    function updatePagination(data) {
+      if (!data) return;
 
-  reviewMessage.addEventListener('input', () => {
-    const count = reviewMessage.value.length;
-    charCount.textContent = `${count}/1000`;
+      if (data.totalPages) {
+        totalPages = data.totalPages;
+      }
 
-    if (count > 1000) {
-      charCount.style.color = '#ff3860';
-    } else {
-      charCount.style.color = '#999';
+      if (firstPageBtn) {
+        firstPageBtn.disabled = currentPage === 1;
+      }
+      if (prevPageBtn) {
+        prevPageBtn.disabled = currentPage === 1;
+      }
+      if (nextPageBtn) {
+        nextPageBtn.disabled = currentPage === totalPages;
+      }
+      if (lastPageBtn) {
+        lastPageBtn.disabled = currentPage === totalPages;
+      }
+
+      if (currentPageSpan) {
+        currentPageSpan.textContent = currentPage;
+      }
+      if (totalPagesSpan) {
+        totalPagesSpan.textContent = `of ${totalPages}`;
+      }
     }
+
+    function fetchReviewsForPage(apiUrl) {
+      if (isLoading) return;
+
+      if (!mainCardReviewContent) return;
+
+      mainCardReviewContent.innerHTML = '<div class="loading-reviews">Loading reviews...</div>';
+      isLoading = true;
+
+      fetch(apiUrl, {
+        method: 'GET',
+        headers: {
+          'ngrok-skip-browser-warning': true,
+          'Content-Type': 'application/json',
+        },
+      })
+        .then((response) => {
+          if (!response.ok) {
+            console.error('Server response:', response.status, response.statusText);
+            throw new Error(`Server responded with status: ${response.status}`);
+          }
+          return response.json();
+        })
+        .then((data) => {
+          displayReview(data);
+          updatePagination(data);
+          isLoading = false;
+        })
+        .catch((error) => {
+          console.error('Error fetching reviews:', error);
+          mainCardReviewContent.innerHTML = `<div class="error-message">Failed to load reviews: ${error.message}. Please try again later.</div>`;
+          isLoading = false;
+        });
+    }
+
+    if (firstPageBtn) {
+      firstPageBtn.addEventListener('click', () => {
+        if (isLoading) return;
+        currentPage = 1;
+        const GET_STORE_REVIEW_API = `${API_BASE_URL}/api/storeReview?active=true&page=${currentPage}`;
+        fetchReviewsForPage(GET_STORE_REVIEW_API);
+      });
+    }
+
+    if (prevPageBtn) {
+      prevPageBtn.addEventListener('click', () => {
+        if (isLoading || currentPage <= 1) return;
+        currentPage--;
+        const GET_STORE_REVIEW_API = `${API_BASE_URL}/api/storeReview?active=true&page=${currentPage}`;
+        fetchReviewsForPage(GET_STORE_REVIEW_API);
+      });
+    }
+
+    if (nextPageBtn) {
+      nextPageBtn.addEventListener('click', () => {
+        if (isLoading || currentPage >= totalPages) return;
+        currentPage++;
+        const GET_STORE_REVIEW_API = `${API_BASE_URL}/api/storeReview?active=true&page=${currentPage}`;
+        fetchReviewsForPage(GET_STORE_REVIEW_API);
+      });
+    }
+
+    if (lastPageBtn) {
+      lastPageBtn.addEventListener('click', () => {
+        if (isLoading) return;
+        currentPage = totalPages;
+        const GET_STORE_REVIEW_API = `${API_BASE_URL}/api/storeReview?active=true&page=${currentPage}`;
+        fetchReviewsForPage(GET_STORE_REVIEW_API);
+      });
+    }
+
+    const GET_STORE_REVIEW_API = `${API_BASE_URL}/api/storeReview?active=true&page=1`;
+    fetchReviewsForPage(GET_STORE_REVIEW_API);
+
+    setupEventListeners();
   });
 
-  if (storeRating) {
-    storeRating.addEventListener('click', () => {
-      reviewModal.style.display = 'flex';
-      document.body.style.overflow = 'hidden';
-    });
+  function setupEventListeners() {
+    if (formFields.every((field) => field.element)) {
+      formFields.forEach((field) => {
+        field.element.addEventListener('input', () => {
+          field.filled = field.element.value.trim() !== '';
+          updateFormProgress();
+        });
+      });
+    }
+
+    if (reviewMessage) {
+      reviewMessage.addEventListener('input', () => {
+        const count = reviewMessage.value.length;
+        charCount.textContent = `${count}/1000`;
+
+        if (count > 1000) {
+          charCount.style.color = '#ff3860';
+        } else {
+          charCount.style.color = '#999';
+        }
+      });
+    }
+
+    if (storeRating) {
+      storeRating.addEventListener('click', () => {
+        reviewModal.style.display = 'flex';
+        document.body.style.overflow = 'hidden';
+      });
+    }
+
+    if (closeModal) {
+      closeModal.addEventListener('click', () => {
+        closeReviewModal();
+      });
+    }
+
+    if (reviewModal) {
+      window.addEventListener('click', (e) => {
+        if (e.target === reviewModal) {
+          closeReviewModal();
+        }
+      });
+
+      reviewModal.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+          closeReviewModal();
+        }
+      });
+    }
+
+    if (addReviewBtn) {
+      addReviewBtn.addEventListener('click', () => {
+        reviewForm.classList.toggle('review-open');
+        if (reviewForm.classList.contains('review-open')) {
+          addReviewBtn.textContent = 'Cancel Review';
+          addReviewBtn.style.backgroundColor = '#f44336';
+        } else {
+          addReviewBtn.textContent = 'Share Your Experience';
+          addReviewBtn.style.backgroundColor = '#4a90e2';
+        }
+      });
+    }
+
+    if (cancelBtn) {
+      cancelBtn.addEventListener('click', () => {
+        reviewForm.classList.remove('review-open');
+        addReviewBtn.textContent = 'Share Your Experience';
+        addReviewBtn.style.backgroundColor = '#4a90e2';
+        resetForm();
+      });
+    }
+
+    if (emojis && emojis.length > 0) {
+      emojis.forEach((emoji) => {
+        emoji.addEventListener('mouseover', () => {
+          const value = emoji.getAttribute('data-value');
+          highlightEmojis(value);
+        });
+
+        emoji.addEventListener('mouseout', () => {
+          resetEmojis();
+          if (userRating > 0) {
+            highlightEmojis(userRating);
+          }
+        });
+
+        emoji.addEventListener('click', () => {
+          const value = emoji.getAttribute('data-value');
+          userRating = value;
+          selectEmoji(value);
+          updateFormProgress();
+        });
+
+        emoji.setAttribute('tabindex', '0');
+        emoji.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            const value = emoji.getAttribute('data-value');
+            userRating = value;
+            selectEmoji(value);
+            updateFormProgress();
+          }
+        });
+      });
+    }
+
+    if (reviewImage) {
+      reviewImage.addEventListener('change', function (e) {
+        const fileInput = e.target;
+
+        if (fileInput.files.length > 0) {
+          Array.from(fileInput.files).forEach((file) => {
+            if (file.type.startsWith('image/')) {
+              selectedFiles.push(file);
+            }
+          });
+
+          updateFileDisplay();
+        }
+
+        fileInput.value = '';
+      });
+    }
+
+    if (submitBtn) {
+      const freshSubmitBtn = submitBtn.cloneNode(true);
+      submitBtn.parentNode.replaceChild(freshSubmitBtn, submitBtn);
+
+      document.getElementById('submitBtn').addEventListener('click', submitReview);
+    }
   }
-
-  closeModal.addEventListener('click', () => {
-    closeReviewModal();
-  });
-
-  window.addEventListener('click', (e) => {
-    if (e.target === reviewModal) {
-      closeReviewModal();
-    }
-  });
-
-  reviewModal.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') {
-      closeReviewModal();
-    }
-  });
-
-  addReviewBtn.addEventListener('click', () => {
-    reviewForm.classList.toggle('review-open');
-    if (reviewForm.classList.contains('review-open')) {
-      addReviewBtn.textContent = 'Cancel Review';
-      addReviewBtn.style.backgroundColor = '#f44336';
-    } else {
-      addReviewBtn.textContent = 'Share Your Experience';
-      addReviewBtn.style.backgroundColor = '#4a90e2';
-    }
-  });
-
-  cancelBtn.addEventListener('click', () => {
-    reviewForm.classList.remove('review-open');
-    addReviewBtn.textContent = 'Share Your Experience';
-    addReviewBtn.style.backgroundColor = '#4a90e2';
-    resetForm();
-  });
 
   function isValidEmail(email) {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -989,6 +1201,8 @@
   }
 
   function updateFormProgress() {
+    if (!formProgress) return;
+
     const totalFields = formFields.length + (userRating > 0 ? 1 : 0);
     const filledFields = formFields.filter((field) => field.filled).length + (userRating > 0 ? 1 : 0);
     const progress = Math.min((filledFields / totalFields) * 100, 100);
@@ -996,14 +1210,18 @@
   }
 
   function resetEmojis() {
+    if (!emojis) return;
+
     emojis.forEach((e) => {
       e.classList.remove('review-active');
     });
   }
 
   function highlightEmojis(value) {
+    if (!emojis) return;
+
     emojis.forEach((e) => {
-      if (e.getAttribute('data-value') <= value) {
+      if (parseInt(e.getAttribute('data-value')) <= parseInt(value)) {
         e.classList.add('review-active');
       } else {
         e.classList.remove('review-active');
@@ -1013,8 +1231,11 @@
 
   function selectEmoji(value) {
     resetEmojis();
+
+    if (!emojis) return;
+
     emojis.forEach((e) => {
-      if (e.getAttribute('data-value') <= value) {
+      if (parseInt(e.getAttribute('data-value')) <= parseInt(value)) {
         e.classList.add('review-active');
       }
     });
@@ -1023,41 +1244,79 @@
   function resetForm() {
     userRating = 0;
     resetEmojis();
+
     formFields.forEach((field) => {
-      field.element.value = '';
-      field.filled = false;
-      field.element.classList.remove('invalid-input');
+      if (field.element) {
+        field.element.value = '';
+        field.filled = false;
+        field.element.classList.remove('invalid-input');
+      }
     });
 
-    document.getElementById('reviewImage').value = '';
-    selectedFiles = [];
-    fileName.textContent = '';
-    thumbnailsContainer.innerHTML = '';
+    if (reviewImage) {
+      reviewImage.value = '';
+    }
 
-    submissionMessage.style.display = 'none';
-    nameError.textContent = '';
-    emailError.textContent = '';
-    charCount.textContent = '0/1000';
+    selectedFiles = [];
+
+    if (fileName) {
+      fileName.textContent = '';
+    }
+
+    if (thumbnailsContainer) {
+      thumbnailsContainer.innerHTML = '';
+    }
+
+    if (submissionMessage) {
+      submissionMessage.style.display = 'none';
+    }
+
+    if (nameError) {
+      nameError.textContent = '';
+    }
+
+    if (emailError) {
+      emailError.textContent = '';
+    }
+
+    if (charCount) {
+      charCount.textContent = '0/1000';
+    }
+
     updateFormProgress();
 
     const formControls = document.querySelectorAll('.review-form-store-group');
-    formControls.forEach((element) => {
-      element.style.display = 'block';
-    });
+    if (formControls) {
+      formControls.forEach((element) => {
+        element.style.display = 'block';
+      });
+    }
 
-    successCheckmark.style.display = 'none';
+    if (successCheckmark) {
+      successCheckmark.style.display = 'none';
+    }
   }
 
   function closeReviewModal() {
+    if (!reviewModal) return;
+
     reviewModal.style.display = 'none';
     document.body.style.overflow = '';
     resetForm();
-    reviewForm.classList.remove('review-open');
-    addReviewBtn.textContent = 'Share Your Experience';
-    addReviewBtn.style.backgroundColor = '#4a90e2';
+
+    if (reviewForm) {
+      reviewForm.classList.remove('review-open');
+    }
+
+    if (addReviewBtn) {
+      addReviewBtn.textContent = 'Share Your Experience';
+      addReviewBtn.style.backgroundColor = '#4a90e2';
+    }
   }
 
   function showSubmissionMessage(message, isSuccess) {
+    if (!submissionMessage) return;
+
     submissionMessage.textContent = message;
     submissionMessage.style.display = 'block';
 
@@ -1068,143 +1327,113 @@
     }
   }
 
-  emojis.forEach((emoji) => {
-    emoji.addEventListener('mouseover', () => {
-      const value = emoji.getAttribute('data-value');
-      highlightEmojis(value);
-    });
+  function displayReview(data) {
+    if (!mainCardReviewContent) return;
 
-    emoji.addEventListener('mouseout', () => {
-      resetEmojis();
-      if (userRating > 0) {
-        highlightEmojis(userRating);
-      }
-    });
+    mainCardReviewContent.innerHTML = '';
 
-    emoji.addEventListener('click', () => {
-      const value = emoji.getAttribute('data-value');
-      userRating = value;
-      selectEmoji(value);
-      updateFormProgress();
-    });
-
-    emoji.setAttribute('tabindex', '0');
-    emoji.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter' || e.key === ' ') {
-        e.preventDefault();
-        const value = emoji.getAttribute('data-value');
-        userRating = value;
-        selectEmoji(value);
-        updateFormProgress();
-      }
-    });
-  });
-
-  function submitReview() {
-    const customerNameValue = document.getElementById('customerName').value.trim();
-    const customerEmailValue = document.getElementById('customerEmail').value.trim();
-    const reviewTitle = document.getElementById('reviewTitle').value.trim();
-    const reviewMessageValue = document.getElementById('reviewMessage').value.trim();
-    const rating = userRating;
-
-    let isValid = true;
-
-    if (!customerNameValue) {
-      nameError.textContent = 'Please enter your name';
-      customerName.classList.add('invalid-input');
-      isValid = false;
-    } else {
-      nameError.textContent = '';
-      customerName.classList.remove('invalid-input');
-    }
-
-    if (!customerEmailValue) {
-      emailError.textContent = 'Please enter your email';
-      customerEmail.classList.add('invalid-input');
-      isValid = false;
-    } else if (!isValidEmail(customerEmailValue)) {
-      emailError.textContent = 'Please enter a valid email address';
-      customerEmail.classList.add('invalid-input');
-      isValid = false;
-    } else {
-      emailError.textContent = '';
-      customerEmail.classList.remove('invalid-input');
-    }
-
-    if (!rating) {
-      showSubmissionMessage('Please select a rating before submitting.', false);
-      isValid = false;
-    }
-
-    if (!isValid) {
+    if (!data.reviews || !Array.isArray(data.reviews) || data.reviews.length === 0) {
+      mainCardReviewContent.innerHTML = '<div class="no-reviews-message">No reviews available yet.</div>';
       return;
     }
 
-    submitBtn.disabled = true;
-    submitBtn.textContent = 'Submitting...';
-
-    const formData = new FormData();
-    formData.append('name', customerNameValue);
-    formData.append('email', customerEmailValue);
-    formData.append('reviewTitle', reviewTitle);
-    formData.append('rating', rating);
-    formData.append('reviewMessage', reviewMessageValue);
-
-    if (selectedFiles.length > 0) {
-      selectedFiles.forEach((file, index) => {
-        formData.append('reviewImages', file);
-      });
+    const storeRatingValue = document.querySelector('.rating-store-value');
+    if (storeRatingValue) {
+      storeRatingValue.textContent = data.averageRating.toFixed(1);
     }
 
-    fetch(ADD_STORE_REVIEW_API, {
-      method: 'POST',
-      body: formData,
-    })
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error('Network response was not ok');
-        }
-        return response.json();
-      })
-      .then((data) => {
-        const formControls = document.querySelectorAll('.review-form-store-group');
-        formControls.forEach((element) => {
-          element.style.display = 'none';
-        });
+    const averageRatingDisplay = document.createElement('div');
+    document.querySelector('.review-modal-store-description').textContent = `average ${data.averageRating.toFixed(
+      1
+    )} Based on ${data.totalReviews} Rating verified reviews`;
 
-        successCheckmark.style.display = 'block';
+    const storeRatingLabel = document.querySelector('.review-rating-store-label');
+    if (storeRatingLabel) {
+      const fullStars = Math.floor(data.averageRating);
+      const partialStar = data.averageRating % 1;
 
-        showSubmissionMessage('Thank you for your review! Your feedback helps us improve our service.', true);
+      let starHTML = '★'.repeat(fullStars);
 
-        setTimeout(() => {
-          closeReviewModal();
-        }, 3000);
-      })
-      .catch((error) => {
-        console.error('Error submitting review:', error);
-        showSubmissionMessage('We encountered an error submitting your review. Please try again later.', false);
-        submitBtn.disabled = false;
-        submitBtn.textContent = 'Submit Review';
-      });
+      if (partialStar >= 0.5) {
+        starHTML += '½';
+      }
+
+      starHTML += '☆'.repeat(5 - starHTML.length);
+
+      storeRatingLabel.textContent = starHTML;
+    }
+
+    data.reviews.forEach((review) => {
+      const reviewDate = review.createdAt
+        ? new Date(review.createdAt).toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+          })
+        : 'No date';
+
+      const starsHTML = generateStars(review.rating);
+
+      const reviewCard = document.createElement('div');
+      reviewCard.className = 'card-store-review';
+
+      reviewCard.innerHTML = `
+        <div class="review-container">
+          <div>
+            <div>
+              <div class="reviewer-details">
+                <div class="reviewer-name">${review.name || 'Anonymous'}</div>
+                <div class="reviewer-email">${review.email || ''}</div>
+              </div>
+            </div>
+            <div class="review-rating">
+              <div class="stars">${starsHTML}</div>
+            </div>
+            <h3 class="review-title">${review.reviewTitle || 'Review'}</h3>
+            <p class="review-message">
+              ${review.reviewMessage || 'No review content'}
+            </p>
+          </div>
+          ${generateImagesHTML(review.reviewImages)}
+          <div class="review-footer">
+            <div class="review-date">${reviewDate}</div>
+          </div>
+        </div>
+      `;
+
+      mainCardReviewContent.appendChild(reviewCard);
+    });
   }
 
-  document.getElementById('reviewImage').addEventListener('change', function (e) {
-    const fileInput = e.target;
+  function generateStars(rating) {
+    if (!rating) return '★★★★★';
 
-    if (fileInput.files.length > 0) {
-      Array.from(fileInput.files).forEach((file) => {
-        if (file.type.startsWith('image/')) {
-          selectedFiles.push(file);
-        }
-      });
+    const numStars = parseInt(rating);
+    if (isNaN(numStars) || numStars < 1 || numStars > 5) return '★★★★★';
 
-      updateFileDisplay();
+    return '★'.repeat(numStars);
+  }
+
+  function generateImagesHTML(images) {
+    if (!images || !Array.isArray(images) || images.length === 0) {
+      return '';
     }
 
-    fileInput.value = '';
-  });
+    let imagesHTML = '<div class="review-images">';
+
+    images.forEach((image) => {
+      if (image && typeof image === 'string') {
+        imagesHTML += `<img src="${API_BASE_URL}/uploads/${image}" alt="Review image" class="review-image">`;
+      }
+    });
+
+    imagesHTML += '</div>';
+    return imagesHTML;
+  }
 
   function updateFileDisplay() {
+    if (!thumbnailsContainer || !fileName) return;
+
     thumbnailsContainer.innerHTML = '';
 
     if (selectedFiles.length > 0) {
@@ -1249,9 +1478,117 @@
     }
   }
 
-  submitBtn.replaceWith(submitBtn.cloneNode(true));
+  function submitReview() {
+    if (!customerName || !customerEmail || !reviewMessage) {
+      showSubmissionMessage('Form elements not found. Please refresh the page and try again.', false);
+      return;
+    }
 
-  const freshSubmitBtn = document.getElementById('submitBtn');
+    const customerNameValue = customerName.value.trim();
+    const customerEmailValue = customerEmail.value.trim();
+    const reviewTitle = document.getElementById('reviewTitle')?.value.trim() || '';
+    const reviewMessageValue = reviewMessage.value.trim();
+    const rating = userRating;
 
-  freshSubmitBtn.addEventListener('click', submitReview);
+    let isValid = true;
+
+    if (!customerNameValue) {
+      if (nameError) nameError.textContent = 'Please enter your name';
+      customerName.classList.add('invalid-input');
+      isValid = false;
+    } else {
+      if (nameError) nameError.textContent = '';
+      customerName.classList.remove('invalid-input');
+    }
+
+    if (!customerEmailValue) {
+      if (emailError) emailError.textContent = 'Please enter your email';
+      customerEmail.classList.add('invalid-input');
+      isValid = false;
+    } else if (!isValidEmail(customerEmailValue)) {
+      if (emailError) emailError.textContent = 'Please enter a valid email address';
+      customerEmail.classList.add('invalid-input');
+      isValid = false;
+    } else {
+      if (emailError) emailError.textContent = '';
+      customerEmail.classList.remove('invalid-input');
+    }
+
+    if (!rating) {
+      showSubmissionMessage('Please select a rating before submitting.', false);
+      isValid = false;
+    }
+
+    if (!isValid) {
+      return;
+    }
+
+    if (submitBtn) {
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Submitting...';
+    }
+
+    const formData = new FormData();
+    formData.append('name', customerNameValue);
+    formData.append('email', customerEmailValue);
+    formData.append('reviewTitle', reviewTitle);
+    formData.append('rating', rating);
+    formData.append('reviewMessage', reviewMessageValue);
+
+    if (selectedFiles.length > 0) {
+      selectedFiles.forEach((file, index) => {
+        formData.append('reviewImages', file);
+      });
+    }
+
+    const fetchPromise = fetch(ADD_STORE_REVIEW_API, {
+      method: 'POST',
+      body: formData,
+    });
+
+    const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error('Request timed out')), 30000));
+
+    Promise.race([fetchPromise, timeoutPromise])
+      .then((response) => {
+        if (!response.ok) {
+          console.error('Server response:', response.status, response.statusText);
+          throw new Error(`Server responded with status: ${response.status}`);
+        }
+        return response.json();
+      })
+      .then((data) => {
+        const formControls = document.querySelectorAll('.review-form-store-group');
+        formControls.forEach((element) => {
+          element.style.display = 'none';
+        });
+
+        if (successCheckmark) {
+          successCheckmark.style.display = 'block';
+        }
+
+        showSubmissionMessage('Thank you for your review! Your feedback helps us improve our service.', true);
+
+        setTimeout(() => {
+          currentPage = 1;
+          const GET_STORE_REVIEW_API = `${API_BASE_URL}/api/storeReview?active=true&page=1`;
+          fetchReviewsForPage(GET_STORE_REVIEW_API);
+        }, 1000);
+
+        setTimeout(() => {
+          closeReviewModal();
+        }, 3000);
+      })
+      .catch((error) => {
+        console.error('Error submitting review:', error);
+        showSubmissionMessage(
+          `We encountered an error submitting your review: ${error.message}. Please try again later.`,
+          false
+        );
+
+        if (submitBtn) {
+          submitBtn.disabled = false;
+          submitBtn.textContent = 'Submit Review';
+        }
+      });
+  }
 </script>

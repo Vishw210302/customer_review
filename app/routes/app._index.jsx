@@ -10,6 +10,7 @@ import {
   InlineStack,
   Page,
   RadioButton,
+  Spinner,
   Text
 } from "@shopify/polaris";
 import React, { useCallback, useEffect, useRef, useState } from "react";
@@ -168,7 +169,7 @@ function Index() {
           height: "100vh",
         }}
       >
-         <Spinner accessibilityLabel="Loading widgets" size="large" />
+        <Spinner accessibilityLabel="Loading widgets" size="large" />
       </div>
     );
   }
@@ -459,7 +460,7 @@ function Index() {
                 </Button>
               ) : (
                 <Button onClick={() => setShowAll(false)} primary>
-                  Show Less
+                  View Less
                 </Button>
               )}
             </div>

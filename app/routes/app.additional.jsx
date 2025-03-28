@@ -1,6 +1,6 @@
 import { json } from "@remix-run/node";
 import { useLoaderData, useNavigation } from '@remix-run/react';
-import { Card, Grid, Page, Spinner } from '@shopify/polaris';
+import { Card, Grid, Page, Spinner, Text } from '@shopify/polaris';
 import React, { useEffect, useState } from 'react';
 import { authenticate } from "../shopify.server";
 import GenericPreview from './modals/GenericPreview';
@@ -135,7 +135,6 @@ const ThemeStatus = () => {
   const { activeTheme, session, blockId } = useLoaderData();
   const [selectedTheme, setSelectedTheme] = useState(null);
   const navigate = useNavigation();
-  console.log("navigation", navigate.state)
   const isPageLoading = navigate.state === "loading";
 
   useEffect(() => {
@@ -206,7 +205,6 @@ const ThemeStatus = () => {
     padding: "16px"
   };
 
-
   const buttonContainerStyle = {
     display: "flex",
     justifyContent: "center",
@@ -232,12 +230,10 @@ const ThemeStatus = () => {
   return (
     <Page fullWidth>
       <Card sectioned>
-        <h1 style={{
-          fontSize: "24px", color: "#333", marginBottom: "25px", fontWeight: "bold",
-        }}
-        >
+
+        <Text variant="headingLg" as="h5">
           Widget Gallery
-        </h1>
+        </Text>
 
         <Grid columns={{ xs: 1, sm: 2, md: 2, lg: 2, xl: 2 }} gap="4">
           <Grid.Cell>

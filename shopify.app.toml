@@ -3,7 +3,7 @@
 client_id = "62f639e7df70e5c7c61e8e7bdb75bea9"
 name = "customer-review"
 handle = "customer-review-6"
-application_url = "https://china-naturals-ui-pour.trycloudflare.com"
+application_url = "https://licking-belong-rca-ian.trycloudflare.com"
 embedded = true
 
 [build]
@@ -17,16 +17,16 @@ scopes = "write_products, read_themes"
 
 [auth]
 redirect_urls = [
-  "https://china-naturals-ui-pour.trycloudflare.com/auth/callback",
-  "https://china-naturals-ui-pour.trycloudflare.com/auth/shopify/callback",
-  "https://china-naturals-ui-pour.trycloudflare.com/api/auth/callback"
+  "https://licking-belong-rca-ian.trycloudflare.com/auth/callback",
+  "https://licking-belong-rca-ian.trycloudflare.com/auth/shopify/callback",
+  "https://licking-belong-rca-ian.trycloudflare.com/api/auth/callback"
 ]
 
 [webhooks]
 api_version = "2025-01"
 
 [app_proxy]
-url = "https://china-naturals-ui-pour.trycloudflare.com"
+url = "https://licking-belong-rca-ian.trycloudflare.com"
 subpath = "v1"
 prefix = "a"
 

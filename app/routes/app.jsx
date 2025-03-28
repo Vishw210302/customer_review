@@ -1,10 +1,10 @@
 import { Link, Outlet, useLoaderData, useNavigation, useRouteError } from "@remix-run/react";
 import { NavMenu } from "@shopify/app-bridge-react";
-import { Spinner } from "@shopify/polaris";
 import polarisStyles from "@shopify/polaris/build/esm/styles.css?url";
 import { AppProvider } from "@shopify/shopify-app-remix/react";
 import { boundary } from "@shopify/shopify-app-remix/server";
 import { authenticate } from "../shopify.server";
+import { Spinner } from "@shopify/polaris";
 
 export const links = () => [{ rel: "stylesheet", href: polarisStyles }];
 
