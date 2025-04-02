@@ -1,3 +1,4 @@
+import { useNavigation } from '@remix-run/react';
 import {
     AppProvider,
     Badge,
@@ -15,82 +16,24 @@ import {
 import { DeleteIcon } from '@shopify/polaris-icons';
 import '@shopify/polaris/build/esm/styles.css';
 import React, { useEffect, useMemo, useState } from 'react';
-import { useNavigation, useLoaderData, Form } from '@remix-run/react';
 import DeleteButtonModal from './modals/DeleteButtonModal';
 
-export async function loader({ request }) {
-    const APIURL = process.env.API_URL;
-    const url = new URL(request.url);
-    const searchQuery = url.searchParams.get('searchQuery') || '';
-    const status = url.searchParams.get('status');
-    const rating = url.searchParams.get('rating');
-    const page = parseInt(url.searchParams.get('page') || '1', 10);
-    const limit = parseInt(url.searchParams.get('limit') || '10', 10);
-
-    try {
-        const filterParams = new URLSearchParams();
-        if (searchQuery) filterParams.append('searchQuery', searchQuery);
-        if (status !== null && status !== undefined) filterParams.append('status', status);
-        if (rating) filterParams.append('rating', rating);
-        filterParams.append('page', page.toString());
-        filterParams.append('limit', limit.toString());
-
-        const queryString = filterParams.toString();
-        const endpoint = `${APIURL}/api/getallReview?${queryString}`;
-
-        const response = await fetch(endpoint, {
-            headers: {
-                'ngrok-skip-browser-warning': true,
-                'Content-Type': 'application/json'
-            }
-        });
-
-        if (!response.ok) {
-            console.error("API error:", response.status, response.statusText);
-            return {
-                success: false,
-                reviews: [],
-                pagination: { currentPage: 1, totalPages: 1 },
-                searchQuery,
-                status,
-                rating
-            };
-        }
-
-        const data = await response.json();
-
-        return {
-            success: true,
-            reviews: data.reviews,
-            pagination: {
-                totalReviews: data.totalReviews,
-                totalPages: data.totalPages,
-                currentPage: data.currentPage,
-                pageSize: data.pageSize
-            },
-            searchQuery,
-            status,
-            rating
-        };
-
-    } catch (error) {
-        console.error("Failed to fetch reviews:", error);
-        return {
-            success: false,
-            reviews: [],
-            pagination: { currentPage: 1, totalPages: 1 },
-            searchQuery,
-            status,
-            rating
-        };
-    }
-}
-
-function ProductReview() {
-    const { reviews, pagination, searchQuery: initialSearchQuery, status: initialStatus, rating: initialRating } = useLoaderData();
+function ProductReview({
+    reviews,
+    pagination,
+    initialSearchQuery,
+    initialStatus,
+    initialRating,
+    submit,
+    deleteReview,
+    updateReviewStatus,
+    onDeleteSuccess,
+    onStatusChangeSuccess,
+    isLoading: parentIsLoading
+}) {
     const navigation = useNavigation();
-    const isLoading = navigation.state === 'loading';
-
+    const isNavigationLoading = navigation.state === "loading" || navigation.state === "submitting";
+    const isLoading = parentIsLoading || isNavigationLoading;
     const [deleteModalOpen, setDeleteModalOpen] = useState(false);
     const [selectedReviewId, setSelectedReviewId] = useState(null);
     const [toast, setToast] = useState({ active: false, message: '', error: false });
@@ -98,7 +41,8 @@ function ProductReview() {
     const [ratingFilter, setRatingFilter] = useState(initialRating || "");
     const [statusFilter, setStatusFilter] = useState(initialStatus || "");
     const [localSearchQuery, setLocalSearchQuery] = useState(initialSearchQuery || "");
-
+    const [processingAction, setProcessingAction] = useState(false);
+    const [isFiltering, setIsFiltering] = useState(false);
     const [reviewStatuses, setReviewStatuses] = useState(
         reviews.reduce((acc, review) => {
             acc[review._id] = review.isActive;
@@ -134,6 +78,7 @@ function ProductReview() {
         setStatusFilter(initialStatus || "");
         setRatingFilter(initialRating || "");
         setLocalSearchQuery(initialSearchQuery || "");
+        setIsFiltering(false);
     }, [reviews, initialSearchQuery, initialStatus, initialRating]);
 
     const handleDeleteModalOpen = (id) => {
@@ -146,32 +91,91 @@ function ProductReview() {
         setSelectedReviewId(null);
     };
 
-    const handleDeleteReview = () => {
-        const formData = new FormData();
-        formData.append('reviewId', selectedReviewId);
-        formData.append('actionType', 'deleteReview');
+    const handleDeleteReview = async () => {
+        if (selectedReviewId) {
+            try {
+                setProcessingAction(true);
+                const result = await deleteReview(selectedReviewId);
 
-        return (
-            <Form method="DELETE" action="/product-reviews">
-                <input type="hidden" name="reviewId" value={selectedReviewId} />
-                <input type="hidden" name="actionType" value="deleteReview" />
-            </Form>
-        );
+                if (result.success) {
+                    setToast({
+                        active: true,
+                        message: 'Review deleted successfully',
+                        error: false
+                    });
+                    onDeleteSuccess && onDeleteSuccess();
+
+                    const url = new URL(window.location.href);
+                    const formData = new FormData();
+                    for (const [key, value] of url.searchParams.entries()) {
+                        formData.append(key, value);
+                    }
+                    submit(formData, { method: 'get', replace: true });
+                } else {
+                    setToast({
+                        active: true,
+                        message: result.error || 'Failed to delete review',
+                        error: true
+                    });
+                }
+                handleDeleteModalClose();
+            } catch (error) {
+                setToast({
+                    active: true,
+                    message: 'An unexpected error occurred',
+                    error: true
+                });
+                handleDeleteModalClose();
+            } finally {
+                setProcessingAction(false);
+            }
+        }
     };
 
-    const handleStatusChange = (reviewId, newStatus) => {
-        const formData = new FormData();
-        formData.append('reviewId', reviewId);
-        formData.append('newStatus', newStatus);
-        formData.append('actionType', 'updateStatus');
+    const handleStatusChange = async (reviewId, newStatus) => {
+        if (isLoading || isFiltering) return;
 
-        return (
-            <Form method="PUT" action="/product-reviews">
-                <input type="hidden" name="reviewId" value={reviewId} />
-                <input type="hidden" name="newStatus" value={newStatus} />
-                <input type="hidden" name="actionType" value="updateStatus" />
-            </Form>
-        );
+        try {
+            setProcessingAction(true);
+
+            setReviewStatuses(prev => ({
+                ...prev,
+                [reviewId]: newStatus === 'true'
+            }));
+
+            const result = await updateReviewStatus(reviewId, newStatus);
+
+            if (result && result.success) {
+                setToast({
+                    active: true,
+                    message: 'Review status updated successfully',
+                    error: false
+                });
+                onStatusChangeSuccess && onStatusChangeSuccess(newStatus === 'true');
+            } else {
+                setReviewStatuses(prev => ({
+                    ...prev,
+                    [reviewId]: !newStatus
+                }));
+                setToast({
+                    active: true,
+                    message: result?.error || 'Failed to update review status',
+                    error: true
+                });
+            }
+        } catch (error) {
+            setReviewStatuses(prev => ({
+                ...prev,
+                [reviewId]: !newStatus
+            }));
+            setToast({
+                active: true,
+                message: 'An unexpected error occurred',
+                error: true
+            });
+        } finally {
+            setProcessingAction(false);
+        }
     };
 
     const toggleToast = () => {
@@ -190,6 +194,20 @@ function ProductReview() {
             }
         }
         return rating;
+    };
+
+    const getRatingTone = (rating) => {
+        if (typeof rating === 'number') {
+            switch (rating) {
+                case 5: return 'success';
+                case 4: return 'info';
+                case 3: return 'warning';
+                case 2: return 'caution';
+                case 1: return 'critical';
+                default: return 'info';
+            }
+        }
+        return 'info';
     };
 
     const getTimeAgo = (dateString) => {
@@ -217,9 +235,30 @@ function ProductReview() {
         { label: 'Excellent', value: '5' },
     ];
 
+    const debounce = (func, delay) => {
+        let timer;
+        return function (...args) {
+            clearTimeout(timer);
+            timer = setTimeout(() => {
+                func.apply(this, args);
+            }, delay);
+        };
+    };
+
+    const submitFilter = (formData) => {
+        if (!isFiltering) {
+            setIsFiltering(true);
+            submit(formData, { method: 'get', replace: true });
+        }
+    };
+
+    const debouncedSubmit = debounce(submitFilter, 500);
+
     const handleSearchChange = (value) => {
         setLocalSearchQuery(value);
         setSearchQuery(value);
+
+        if (isLoading || isFiltering) return;
 
         const url = new URL(window.location.href);
         if (value) {
@@ -228,10 +267,17 @@ function ProductReview() {
             url.searchParams.delete('searchQuery');
         }
         url.searchParams.set('page', '1');
-        window.history.pushState({}, '', url);
+
+        const formData = new FormData();
+        for (const [key, value] of url.searchParams.entries()) {
+            formData.append(key, value);
+        }
+        debouncedSubmit(formData);
     };
 
     const handleStatusFilterChange = (value) => {
+        if (isLoading || isFiltering) return;
+
         setStatusFilter(value);
 
         const url = new URL(window.location.href);
@@ -241,10 +287,18 @@ function ProductReview() {
             url.searchParams.delete('status');
         }
         url.searchParams.set('page', '1');
-        window.history.pushState({}, '', url);
+
+        const formData = new FormData();
+        for (const [key, value] of url.searchParams.entries()) {
+            formData.append(key, value);
+        }
+        setIsFiltering(true);
+        submit(formData, { method: 'get', replace: true });
     };
 
     const handleRatingFilterChange = (value) => {
+        if (isLoading || isFiltering) return;
+
         setRatingFilter(value);
 
         const url = new URL(window.location.href);
@@ -254,17 +308,28 @@ function ProductReview() {
             url.searchParams.delete('rating');
         }
         url.searchParams.set('page', '1');
-        window.history.pushState({}, '', url);
+
+        const formData = new FormData();
+        for (const [key, value] of url.searchParams.entries()) {
+            formData.append(key, value);
+        }
+        setIsFiltering(true);
+        submit(formData, { method: 'get', replace: true });
     };
 
     const handleClearAllFilters = () => {
+        if (isLoading || isFiltering) return;
+
         const url = new URL(window.location.href);
         url.searchParams.delete('searchQuery');
         url.searchParams.delete('status');
         url.searchParams.delete('rating');
         url.searchParams.set('page', '1');
 
-        window.history.pushState({}, '', url);
+        const formData = new FormData();
+        formData.append('page', '1');
+        setIsFiltering(true);
+        submit(formData, { method: 'get', replace: true });
 
         setLocalSearchQuery("");
         setSearchQuery("");
@@ -273,54 +338,81 @@ function ProductReview() {
     };
 
     const handlePageChange = (newPage) => {
+        if (isLoading || isFiltering) return;
+
         const url = new URL(window.location.href);
         url.searchParams.set('page', newPage.toString());
-        window.history.pushState({}, '', url);
+
+        const formData = new FormData();
+        for (const [key, value] of url.searchParams.entries()) {
+            formData.append(key, value);
+        }
+        setIsFiltering(true);
+        submit(formData, { method: 'get', replace: true });
+    };
+
+    const handleQueryClear = () => {
+        if (isLoading || isFiltering) return;
+
+        setLocalSearchQuery("");
+        setSearchQuery("");
+        const url = new URL(window.location.href);
+        url.searchParams.delete('searchQuery');
+        url.searchParams.set('page', '1');
+        const formData = new FormData();
+        for (const [key, value] of url.searchParams.entries()) {
+            formData.append(key, value);
+        }
+        setIsFiltering(true);
+        submit(formData, { method: 'get', replace: true });
     };
 
     const rows = filteredReviews.map((review, index) => {
-        const ratingDisplay = getRatingText(review.rating);
+        const ratingDisplay = getRatingText(review?.rating);
+        const ratingTone = getRatingTone(review?.rating);
 
         return [
-            <Text key={index + "key"} variant="bodyMd" as="p">{review.name || "Unknown"}</Text>,
-            review.productId,
-            review.email,
-            review.mobile || "N/A",
+            <Text key={index + "key"} variant="bodyMd" as="p">{review?.name || "Unknown"}</Text>,
+            review?.productId,
+            review?.email,
+            review?.mobile || "N/A",
             <Badge
-                key={`rating-${review._id}`}
-                tone="info"
+                key={`rating-${review?._id}`}
+                tone={ratingTone}
             >
                 {ratingDisplay}
             </Badge>,
-            <Text key={`date-${review._id}`} variant="bodyMd" as="p">
-                {new Date(review.createdAt).toLocaleDateString('en-US', {
+            <Text key={`date-${review?._id}`} variant="bodyMd" as="p">
+                {new Date(review?.createdAt).toLocaleDateString('en-US', {
                     year: 'numeric',
                     month: 'short',
                     day: 'numeric'
                 })}
                 <br />
-                <Text variant="bodySm" tone="subdued">{getTimeAgo(review.createdAt)}</Text>
+                <Text variant="bodySm" tone="subdued">{getTimeAgo(review?.createdAt)}</Text>
             </Text>,
-            review.reviewText || "N/A",
+            review?.reviewText || "N/A",
             <Badge
-                key={`recommend-${review._id}`}
-                tone={review.recommend ? "success" : "critical"}
+                key={`recommend-${review?._id}`}
+                tone={review?.recommend ? "success" : "critical"}
             >
-                {review.recommend ? "Recommended" : "Not Recommended"}
+                {review?.recommend ? "Recommended" : "Not Recommended"}
             </Badge>,
             <Select
-                key={review._id}
+                key={`status-${review?._id}`}
                 labelInline
                 options={statusOptions.filter(option => option.value !== '')}
-                onChange={(newStatus) => handleStatusChange(review._id, newStatus)}
-                value={String(reviewStatuses[review._id])}
+                onChange={(newStatus) => handleStatusChange(review?._id, newStatus)}
+                value={String(reviewStatuses[review?._id])}
+                disabled={processingAction || isLoading || isFiltering}
             />,
             <Button
-                key={`delete-${review._id}`}
+                key={`delete-${review?._id}`}
                 icon={DeleteIcon}
                 tone="critical"
-                onClick={() => handleDeleteModalOpen(review._id)}
-                accessibilityLabel={`Delete review by ${review.name || "Unknown"}`}
+                onClick={() => handleDeleteModalOpen(review?._id)}
+                accessibilityLabel={`Delete review by ${review?.name || "Unknown"}`}
+                disabled={processingAction || isLoading || isFiltering}
             />
         ];
     });
@@ -339,6 +431,7 @@ function ProductReview() {
                                         queryValue={localSearchQuery}
                                         queryPlaceholder="Search Name, Email and Product here..."
                                         filters={[]}
+                                        disabled={isLoading || isFiltering}
                                         appliedFilters={[
                                             ...(statusFilter ? [{
                                                 key: 'status',
@@ -350,14 +443,7 @@ function ProductReview() {
                                             }] : [])
                                         ]}
                                         onQueryChange={handleSearchChange}
-                                        onQueryClear={() => {
-                                            setLocalSearchQuery("");
-                                            setSearchQuery("");
-                                            const url = new URL(window.location.href);
-                                            url.searchParams.delete('searchQuery');
-                                            url.searchParams.set('page', '1');
-                                            window.history.pushState({}, '', url);
-                                        }}
+                                        onQueryClear={handleQueryClear}
                                         onClearAll={handleClearAllFilters}
                                     />
                                 </div>
@@ -368,6 +454,7 @@ function ProductReview() {
                                         options={statusOptions}
                                         onChange={handleStatusFilterChange}
                                         value={statusFilter}
+                                        disabled={isLoading || isFiltering}
                                     />
                                 </div>
 
@@ -377,48 +464,44 @@ function ProductReview() {
                                         options={ratingOptions}
                                         onChange={handleRatingFilterChange}
                                         value={ratingFilter}
+                                        disabled={isLoading || isFiltering}
                                     />
                                 </div>
                             </div>
 
-                            {isLoading ? (
-                                <div style={{ textAlign: 'center', padding: '20px' }}>
-                                    <Text>Loading...</Text>
+                            <>
+                                <div>
+                                    <DataTable
+                                        columnContentTypes={[
+                                            'text', 'text', 'text', 'text', 'text',
+                                            'text', 'text', 'text', 'text', 'text'
+                                        ]}
+                                        headings={[
+                                            'Reviewer', 'Product', 'Email', 'Mobile Number', 'Rating',
+                                            'Date', 'Review', 'Recommended', 'Status', 'Actions'
+                                        ]}
+                                        rows={rows}
+                                        hideScrollIndicator={true}
+                                    />
                                 </div>
-                            ) : (
-                                <>
-                                    <div>
-                                        <DataTable
-                                            columnContentTypes={[
-                                                'text', 'text', 'text', 'text', 'text',
-                                                'text', 'text', 'text', 'text', 'text'
-                                            ]}
-                                            headings={[
-                                                'Reviewer', 'Product', 'Email', 'Mobile Number', 'Rating',
-                                                'Date', 'Review', 'Recommended', 'Status', 'Actions'
-                                            ]}
-                                            sortable={[false, true, true, true, true, true, false, false]}
-                                            rows={rows}
-                                            hideScrollIndicator={true}
-                                        />
-                                    </div>
 
-                                    <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '1rem' }}>
-                                        <div style={{ display: 'flex', justifyContent: 'center', marginTop: '0.5rem' }}>
-                                            <Text variant="bodySm" tone="subdued">
-                                                Showing {filteredReviews.length} of {pagination.totalReviews} reviews
-                                            </Text>
-                                        </div>
-                                        <Pagination
-                                            label={`Page ${pagination.currentPage} of ${pagination.totalPages}`}
-                                            hasPrevious={pagination.currentPage > 1}
-                                            onPrevious={() => handlePageChange(pagination.currentPage - 1)}
-                                            hasNext={pagination.currentPage < pagination.totalPages}
-                                            onNext={() => handlePageChange(pagination.currentPage + 1)}
-                                        />
+                                <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '1rem' }}>
+                                    <div style={{ display: 'flex', justifyContent: 'center', marginTop: '0.5rem' }}>
+                                        <Text variant="bodySm" tone="subdued">
+                                            Showing {filteredReviews.length} of {pagination.totalReviews} reviews
+                                            {(isLoading || isFiltering) && " (Loading...)"}
+                                        </Text>
                                     </div>
-                                </>
-                            )}
+                                    <Pagination
+                                        label={`Page ${pagination.currentPage} of ${pagination.totalPages}`}
+                                        hasPrevious={pagination.currentPage > 1}
+                                        onPrevious={() => handlePageChange(pagination.currentPage - 1)}
+                                        hasNext={pagination.currentPage < pagination.totalPages}
+                                        onNext={() => handlePageChange(pagination.currentPage + 1)}
+                                        disabled={isLoading || isFiltering}
+                                    />
+                                </div>
+                            </>
                         </>
                     </Card>
 

@@ -10,14 +10,13 @@ import {
 } from '@shopify/polaris';
 import '@shopify/polaris/build/esm/styles.css';
 import React, { useCallback, useEffect, useState } from 'react';
-import ProductReview from './app.productReview';
+import ProductReview from "./app.ProductReview"
 import StoreReviewListing from './app.StoreReviewListing';
-import CollectionReviewListing from './CollectionReviewListing';
 
 export async function loader({ request }) {
-
   const APIURL = process.env.API_URL;
   const url = new URL(request.url);
+
   const reviewType = url.searchParams.get('reviewType') || 'product';
   const searchQuery = url.searchParams.get('searchQuery') || '';
   const nameSearch = url.searchParams.get('name') || '';
@@ -26,18 +25,22 @@ export async function loader({ request }) {
   const rating = url.searchParams.get('rating');
   const page = parseInt(url.searchParams.get('page') || '1', 10);
   const limit = parseInt(url.searchParams.get('limit') || '10', 10);
+  const isInitialLoad = url.searchParams.get('isInitialLoad') === 'true';
 
-  let reviewsResponse = {
+  var reviewsResponse = {
     success: false,
     reviews: [],
     pagination: { currentPage: 1, totalPages: 1 },
-    reviewType
+    reviewType,
+    searchQuery,
+    status,
+    rating
   };
 
   let storeReviewsResponse = {
     success: false,
     storeReviews: [],
-    pagination: { currentPage: 1, totalPages: 1 }
+    storePagination: { currentPage: 1, totalPages: 1 },
   };
 
   try {
@@ -54,7 +57,10 @@ export async function loader({ request }) {
     const endpoint = `${APIURL}/api/getallReview?${queryString}`;
 
     const response = await fetch(endpoint, {
-      headers: { 'ngrok-skip-browser-warning': true }
+      headers: {
+        'ngrok-skip-browser-warning': true,
+        'Content-Type': 'application/json'
+      }
     });
 
     if (response.ok) {
@@ -68,7 +74,10 @@ export async function loader({ request }) {
           currentPage: data.currentPage,
           pageSize: data.pageSize
         },
-        reviewType
+        reviewType,
+        searchQuery,
+        status,
+        rating
       };
     } else {
       console.error("API error:", response.status, response.statusText);
@@ -77,35 +86,42 @@ export async function loader({ request }) {
     console.error("Failed to fetch reviews:", error);
   }
 
-  try {
-    const storeReviewFilterParams = new URLSearchParams();
-    if (nameSearch) storeReviewFilterParams.append('name', nameSearch);
-    if (emailSearch) storeReviewFilterParams.append('email', emailSearch);
-    storeReviewFilterParams.append('page', page.toString());
-    storeReviewFilterParams.append('limit', limit.toString());
+  if (reviewType === 'store' || isInitialLoad) {
+    try {
+      const storeReviewFilterParams = new URLSearchParams();
+      if (nameSearch) storeReviewFilterParams.append('name', nameSearch);
+      if (emailSearch) storeReviewFilterParams.append('email', emailSearch);
+      storeReviewFilterParams.append('page', page.toString());
+      storeReviewFilterParams.append('limit', '1000');
 
-    const storeReviewEndpoint = `${APIURL}/api/storeReview?${storeReviewFilterParams.toString()}`;
+      const storeReviewEndpoint = `${APIURL}/api/storeReview?${storeReviewFilterParams.toString()}`;
 
-    const storeResponse = await fetch(storeReviewEndpoint, {
-      headers: { 'ngrok-skip-browser-warning': true }
-    });
+      const storeResponse = await fetch(storeReviewEndpoint, {
+        headers: {
+          'ngrok-skip-browser-warning': true,
+          'Content-Type': 'application/json'
+        }
+      });
 
-    if (storeResponse.ok) {
-      const storeData = await storeResponse.json();
+      if (storeResponse.ok) {
+        const storeData = await storeResponse.json();
 
-      storeReviewsResponse = {
-        success: true,
-        storeReviews: storeData.reviews || [],
-        storePagination: storeData.pagination || {
-          currentPage: page,
-          totalPages: storeData.totalPages || 1
-        },
-      };
-    } else {
-      console.error("Store API error:", storeResponse.status, storeResponse.statusText);
+        storeReviewsResponse = {
+          success: true,
+          storeReviews: storeData.reviews || [],
+          storePagination: {
+            currentPage: storeData.currentPage || page,
+            totalPages: storeData.totalPages || 1,
+            totalReviews: storeData.totalReviews,
+            pageSize: storeData.pageSize
+          },
+        };
+      } else {
+        console.error("Store API error:", storeResponse.status, storeResponse.statusText);
+      }
+    } catch (error) {
+      console.error("Failed to fetch store reviews:", error);
     }
-  } catch (error) {
-    console.error("Failed to fetch store reviews:", error);
   }
 
   return {
@@ -121,35 +137,7 @@ export async function action({ request }) {
   const actionType = formData.get('actionType');
   const reviewType = formData.get('reviewType') || 'product';
 
-  if (actionType === 'deleteReview') {
-    const reviewId = formData.get('reviewId');
-
-    try {
-      const response = await fetch(`${APIURL}/api/deleteReview/${reviewId}`, {
-        method: 'DELETE',
-        headers: {
-          'ngrok-skip-browser-warning': true,
-          'X-Review-Type': reviewType
-        }
-      });
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        return {
-          success: false,
-          error: `Failed to delete review. Status: ${response.status}, Message: ${errorText}`,
-          reviewType
-        };
-      }
-      return { success: true, actionType: 'deleteReview', reviewType };
-    } catch (error) {
-      return {
-        success: false,
-        error: `Network error: ${error.message}`,
-        reviewType
-      };
-    }
-  } else if (actionType === 'updateStatus') {
+  if (actionType === 'updateStatus') {
     const reviewId = formData.get('reviewId');
     const newStatus = formData.get('newStatus') === 'true';
 
@@ -190,14 +178,27 @@ function ReviewsManager() {
     reviews,
     pagination,
     reviewType,
+    searchQuery: initialSearchQuery,
+    status: initialStatus,
+    rating: initialRating,
     storeReviews,
     storePagination,
     success,
     APIURL
   } = useLoaderData();
+
   const submit = useSubmit();
   const [selectedTab, setSelectedTab] = useState(0);
   const [toast, setToast] = useState({ active: false, message: '', error: false });
+  const [allStoreReviews, setAllStoreReviews] = useState(storeReviews || []);
+  const [isInitialLoad, setIsInitialLoad] = useState(true);
+
+  useEffect(() => {
+    if (storeReviews && storeReviews.length > 0) {
+      setAllStoreReviews(storeReviews);
+    }
+    setIsInitialLoad(false);
+  }, [storeReviews]);
 
   const updateStoreReviewStatus = async (reviewId, newStatus) => {
     try {
@@ -221,6 +222,12 @@ function ReviewsManager() {
         throw new Error('Review not found or could not be updated');
       }
 
+      setAllStoreReviews(prevReviews =>
+        prevReviews.map(review =>
+          review._id === reviewId ? { ...review, isActive: newStatus } : review
+        )
+      );
+
       return {
         success: true,
         updatedReview: responseData.updatedReview
@@ -235,7 +242,7 @@ function ReviewsManager() {
 
   const deleteStoreReview = async (reviewId) => {
     try {
-      const response = await fetch(`${APIURL}/api/deleteReview/${reviewId}`, {
+      const response = await fetch(`${APIURL}/api/storeReview/${reviewId}`, {
         method: 'DELETE',
         headers: {
           'ngrok-skip-browser-warning': true
@@ -247,11 +254,62 @@ function ReviewsManager() {
         throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
       }
 
+      setAllStoreReviews(prevReviews =>
+        prevReviews.filter(review => review._id !== reviewId)
+      );
+
       return { success: true };
     } catch (error) {
       return {
         success: false,
         error: error.message || 'Failed to delete review'
+      };
+    }
+  };
+
+  const deleteReview = async (reviewId) => {
+    try {
+      const response = await fetch(`${APIURL}/api/deleteReview/${reviewId}`, {
+        method: 'DELETE',
+        headers: {
+          'ngrok-skip-browser-warning': true,
+          'X-Review-Type': reviewType
+        }
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        return {
+          success: false,
+          error: `Failed to delete review. Status: ${response.status}, Message: ${errorText}`,
+          reviewType
+        };
+      }
+      return { success: true, actionType: 'deleteReview', reviewType };
+    } catch (error) {
+      return {
+        success: false,
+        error: `Network error: ${error.message}`,
+        reviewType
+      };
+    }
+  };
+
+  const updateReviewStatus = async (reviewId, newStatus) => {
+    try {
+      const formData = new FormData();
+      formData.append('actionType', 'updateStatus');
+      formData.append('reviewId', reviewId);
+      formData.append('newStatus', newStatus);
+      formData.append('reviewType', reviewType);
+
+      submit(formData, { method: 'post' });
+
+      return { success: true };
+    } catch (error) {
+      return {
+        success: false,
+        error: error.message || 'Failed to update review status'
       };
     }
   };
@@ -272,6 +330,7 @@ function ReviewsManager() {
     params.delete('searchQuery');
     params.delete('status');
     params.delete('rating');
+    params.set('isInitialLoad', 'true');
 
     submit(params, {
       method: 'get',
@@ -307,16 +366,13 @@ function ReviewsManager() {
       panelID: 'product-reviews-content',
     },
     {
-      id: 'collection-reviews',
-      content: 'Collection Reviews',
-      panelID: 'collection-reviews-content',
-    },
-    {
       id: 'store-reviews',
       content: 'Store Reviews',
       panelID: 'store-reviews-content',
     },
   ];
+
+  const storeTabIndex = 1;
 
   return (
     <AppProvider>
@@ -334,22 +390,26 @@ function ReviewsManager() {
                 <ProductReview
                   reviews={reviews}
                   pagination={pagination}
+                  initialSearchQuery={initialSearchQuery}
+                  initialStatus={initialStatus}
+                  initialRating={initialRating}
                   submit={submit}
                   onDeleteSuccess={handleDeleteSuccess}
+                  deleteReview={deleteReview}
+                  updateReviewStatus={updateReviewStatus}
                   onStatusChangeSuccess={handleStatusChangeSuccess}
+                  isLoading={false}
                 />
               )}
-              {selectedTab === 1 && (
-                <CollectionReviewListing />
-              )}
-              {selectedTab === 2 && (
+              {selectedTab === storeTabIndex && (
                 <StoreReviewListing
-                  storeReviews={storeReviews}
+                  storeReviews={allStoreReviews}
                   pagination={storePagination}
                   reviewType={reviewType}
                   success={success}
                   updateStoreReviewStatus={updateStoreReviewStatus}
                   deleteStoreReview={deleteStoreReview}
+                  clientSideFiltering={true}
                 />
               )}
             </LegacyStack>

@@ -1,4 +1,4 @@
-import { useFetcher, useNavigation, useSearchParams } from '@remix-run/react';
+import { useFetcher } from '@remix-run/react';
 import {
     BlockStack,
     Button,
@@ -8,117 +8,29 @@ import {
     Page,
     Pagination,
     Select,
-    Spinner,
     Text,
     TextField,
     Toast
 } from '@shopify/polaris';
 import { DeleteIcon } from '@shopify/polaris-icons';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import DeleteButtonModal from './modals/DeleteButtonModal';
 
-export async function action({ request }) {
-    const APIURL = process.env.APIURL
-    const formData = await request.formData();
-    const actionType = formData.get('actionType');
+function StoreReviewListing({ storeReviews, updateStoreReviewStatus, deleteStoreReview }) {
 
-    try {
-        if (actionType === 'updateStatus') {
-            const reviewId = formData.get('reviewId');
-            const newStatus = formData.get('newStatus') === 'true';
-
-            const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), 10000);
-
-            try {
-                const response = await fetch(`${APIURL}/api/storeReview/${reviewId}`, {
-                    method: 'PUT',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'ngrok-skip-browser-warning': true
-                    },
-                    body: JSON.stringify({ isActive: newStatus })
-                });
-
-                clearTimeout(timeoutId);
-
-                if (!response.ok) {
-                    const errorText = await response.text();
-                    throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
-                }
-
-                const responseData = await response.json();
-
-                if (!responseData || !responseData.updatedReview) {
-                    throw new Error('Review not found or could not be updated');
-                }
-
-                return {
-                    success: true,
-                    actionType: 'updateStatus',
-                    updatedReview: responseData.updatedReview
-                };
-            } catch (error) {
-                clearTimeout(timeoutId);
-
-                if (error.name === 'AbortError') {
-                    return {
-                        success: false,
-                        error: 'Request timed out. Please check your network connection.'
-                    };
-                }
-
-                return {
-                    success: false,
-                    error: error.message || 'Failed to update review status',
-                    details: error.toString()
-                };
-            }
-        }
-
-        return { success: false, error: 'Invalid action type' };
-    } catch (error) {
-        console.error('Unexpected error in action:', error);
-        return {
-            success: false,
-            error: 'An unexpected error occurred',
-            details: error.toString()
-        };
-    }
-}
-
-function StoreReviewListing({ storeReviews, updateStoreReviewStatus, deleteStoreReview, }) {
-
-    const [searchParams, setSearchParams] = useSearchParams();
     const fetcher = useFetcher();
     const [currentPage, setCurrentPage] = useState(1);
     const [itemsPerPage] = useState(10);
-    const [searchValue, setSearchValue] = useState(searchParams.get('search') || '');
-    const [filterRating, setFilterRating] = useState(searchParams.get('rating') || 'all');
-    const [filterStatus, setFilterStatus] = useState(searchParams.get('status') || 'all');
+    const [searchValue, setSearchValue] = useState('');
+    const [filterRating, setFilterRating] = useState('all');
+    const [filterStatus, setFilterStatus] = useState('all');
     const [selectedImageIndex, setSelectedImageIndex] = useState(null);
     const [selectedImagesArray, setSelectedImagesArray] = useState([]);
     const [deleteModalOpen, setDeleteModalOpen] = useState(false);
     const [showImageModal, setShowImageModal] = useState(false);
     const [selectedReviewId, setSelectedReviewId] = useState(null);
     const [toast, setToast] = useState({ active: false, message: '', error: false });
-    const navigate = useNavigation();
-    const isPageLoading = navigate.state === "loading";
-
-    if (isPageLoading) {
-        return (
-            <div style={{
-                display: "flex",
-                justifyContent: "center",
-                alignItems: "center",
-                background: "#e3e3e3",
-                height: "100vh",
-            }}
-            >
-                <Spinner accessibilityLabel="Loading widgets" size="large" />
-            </div>
-        );
-    }
+    const [processingAction, setProcessingAction] = useState(false);
 
     const processReviews = useCallback((rawReviews) => {
         if (!rawReviews || !Array.isArray(rawReviews)) return [];
@@ -133,15 +45,42 @@ function StoreReviewListing({ storeReviews, updateStoreReviewStatus, deleteStore
             review: review.reviewMessage,
             date: review.createdAt,
             isActive: review.isActive !== undefined ? review.isActive : true,
-            images: review.reviewImages ? review.reviewImages.map(img => `https://8f16-223-229-149-98.ngrok-free.app/uploads/${img}`) : []
+            images: review.reviewImages ? review.reviewImages.map(img => `https://5613-106-215-23-87.ngrok-free.app/uploads/${img}`) : []
         }));
     }, []);
 
-    const [reviews, setReviews] = useState(processReviews(storeReviews));
+    const [processedReviews, setProcessedReviews] = useState([]);
 
     useEffect(() => {
-        setReviews(processReviews(storeReviews));
+        setProcessedReviews(processReviews(storeReviews));
     }, [storeReviews, processReviews]);
+
+    const filteredReviews = useMemo(() => {
+        let result = [...processedReviews];
+
+        if (searchValue) {
+            const searchLower = searchValue.toLowerCase();
+            result = result.filter(review =>
+                (review.customer && review.customer.toLowerCase().includes(searchLower)) ||
+                (review.email && review.email.toLowerCase().includes(searchLower))
+            );
+        }
+
+        if (filterRating !== 'all') {
+            result = result.filter(review =>
+                review.rating === parseInt(filterRating)
+            );
+        }
+
+        if (filterStatus !== 'all') {
+            const isActive = filterStatus === 'true';
+            result = result.filter(review =>
+                review.isActive === isActive
+            );
+        }
+
+        return result;
+    }, [processedReviews, searchValue, filterRating, filterStatus]);
 
     const ratingOptions = [
         { label: 'All Ratings', value: 'all' },
@@ -164,51 +103,12 @@ function StoreReviewListing({ storeReviews, updateStoreReviewStatus, deleteStore
     ];
 
     useEffect(() => {
-        let filteredReviews = processReviews(storeReviews);
-
-        if (searchValue) {
-            const searchLower = searchValue.toLowerCase();
-            filteredReviews = filteredReviews.filter(review =>
-                (review.customer && review.customer.toLowerCase().includes(searchLower)) ||
-                (review.email && review.email.toLowerCase().includes(searchLower))
-            );
-        }
-
-        if (filterRating !== 'all') {
-            filteredReviews = filteredReviews.filter(review =>
-                review.rating === parseInt(filterRating)
-            );
-        }
-
-        if (filterStatus !== 'all') {
-            const isActive = filterStatus === 'true';
-            filteredReviews = filteredReviews.filter(review =>
-                review.isActive === isActive
-            );
-        }
-
-        setReviews(filteredReviews);
         setCurrentPage(1);
-    }, [searchValue, filterRating, filterStatus, storeReviews, processReviews]);
+    }, [searchValue, filterRating, filterStatus]);
 
     const handleSearchChange = useCallback((value) => {
         setSearchValue(value);
-
-        const params = new URLSearchParams(searchParams);
-
-        if (value) {
-            params.set('search', value);
-        } else {
-            params.delete('search');
-        }
-
-        params.set('page', '1');
-
-        setSearchParams(params, {
-            replace: true,
-            preventScrollReset: true
-        });
-    }, [searchParams, setSearchParams]);
+    }, []);
 
     const handlePaginationChange = useCallback((newPage) => {
         setCurrentPage(newPage);
@@ -238,12 +138,13 @@ function StoreReviewListing({ storeReviews, updateStoreReviewStatus, deleteStore
 
     const handleStatusChange = useCallback(async (reviewId, newStatus) => {
         try {
+            setProcessingAction(true);
             const isActive = newStatus === 'true';
 
             const result = await updateStoreReviewStatus(reviewId, isActive);
 
             if (result.success) {
-                setReviews(prevReviews =>
+                setProcessedReviews(prevReviews =>
                     prevReviews.map(review =>
                         review.id === reviewId
                             ? { ...review, isActive: isActive }
@@ -257,14 +158,6 @@ function StoreReviewListing({ storeReviews, updateStoreReviewStatus, deleteStore
                     error: false
                 });
             } else {
-                setReviews(prevReviews =>
-                    prevReviews.map(review =>
-                        review.id === reviewId
-                            ? { ...review, isActive: !isActive }
-                            : review
-                    )
-                );
-
                 setToast({
                     active: true,
                     message: result.error || 'Failed to update review status',
@@ -279,6 +172,8 @@ function StoreReviewListing({ storeReviews, updateStoreReviewStatus, deleteStore
                 message: 'An unexpected error occurred',
                 error: true
             });
+        } finally {
+            setProcessingAction(false);
         }
     }, [updateStoreReviewStatus]);
 
@@ -296,13 +191,6 @@ function StoreReviewListing({ storeReviews, updateStoreReviewStatus, deleteStore
                     message: fetcher.data.error || 'Failed to update review status',
                     error: true
                 });
-
-                setReviews(prevReviews =>
-                    prevReviews.map(review => ({
-                        ...review,
-                        isActive: !review.isActive
-                    }))
-                );
             }
         }
     }, [fetcher.data]);
@@ -320,10 +208,11 @@ function StoreReviewListing({ storeReviews, updateStoreReviewStatus, deleteStore
     const handleDeleteReview = useCallback(async () => {
         if (selectedReviewId) {
             try {
+                setProcessingAction(true);
                 const result = await deleteStoreReview(selectedReviewId);
 
                 if (result.success) {
-                    setReviews(prevReviews =>
+                    setProcessedReviews(prevReviews =>
                         prevReviews.filter(review => review.id !== selectedReviewId)
                     );
                     setToast({
@@ -346,6 +235,8 @@ function StoreReviewListing({ storeReviews, updateStoreReviewStatus, deleteStore
                     error: true
                 });
                 handleDeleteModalClose();
+            } finally {
+                setProcessingAction(false);
             }
         }
     }, [selectedReviewId, deleteStoreReview, handleDeleteModalClose]);
@@ -398,86 +289,99 @@ function StoreReviewListing({ storeReviews, updateStoreReviewStatus, deleteStore
         );
     }, [handleImageClick]);
 
+    const sortedReviews = useMemo(() => {
+        return [...filteredReviews];
+    }, [filteredReviews]);
+
     const handleSort = useCallback(
         (index, direction) => {
-            const sortedData = [...reviews].sort((a, b) => {
-                let valueA, valueB;
+            setProcessedReviews(prev => {
+                const sortedData = [...prev].sort((a, b) => {
+                    let valueA, valueB;
 
-                switch (index) {
-                    case 1:
-                        valueA = a.customer?.toLowerCase() || '';
-                        valueB = b.customer?.toLowerCase() || '';
-                        break;
-                    case 2:
-                        valueA = a.rating || 0;
-                        valueB = b.rating || 0;
-                        break;
-                    case 3:
-                        valueA = a.review?.toLowerCase() || '';
-                        valueB = b.review?.toLowerCase() || '';
-                        break;
-                    case 4:
-                        valueA = a.reviewTitle?.toLowerCase() || '';
-                        valueB = b.reviewTitle?.toLowerCase() || '';
-                        break;
-                    case 5:
-                        valueA = new Date(a.date || 0);
-                        valueB = new Date(b.date || 0);
-                        break;
-                    default:
-                        return 0;
-                }
+                    switch (index) {
+                        case 1:
+                            valueA = a.customer?.toLowerCase() || '';
+                            valueB = b.customer?.toLowerCase() || '';
+                            break;
+                        case 2:
+                            valueA = a.rating || 0;
+                            valueB = b.rating || 0;
+                            break;
+                        case 3:
+                            valueA = a.review?.toLowerCase() || '';
+                            valueB = b.review?.toLowerCase() || '';
+                            break;
+                        case 4:
+                            valueA = a.reviewTitle?.toLowerCase() || '';
+                            valueB = b.reviewTitle?.toLowerCase() || '';
+                            break;
+                        case 5:
+                            valueA = new Date(a.date || 0);
+                            valueB = new Date(b.date || 0);
+                            break;
+                        default:
+                            return 0;
+                    }
 
-                if (direction === 'ascending') {
-                    return valueA < valueB ? -1 : valueA > valueB ? 1 : 0;
-                } else {
-                    return valueA > valueB ? -1 : valueA < valueB ? 1 : 0;
-                }
+                    if (direction === 'ascending') {
+                        return valueA < valueB ? -1 : valueA > valueB ? 1 : 0;
+                    } else {
+                        return valueA > valueB ? -1 : valueA < valueB ? 1 : 0;
+                    }
+                });
+
+                return sortedData;
             });
-
-            setReviews(sortedData);
         },
-        [reviews]
+        []
     );
 
     const indexOfLastItem = currentPage * itemsPerPage;
     const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-    const currentItems = reviews.slice(indexOfFirstItem, indexOfLastItem);
 
-    const rows = currentItems.map(review => [
-        <div key={`images-${review.id}`} style={{ width: "250px" }}>
-            {renderImageThumbnails(review.images)}
-        </div>,
-        <div key={`product-${review.id}`}>
-            <div style={{ fontSize: '15px', color: '#637381', fontWeight: 'bold' }}>{review.customer}</div>
-            <div style={{ fontSize: "12px" }}>{review.product}</div>
-        </div>,
-        <div key={`rating-${review.id}`} style={{ color: '#FFB900', fontSize: "18px" }}>
-            {renderStarRating(review.rating)}
-        </div>,
-        <div key={`reviewTitle-${review.id}`} style={{ width: "250px", whiteSpace: "normal" }}>
-            {review.reviewTitle}
-        </div>,
-        <div key={`review-${review.id}`} style={{ textWrap: "wrap", width: "250px" }}>
-            {review.review}
-        </div>,
-        <div key={`date-${review.id}`}>
-            {new Date(review.date).toLocaleDateString()}
-        </div>,
-        <Select
-            key={`status-${review.id}`}
-            options={statusChangeOptions}
-            onChange={(value) => handleStatusChange(review.id, value)}
-            value={review.isActive ? 'true' : 'false'}
-        />,
-        <Button
-            key={`action-${review.id}`}
-            icon={DeleteIcon}
-            tone="critical"
-            onClick={() => handleDeleteModalOpen(review.id)}
-            accessibilityLabel="Delete review"
-        />
-    ]);
+    const currentItems = useMemo(() => {
+        return sortedReviews.slice(indexOfFirstItem, indexOfLastItem);
+    }, [sortedReviews, indexOfFirstItem, indexOfLastItem]);
+
+    const rows = useMemo(() => {
+        return currentItems.map(review => [
+            <div key={`images-${review.id}`} style={{ width: "250px" }}>
+                {renderImageThumbnails(review.images)}
+            </div>,
+            <div key={`product-${review.id}`}>
+                <div style={{ fontSize: '15px', color: '#637381', fontWeight: 'bold' }}>{review.customer}</div>
+                <div style={{ fontSize: "12px" }}>{review.product}</div>
+            </div>,
+            <div key={`rating-${review.id}`} style={{ color: '#FFB900', fontSize: "18px" }}>
+                {renderStarRating(review.rating)}
+            </div>,
+            <div key={`reviewTitle-${review.id}`} style={{ width: "250px", whiteSpace: "normal" }}>
+                {review.reviewTitle}
+            </div>,
+            <div key={`review-${review.id}`} style={{ textWrap: "wrap", width: "250px" }}>
+                {review.review}
+            </div>,
+            <div key={`date-${review.id}`}>
+                {new Date(review.date).toLocaleDateString()}
+            </div>,
+            <Select
+                key={`status-${review.id}`}
+                options={statusChangeOptions}
+                onChange={(value) => handleStatusChange(review.id, value)}
+                value={review.isActive ? 'true' : 'false'}
+                disabled={processingAction}
+            />,
+            <Button
+                key={`action-${review.id}`}
+                icon={DeleteIcon}
+                tone="critical"
+                onClick={() => handleDeleteModalOpen(review.id)}
+                accessibilityLabel="Delete review"
+                disabled={processingAction}
+            />
+        ]);
+    }, [currentItems, renderImageThumbnails, renderStarRating, handleStatusChange, handleDeleteModalOpen, processingAction]);
 
     const dismissToast = useCallback(() => {
         setToast({ active: false, message: '', error: false });
@@ -506,17 +410,6 @@ function StoreReviewListing({ storeReviews, updateStoreReviewStatus, deleteStore
                                     value={filterRating}
                                     onChange={(value) => {
                                         setFilterRating(value);
-                                        const params = new URLSearchParams(searchParams);
-                                        if (value !== 'all') {
-                                            params.set('rating', value);
-                                        } else {
-                                            params.delete('rating');
-                                        }
-                                        params.set('page', '1');
-                                        setSearchParams(params, {
-                                            replace: true,
-                                            preventScrollReset: true
-                                        });
                                     }}
                                 />
                             </div>
@@ -527,17 +420,6 @@ function StoreReviewListing({ storeReviews, updateStoreReviewStatus, deleteStore
                                     value={filterStatus}
                                     onChange={(value) => {
                                         setFilterStatus(value);
-                                        const params = new URLSearchParams(searchParams);
-                                        if (value !== 'all') {
-                                            params.set('status', value);
-                                        } else {
-                                            params.delete('status');
-                                        }
-                                        params.set('page', '1');
-                                        setSearchParams(params, {
-                                            replace: true,
-                                            preventScrollReset: true
-                                        });
                                     }}
                                 />
                             </div>
@@ -577,16 +459,21 @@ function StoreReviewListing({ storeReviews, updateStoreReviewStatus, deleteStore
 
                 <LegacyCard.Section>
                     <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                        <p>{`Showing ${reviews?.length > 0 ? indexOfFirstItem + 1 : 0}-${Math.min(reviews?.length, indexOfLastItem)} of ${reviews?.length} results`}</p>
-
+                        <p>
+                            {
+                                `Showing ${filteredReviews.length > 0 ? indexOfFirstItem + 1 : 0}-
+                                ${Math.min(filteredReviews.length, indexOfLastItem)} of ${filteredReviews.length} results`
+                            }
+                        </p>
                         <Pagination
                             hasPrevious={currentPage > 1}
                             onPrevious={() => handlePaginationChange(currentPage - 1)}
-                            hasNext={indexOfLastItem < reviews?.length}
+                            hasNext={indexOfLastItem < filteredReviews.length}
                             onNext={() => handlePaginationChange(currentPage + 1)}
                         />
                     </div>
                 </LegacyCard.Section>
+
             </LegacyCard>
 
             <Modal

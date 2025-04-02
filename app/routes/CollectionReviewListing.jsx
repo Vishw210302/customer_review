@@ -192,9 +192,9 @@ const CollectionReviewListing = () => {
 
     }, []);
 
-    const handleDeleteReview = useCallback(() => {
-        console.log("CLicked By Me")
-    }, []);
+    const handleDeleteReview = () => {
+
+    }
 
     const renderStarRating = (rating) => {
         return '★'.repeat(rating) + '☆'.repeat(5 - rating);

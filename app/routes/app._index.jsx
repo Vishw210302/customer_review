@@ -19,8 +19,8 @@ import { authenticate } from "../shopify.server";
 export const loader = async ({ request }) => {
 
   const { session } = await authenticate.admin(request);
-  const shopDomain = session.shop;
-  const accessToken = session.accessToken;
+  const shopDomain = session?.shop;
+  const accessToken = session?.accessToken;
   const appBlckId = process.env.SHOPIFY_REVIEW_ID;
 
   const getActiveThemeQuery = `
@@ -78,8 +78,8 @@ export const action = async ({ request }) => {
   const formData = await request.formData();
   const activeThemeId = formData.get("activeThemeId");
   const appBlckId = process.env.SHOPIFY_REVIEW_ID;
-  const accessToken = session.accessToken;
-  const shopDomain = session.shop;
+  const accessToken = session?.accessToken;
+  const shopDomain = session?.shop;
 
   const response = await fetch(
     `https://${shopDomain}/admin/api/2025-01/graphql.json`,
@@ -349,7 +349,7 @@ function Index() {
                   target="_blank"
                   href={
                     selectedTheme
-                      ? `https://${session.shop}/admin/themes/${selectedTheme?.split("/").pop()}/editor?context=apps&activateAppId=${appBlckId}/app-embed`
+                      ? `https://${session?.shop}/admin/themes/${selectedTheme?.split("/").pop()}/editor?context=apps&activateAppId=${appBlckId}/app-embed`
                       : "#"
                   }
                   style={{ display: "none" }}

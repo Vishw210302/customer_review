@@ -25,10 +25,16 @@ export async function loader({ request }) {
 
         const queryString = filterParams.toString();
         const endpoint = `${apiurl}/api/getallReview?${queryString}`;
+        const storeEndpoint = `${apiurl}/api/storeReview`;
 
-        const response = await fetch(endpoint, {
-            headers: { 'ngrok-skip-browser-warning': true }
-        });
+        const [response, storeResponse] = await Promise.all([
+            fetch(endpoint, {
+                headers: { 'ngrok-skip-browser-warning': true }
+            }),
+            fetch(storeEndpoint, {
+                headers: { 'ngrok-skip-browser-warning': true }
+            })
+        ]);
 
         if (!response.ok) {
             console.error("API error:", response.status, response.statusText);
@@ -36,32 +42,44 @@ export async function loader({ request }) {
                 success: false,
                 reviews: [],
                 pagination: { currentPage: 1, totalPages: 1 },
-                reviewType
+                reviewType,
+                storeReviewData: null
             };
         }
 
+        if (!storeResponse.ok) {
+            console.error("Store API error:", storeResponse.status, storeResponse.statusText);
+        }
+
         const data = await response.json();
+        const storeReviewData = storeResponse.ok ? await storeResponse.json() : null;
 
         return {
             success: true,
-            averageRating: data.averageRating,
-            reviews: data.reviews,
-            pagination: {
-                totalReviews: data.totalReviews,
-                totalPages: data.totalPages,
-                currentPage: data.currentPage,
-                pageSize: data.pageSize
+            data: {
+                averageRating: data.averageRating,
+                reviews: data.reviews,
+                pagination: {
+                    totalReviews: data.totalReviews,
+                    totalPages: data.totalPages,
+                    currentPage: data.currentPage,
+                    pageSize: data.pageSize
+                },
+                reviewType
             },
-            reviewType
+            storeReviewData
         };
 
     } catch (error) {
         console.error("Failed to fetch reviews:", error);
         return {
             success: false,
-            reviews: [],
-            pagination: { currentPage: 1, totalPages: 1 },
-            reviewType
+            data: {
+                reviews: [],
+                pagination: { currentPage: 1, totalPages: 1 },
+                reviewType
+            },
+            storeReviewData: null
         };
     }
 }
@@ -70,7 +88,7 @@ const MainDashboard = () => {
 
     const navigate = useNavigation();
     const isPageLoading = navigate.state === "loading";
-    const data = useLoaderData();
+    const { data, storeReviewData } = useLoaderData();
 
     if (isPageLoading) {
         return (
@@ -128,7 +146,6 @@ const MainDashboard = () => {
             fontWeight: '500',
             cursor: 'pointer',
         },
-
     };
 
     const layoutStyles = {
@@ -159,9 +176,7 @@ const MainDashboard = () => {
             </div>
 
             <div style={layoutStyles.container}>
-
-                <CardsOfDashboard data={data} />
-
+                <CardsOfDashboard data={data} storeReviewData={storeReviewData} />
             </div>
         </div>
     );

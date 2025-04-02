@@ -48,7 +48,7 @@ export const loader = async ({ request }) => {
 
   try {
     const themeResponse = await fetch(
-      `https://${session.shop}/admin/api/2025-01/graphql.json`,
+      `https://${session?.shop}/admin/api/2025-01/graphql.json`,
       {
         method: "POST",
         headers: {
@@ -71,7 +71,7 @@ export const loader = async ({ request }) => {
     }
 
     const shopResponse = await fetch(
-      `https://${session.shop}/admin/api/2025-01/graphql.json`,
+      `https://${session?.shop}/admin/api/2025-01/graphql.json`,
       {
         method: "POST",
         headers: {
@@ -188,9 +188,9 @@ const ThemeStatus = () => {
 
   const themeId = selectedTheme?.split("/").pop();
 
-  const particularProductUrl = `https://${session.shop}/admin/themes/${themeId}/editor?template=product&addAppBlockId=${blockId}/particular-product&target=mainSection`;
-  const starRatingUrl = `https://${session.shop}/admin/themes/${themeId}/editor?template=product&addAppBlockId=${blockId}/star-rating&target=section`;
-  const storeReview = `https://${session.shop}/admin/themes/${themeId}/editor?template=product&addAppBlockId=${blockId}/store-review&target=section`;
+  const particularProductUrl = `https://${session?.shop}/admin/themes/${themeId}/editor?template=product&addAppBlockId=${blockId}/particular-product&target=mainSection`;
+  const starRatingUrl = `https://${session?.shop}/admin/themes/${themeId}/editor?template=product&addAppBlockId=${blockId}/star-rating&target=section`;
+  const storeReview = `https://${session?.shop}/admin/themes/${themeId}/editor?template=product&addAppBlockId=${blockId}/store-review&target=section`;
 
   const cardStyle = {
     height: "100%",
