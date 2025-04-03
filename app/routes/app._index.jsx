@@ -1,5 +1,5 @@
 import { json } from "@remix-run/node";
-import { useFetcher, useLoaderData, useNavigation } from "@remix-run/react";
+import { useFetcher, useLoaderData, useNavigate } from "@remix-run/react";
 import {
   Badge,
   BlockStack,
@@ -154,7 +154,7 @@ function Index() {
   const [selectedTheme, setSelectedTheme] = useState(activeTheme?.id);
   const [appEmbedStatus, setAppEmbedStatus] = useState(null);
   const refLink = useRef(null);
-  const navigate = useNavigation();
+  const navigate = useNavigate();
   const isPageLoading = false;
   const [showAll, setShowAll] = useState(false);
 
@@ -176,6 +176,20 @@ function Index() {
 
   const appData = [
     {
+      title: "QBoost: Upsell & Cross Sell",
+      description: "Maximize your store's potential with seamless upsell features that drive extra revenue.",
+      imageUrl: "https://cdn.shopify.com/s/files/1/0560/1535/6003/files/QuickBoostLogo.png?v=1742299521",
+      imageAlt: "QBoost",
+      appUrl: "https://apps.shopify.com/qboost-upsell-cross-sell"
+    },
+    {
+      title: "IceMajesty",
+      description: "Snowy magic: Transform with enchanting snow effects!",
+      imageUrl: "https://cdn.shopify.com/s/files/1/0560/1535/6003/files/IceMajestyLogo.png?v=1742479358",
+      imageAlt: "IceMajesty",
+      appUrl: "https://apps.shopify.com/icemajesty-1"
+    },
+    {
       title: "ChatNest: Stay in touch",
       description: "Make your communication easy, enjoyable, and safe with Chat Nest: Stay In Touch.",
       imageUrl: "https://cdn.shopify.com/s/files/1/0560/1535/6003/files/ChatNestLogo.png?v=1742298505",
@@ -190,26 +204,12 @@ function Index() {
       appUrl: "https://apps.shopify.com/scriptinjectorapp"
     },
     {
-      title: "QBoost: Upsell & Cross Sell",
-      description: "Maximize your store's potential with seamless upsell features that drive extra revenue.",
-      imageUrl: "https://cdn.shopify.com/s/files/1/0560/1535/6003/files/QuickBoostLogo.png?v=1742299521",
-      imageAlt: "QBoost",
-      appUrl: "https://apps.shopify.com/qboost-upsell-cross-sell"
-    },
-    {
       title: "FileMaster ‑ Files Exporter",
       description: "Easily manage & download all your store files in just one click.",
       imageUrl: "https://cdn.shopify.com/s/files/1/0560/1535/6003/files/FilemasterLogo.png?v=1742298178",
       imageAlt: "FileMaster",
       appUrl: "https://apps.shopify.com/filemaster-exporter"
     },
-    {
-      title: "IceMajesty",
-      description: "Snowy magic: Transform with enchanting snow effects!",
-      imageUrl: "https://cdn.shopify.com/s/files/1/0560/1535/6003/files/IceMajestyLogo.png?v=1742479358",
-      imageAlt: "IceMajesty",
-      appUrl: "https://apps.shopify.com/icemajesty-1"
-    }
   ];
 
   const displayedApps = showAll ? appData : appData.slice(0, 2);

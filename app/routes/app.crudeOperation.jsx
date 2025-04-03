@@ -12,11 +12,13 @@ import '@shopify/polaris/build/esm/styles.css';
 import React, { useCallback, useEffect, useState } from 'react';
 import ProductReview from "./app.ProductReview"
 import StoreReviewListing from './app.StoreReviewListing';
+import { authenticate } from '../shopify.server';
 
 export async function loader({ request }) {
   const APIURL = process.env.API_URL;
   const url = new URL(request.url);
-
+  const { session } = await authenticate.admin(request);
+  const shopName = session.shop
   const reviewType = url.searchParams.get('reviewType') || 'product';
   const searchQuery = url.searchParams.get('searchQuery') || '';
   const nameSearch = url.searchParams.get('name') || '';
@@ -54,7 +56,7 @@ export async function loader({ request }) {
     filterParams.append('limit', limit.toString());
 
     const queryString = filterParams.toString();
-    const endpoint = `${APIURL}/api/getallReview?${queryString}`;
+    const endpoint = `${APIURL}/api/getallReview/${shopName}?${queryString}`;
 
     const response = await fetch(endpoint, {
       headers: {
@@ -92,9 +94,11 @@ export async function loader({ request }) {
       if (nameSearch) storeReviewFilterParams.append('name', nameSearch);
       if (emailSearch) storeReviewFilterParams.append('email', emailSearch);
       storeReviewFilterParams.append('page', page.toString());
-      storeReviewFilterParams.append('limit', '1000');
+      storeReviewFilterParams.append('limit', '10');
+      const { session } = await authenticate.admin(request);
+      const shopName = session.shop
 
-      const storeReviewEndpoint = `${APIURL}/api/storeReview?${storeReviewFilterParams.toString()}`;
+      const storeReviewEndpoint = `${APIURL}/api/storeReview/${shopName}?${storeReviewFilterParams.toString()}`;
 
       const storeResponse = await fetch(storeReviewEndpoint, {
         headers: {

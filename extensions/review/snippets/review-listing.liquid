@@ -1,4 +1,6 @@
 {% assign product_id = product.id %}
+{% assign shop_name = shop.metafields.shopName.shopName %}
+
 <!doctype html>
 <html lang="en">
   <head>
@@ -264,7 +266,7 @@
     <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
     <script>
       document.addEventListener('DOMContentLoaded', function () {
-        const API_ENDPOINT = `https://5613-106-215-23-87.ngrok-free.app/api/getReview/{{ product_id }}`;
+        const API_ENDPOINT = `https://b4e6-106-201-200-14.ngrok-free.app/api/getReview/{{ shop_name }}/{{ product_id }}`;
         let swiperInstance = null;
         let currentRetry = 0;
 

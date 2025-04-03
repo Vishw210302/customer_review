@@ -2,6 +2,7 @@ import { useLoaderData, useNavigation } from '@remix-run/react';
 import { Spinner } from '@shopify/polaris';
 import React from 'react';
 import CardsOfDashboard from './app.CardsOfDashboard';
+import { authenticate } from '../shopify.server';
 
 export async function loader({ request }) {
 
@@ -13,6 +14,8 @@ export async function loader({ request }) {
     const rating = url.searchParams.get('rating');
     const page = parseInt(url.searchParams.get('page') || '1', 10);
     const limit = parseInt(url.searchParams.get('limit') || '10', 10);
+    const { session } = await authenticate.admin(request);
+    const shopName = session.shop
 
     try {
         const filterParams = new URLSearchParams();
@@ -24,8 +27,8 @@ export async function loader({ request }) {
         filterParams.append('limit', limit.toString());
 
         const queryString = filterParams.toString();
-        const endpoint = `${apiurl}/api/getallReview?${queryString}`;
-        const storeEndpoint = `${apiurl}/api/storeReview`;
+        const endpoint = `${apiurl}/api/getallReview/${shopName}?${queryString}`;
+        const storeEndpoint = `${apiurl}/api/storeReview/${shopName}`;
 
         const [response, storeResponse] = await Promise.all([
             fetch(endpoint, {

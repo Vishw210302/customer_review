@@ -1,3 +1,5 @@
+{% assign shop_name = shop.metafields.shopName.shopName %}
+
 <style>
   .container {
     max-width: 1200px;
@@ -822,7 +824,7 @@
         </div>
         <div class="error-message" id="nameError"></div>
       </div>
-
+      <input type="hidden" id="storeName" name="storeName" value="{{ shop_name }}">
       <div class="review-form-store-group">
         <label for="customerEmail">Email Address</label>
         <div class="input-container">
@@ -931,15 +933,17 @@
   const nameError = document.getElementById('nameError');
   const emailError = document.getElementById('emailError');
   const customerName = document.getElementById('customerName');
+  const storeName = document.getElementById('storeName');
   const customerEmail = document.getElementById('customerEmail');
   const successCheckmark = document.getElementById('successCheckmark');
   const thumbnailsContainer = document.getElementById('reviewThumbnails');
   const mainCardReviewContent = document.querySelector('.main-card-review-content');
-  const API_BASE_URL = 'https://5613-106-215-23-87.ngrok-free.app';
+  const API_BASE_URL = 'https://b4e6-106-201-200-14.ngrok-free.app';
   const ADD_STORE_REVIEW_API = `${API_BASE_URL}/api/storeReview`;
   let userRating = 0;
   let formFields = [
     { element: customerName, filled: false },
+    { element: storeName, filled: true },
     { element: customerEmail, filled: false },
     { element: document.getElementById('reviewTitle'), filled: false },
     { element: reviewMessage, filled: false },
@@ -1025,7 +1029,7 @@
       firstPageBtn.addEventListener('click', () => {
         if (isLoading) return;
         currentPage = 1;
-        const GET_STORE_REVIEW_API = `${API_BASE_URL}/api/storeReview?active=true&page=${currentPage}`;
+        const GET_STORE_REVIEW_API = `${API_BASE_URL}/api/storeReview/{{ shop_name }}?active=true&page=${currentPage}`;
         fetchReviewsForPage(GET_STORE_REVIEW_API);
       });
     }
@@ -1034,7 +1038,7 @@
       prevPageBtn.addEventListener('click', () => {
         if (isLoading || currentPage <= 1) return;
         currentPage--;
-        const GET_STORE_REVIEW_API = `${API_BASE_URL}/api/storeReview?active=true&page=${currentPage}`;
+        const GET_STORE_REVIEW_API = `${API_BASE_URL}/api/storeReview/{{ shop_name }}?active=true&page=${currentPage}`;
         fetchReviewsForPage(GET_STORE_REVIEW_API);
       });
     }
@@ -1043,7 +1047,7 @@
       nextPageBtn.addEventListener('click', () => {
         if (isLoading || currentPage >= totalPages) return;
         currentPage++;
-        const GET_STORE_REVIEW_API = `${API_BASE_URL}/api/storeReview?active=true&page=${currentPage}`;
+        const GET_STORE_REVIEW_API = `${API_BASE_URL}/api/storeReview/{{ shop_name }}?active=true&page=${currentPage}`;
         fetchReviewsForPage(GET_STORE_REVIEW_API);
       });
     }
@@ -1052,12 +1056,12 @@
       lastPageBtn.addEventListener('click', () => {
         if (isLoading) return;
         currentPage = totalPages;
-        const GET_STORE_REVIEW_API = `${API_BASE_URL}/api/storeReview?active=true&page=${currentPage}`;
+        const GET_STORE_REVIEW_API = `${API_BASE_URL}/api/storeReview/{{ shop_name }}?active=true&page=${currentPage}`;
         fetchReviewsForPage(GET_STORE_REVIEW_API);
       });
     }
 
-    const GET_STORE_REVIEW_API = `${API_BASE_URL}/api/storeReview?active=true&page=1`;
+    const GET_STORE_REVIEW_API = `${API_BASE_URL}/api/storeReview/{{ shop_name }}?active=true&page=1`;
     fetchReviewsForPage(GET_STORE_REVIEW_API);
 
     setupEventListeners();
@@ -1488,6 +1492,7 @@
     const customerEmailValue = customerEmail.value.trim();
     const reviewTitle = document.getElementById('reviewTitle')?.value.trim() || '';
     const reviewMessageValue = reviewMessage.value.trim();
+    const storeNameValue = storeName.value.trim();
     const rating = userRating;
 
     let isValid = true;
@@ -1534,6 +1539,7 @@
     formData.append('reviewTitle', reviewTitle);
     formData.append('rating', rating);
     formData.append('reviewMessage', reviewMessageValue);
+    formData.append('storeName', storeNameValue);
 
     if (selectedFiles.length > 0) {
       selectedFiles.forEach((file, index) => {
@@ -1570,7 +1576,7 @@
 
         setTimeout(() => {
           currentPage = 1;
-          const GET_STORE_REVIEW_API = `${API_BASE_URL}/api/storeReview?active=true&page=1`;
+          const GET_STORE_REVIEW_API = `${API_BASE_URL}/api/storeReview/{{ shop_name }}?active=true&page=1`;
           fetchReviewsForPage(GET_STORE_REVIEW_API);
         }, 1000);
 

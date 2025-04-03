@@ -86,6 +86,7 @@ export const loader = async ({ request }) => {
 
     const shopDataResponse = await shopResponse.json();
     const shopData = shopDataResponse?.data?.shop;
+    const shopName = shopDataResponse?.data?.shop.myshopifyDomain;
     const blockID = process.env.SHOPIFY_REVIEW_ID;
 
     const metafieldUpdateResponse = await admin.graphql(`
@@ -103,6 +104,13 @@ export const loader = async ({ request }) => {
              namespace: "blockID",
              key: "blockID",
              value: "${blockID}",
+             type: "string"
+          },
+          {
+             ownerId: "${shopData?.id}",
+             namespace: "shopName",
+             key: "shopName",
+             value: "${shopName}",
              type: "string"
           },
         ]) {
@@ -189,7 +197,7 @@ const ThemeStatus = () => {
   const themeId = selectedTheme?.split("/").pop();
 
   const particularProductUrl = `https://${session?.shop}/admin/themes/${themeId}/editor?template=product&addAppBlockId=${blockId}/particular-product&target=mainSection`;
-  const starRatingUrl = `https://${session?.shop}/admin/themes/${themeId}/editor?template=product&addAppBlockId=${blockId}/star-rating&target=section`;
+  const starRatingUrl = `https://${session?.shop}/admin/themes/${themeId}/editor?template=product&addAppBlockId=${blockId}/custom-block&target=section`;
   const storeReview = `https://${session?.shop}/admin/themes/${themeId}/editor?template=product&addAppBlockId=${blockId}/store-review&target=section`;
 
   const cardStyle = {
