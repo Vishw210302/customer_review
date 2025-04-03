@@ -3,7 +3,7 @@
 client_id = "62f639e7df70e5c7c61e8e7bdb75bea9"
 name = "customer-review"
 handle = "customer-review-6"
-application_url = "https://sims-fu-angela-available.trycloudflare.com"
+application_url = "https://wild-bestsellers-ensures-make.trycloudflare.com"
 embedded = true
 
 [build]
@@ -17,16 +17,16 @@ scopes = "write_products, read_themes"
 
 [auth]
 redirect_urls = [
-  "https://sims-fu-angela-available.trycloudflare.com/auth/callback",
-  "https://sims-fu-angela-available.trycloudflare.com/auth/shopify/callback",
-  "https://sims-fu-angela-available.trycloudflare.com/api/auth/callback"
+  "https://wild-bestsellers-ensures-make.trycloudflare.com/auth/callback",
+  "https://wild-bestsellers-ensures-make.trycloudflare.com/auth/shopify/callback",
+  "https://wild-bestsellers-ensures-make.trycloudflare.com/api/auth/callback"
 ]
 
 [webhooks]
 api_version = "2025-01"
 
 [app_proxy]
-url = "https://sims-fu-angela-available.trycloudflare.com"
+url = "https://wild-bestsellers-ensures-make.trycloudflare.com"
 subpath = "v1"
 prefix = "a"
 

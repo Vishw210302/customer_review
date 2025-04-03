@@ -2,17 +2,23 @@ import { json } from "@remix-run/node";
 import { useFetcher, useLoaderData, useNavigate } from "@remix-run/react";
 import {
   Badge,
+  Banner,
   BlockStack,
   Box,
   Button,
   Card,
   Grid,
+  Icon,
   InlineStack,
   Page,
   RadioButton,
   Spinner,
   Text
 } from "@shopify/polaris";
+import {
+  ChevronUpIcon,
+  AlertTriangleIcon
+} from '@shopify/polaris-icons';
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { authenticate } from "../shopify.server";
 
@@ -114,7 +120,25 @@ export const action = async ({ request }) => {
   );
 
   const appEmbedData = await response.json();
-  const data = appEmbedData?.data?.theme?.files?.nodes[0].body?.content;
+  const purchaseTheme = appEmbedData?.data?.theme?.files
+
+  // Fix for TypeError: Cannot read properties of null (reading 'nodes')
+  if (!appEmbedData?.data?.theme?.files?.nodes || appEmbedData.data.theme.files.nodes.length === 0) {
+    return json({
+      checkDisabled: true,
+      error: 'Theme files not found or empty',
+      purchaseTheme
+    });
+  }
+
+  const data = appEmbedData?.data?.theme?.files.nodes[0]?.body?.content;
+
+  if (!data) {
+    return json({
+      checkDisabled: true,
+      error: 'Theme settings content not found',
+    });
+  }
 
   try {
     const settingsData = JSON.parse(data.substring(data.indexOf('{')));
@@ -134,6 +158,7 @@ export const action = async ({ request }) => {
 
     return json({
       checkDisabled: appNeedsToBeEmbedded,
+      appEmbedData,
     });
 
   } catch (error) {
@@ -153,10 +178,12 @@ function Index() {
   const [showAppEmbed, setShowAppEmbed] = useState(true);
   const [selectedTheme, setSelectedTheme] = useState(activeTheme?.id);
   const [appEmbedStatus, setAppEmbedStatus] = useState(null);
+  const [themePurchase, setThemePurchase] = useState();
   const refLink = useRef(null);
   const navigate = useNavigate();
   const isPageLoading = false;
   const [showAll, setShowAll] = useState(false);
+  const [iconRotation, setIconRotation] = useState(0);
 
   if (isPageLoading) {
     return (
@@ -240,7 +267,12 @@ function Index() {
       setShowAppEmbed(fetcher.data.checkDisabled);
       setAppEmbedStatus(!fetcher.data.checkDisabled);
     }
+    setThemePurchase(fetcher?.data?.purchaseTheme)
   }, [fetcher.data]);
+
+  useEffect(() => {
+    setIconRotation(isThemeSelectionVisible ? 0 : 180);
+  }, [isThemeSelectionVisible]);
 
   const handleThemeSelect = useCallback(
     (id) => {
@@ -272,20 +304,31 @@ function Index() {
 
         <Card>
           <BlockStack gap="200">
-            <InlineStack align="space-between" blockAlign="center">
-              <Text variant="headingMd" fontWeight="semibold">
-                Theme Selection
-              </Text>
-              <Button
-                variant="monochromePlain"
-                onClick={toggleThemeSelection}
-                style={{ textDecoration: "none" }}
-              >
-                <span style={{ fontSize: "30px", textDecoration: "none" }}>
-                  {isThemeSelectionVisible ? "-" : "+"}
-                </span>
-              </Button>
-            </InlineStack>
+            <div onClick={toggleThemeSelection}>
+              <InlineStack align="space-between" blockAlign="center">
+                <Text onClick={toggleThemeSelection} variant="headingMd" fontWeight="semibold" >
+                  Theme Selection
+                </Text>
+                <Button
+                  variant="monochromePlain"
+                  onClick={toggleThemeSelection}
+                  style={{ textDecoration: "none" }}
+                >
+                  <span style={{
+                    fontSize: "30px",
+                    textDecoration: "none",
+                    display: "inline-block",
+                    transform: `rotate(${iconRotation}deg)`,
+                    transition: "transform 0.3s ease-in-out"
+                  }}>
+                    <Icon
+                      source={ChevronUpIcon}
+                      tone="base"
+                    />
+                  </span>
+                </Button>
+              </InlineStack>
+            </div>
 
             <Text variant="bodyMd" color="subdued">
               Select the theme you want to activate the product page inventory widget on
@@ -327,17 +370,23 @@ function Index() {
 
             <Box paddingBlockStart="0">
               <InlineStack gap="200" blockAlign="center">
-                {showAppEmbed ? (
-                  <Button
-                    variant="primary"
-                    onClick={handleAppembed}
-                  >
-                    Activate App Embed
-                  </Button>
+                {themePurchase === null ? (
+                  <Banner
+                    title="You need to purchase the theme to enable the App "
+                    tone="critical"
+                    icon={AlertTriangleIcon}
+
+                  />
                 ) : (
-                  <>
-                    {appEmbedStatus && <Badge tone="success">Active</Badge>}
-                  </>
+                  showAppEmbed ? (
+                    <Button variant="primary" onClick={handleAppembed}>
+                      Activate App Embed
+                    </Button>
+                  ) : (
+                    <>
+                      {appEmbedStatus && <Badge tone="success">Active</Badge>}
+                    </>
+                  )
                 )}
 
                 {fetcher.state === "submitting" && (
@@ -359,7 +408,7 @@ function Index() {
               </InlineStack>
             </Box>
           </BlockStack>
-        </Card>
+        </Card >
 
         <Card>
           <BlockStack gap="200">
@@ -467,7 +516,7 @@ function Index() {
           </Card>
         </Box>
 
-      </BlockStack>
+      </BlockStack >
     );
   };
 
