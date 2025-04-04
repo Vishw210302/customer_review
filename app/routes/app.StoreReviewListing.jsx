@@ -45,7 +45,7 @@ function StoreReviewListing({ storeReviews, updateStoreReviewStatus, deleteStore
             review: review.reviewMessage,
             date: review.createdAt,
             isActive: review.isActive !== undefined ? review.isActive : true,
-            images: review.reviewImages ? review.reviewImages.map(img => `https://b4e6-106-201-200-14.ngrok-free.app/uploads/${img}`) : []
+            images: review.reviewImages ? review.reviewImages.map(img => `https://9ca5-182-65-77-44.ngrok-free.app/uploads/${img}`) : []
         }));
     }, []);
 

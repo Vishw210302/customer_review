@@ -16,8 +16,8 @@ import {
   Text
 } from "@shopify/polaris";
 import {
-  ChevronUpIcon,
-  AlertTriangleIcon
+  AlertTriangleIcon,
+  ChevronUpIcon
 } from '@shopify/polaris-icons';
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { authenticate } from "../shopify.server";
