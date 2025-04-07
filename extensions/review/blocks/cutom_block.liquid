@@ -1,8 +1,8 @@
 {% assign avg_rating = block.settings.product.metafields.demo.avg_rating.value | round %}
 {% assign access_token = shop.metafields.accesstoken.token %}
-{% assign blockID = shop.metafields.blockID.blockID %}
+{% assign block_id = shop.metafields.blockID.blockID %}
 
-<span class="main_block_listing" data-theme-id="{{ theme_id }}">
+<span class="main_block_listing">
   {% render 'stars', rating: avg_rating %}
   {% render 'review-listing', rating: avg_rating %}
 </span>
@@ -120,7 +120,7 @@
 
       const productSectionBlocks = settingsData.current.blocks;
       const checkDisabled = Object.values(productSectionBlocks).find(
-        (item) => item.type && item.type.includes('{{blockID}}')
+        (item) => item.type && item.type.includes('{{block_id}}')
       )?.disabled;
 
       const main_block_listing = document.querySelector('.main_block_listing');

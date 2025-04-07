@@ -589,6 +589,10 @@
     flex: 1;
   }
 
+  .main-div-review {
+    padding: 5px 15px;
+  }
+
   .reviewer-name {
     font-weight: 600;
     color: #333;
@@ -1354,13 +1358,8 @@
     const storeRatingLabel = document.querySelector('.review-rating-store-label');
     if (storeRatingLabel) {
       const fullStars = Math.floor(data.averageRating);
-      const partialStar = data.averageRating % 1;
 
       let starHTML = '★'.repeat(fullStars);
-
-      if (partialStar >= 0.5) {
-        starHTML += '½';
-      }
 
       starHTML += '☆'.repeat(5 - starHTML.length);
 
@@ -1383,7 +1382,7 @@
 
       reviewCard.innerHTML = `
         <div class="review-container">
-          <div>
+          <div class="main-div-review">
             <div>
               <div class="reviewer-details">
                 <div class="reviewer-name">${review.name || 'Anonymous'}</div>

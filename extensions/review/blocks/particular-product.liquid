@@ -1,7 +1,7 @@
 {% assign access_token = shop.metafields.accesstoken.token %}
-{% assign blockID = shop.metafields.blockID.blockID %}
+{% assign block_id = shop.metafields.blockID.blockID %}
 
-<span class="second_block_listing" data-theme-id="{{ theme_id }}">
+<span class="second_block_listing">
   {% render 'particular-product-review' %}
 </span>
 
@@ -120,7 +120,7 @@
 
       const productSectionBlocks = settingsData.current.blocks;
       const checkDisabled = Object.values(productSectionBlocks).find(
-        (item) => item.type && item.type.includes('{{blockID}}')
+        (item) => item.type && item.type.includes('{{block_id}}')
       )?.disabled;
 
       const second_block_listing = document.querySelector('.second_block_listing');
