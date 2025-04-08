@@ -445,19 +445,19 @@ function ProductReview({
                     appliedFilters={[
                       ...(statusFilter
                         ? [
-                            {
-                              key: "status",
-                              label: `Status: ${statusOptions.find((opt) => opt.value === statusFilter)?.label || ""}`,
-                            },
-                          ]
+                          {
+                            key: "status",
+                            label: `Status: ${statusOptions.find((opt) => opt.value === statusFilter)?.label || ""}`,
+                          },
+                        ]
                         : []),
                       ...(ratingFilter
                         ? [
-                            {
-                              key: "rating",
-                              label: `Rating: ${ratingOptions.find((opt) => opt.value === ratingFilter)?.label || ""}`,
-                            },
-                          ]
+                          {
+                            key: "rating",
+                            label: `Rating: ${ratingOptions.find((opt) => opt.value === ratingFilter)?.label || ""}`,
+                          },
+                        ]
                         : []),
                     ]}
                     onQueryChange={handleSearchChange}

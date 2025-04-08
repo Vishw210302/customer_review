@@ -14,8 +14,7 @@ import {
   RadioButton,
   SkeletonBodyText,
   SkeletonDisplayText,
-  Spinner,
-  Text,
+  Text
 } from "@shopify/polaris";
 import {
   AlertTriangleIcon,
@@ -389,7 +388,6 @@ const Index = () => {
           <Card>
             {isLoading ? (
               <BlockStack gap="200" align="center">
-                <Spinner accessibilityLabel="Checking status..." size="small" />
                 <AppEmbedSkeleton />
               </BlockStack>
             ) : embedStatus == null ? (
