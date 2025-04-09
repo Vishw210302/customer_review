@@ -3,7 +3,7 @@
 client_id = "62f639e7df70e5c7c61e8e7bdb75bea9"
 name = "customer-review"
 handle = "customer-review-6"
-application_url = "https://including-reid-downloaded-miami.trycloudflare.com"
+application_url = "https://august-manufacturers-circuits-fleece.trycloudflare.com"
 embedded = true
 
 [build]
@@ -17,16 +17,16 @@ scopes = "write_products, read_themes"
 
 [auth]
 redirect_urls = [
-  "https://including-reid-downloaded-miami.trycloudflare.com/auth/callback",
-  "https://including-reid-downloaded-miami.trycloudflare.com/auth/shopify/callback",
-  "https://including-reid-downloaded-miami.trycloudflare.com/api/auth/callback"
+  "https://august-manufacturers-circuits-fleece.trycloudflare.com/auth/callback",
+  "https://august-manufacturers-circuits-fleece.trycloudflare.com/auth/shopify/callback",
+  "https://august-manufacturers-circuits-fleece.trycloudflare.com/api/auth/callback"
 ]
 
 [webhooks]
 api_version = "2025-01"
 
 [app_proxy]
-url = "https://including-reid-downloaded-miami.trycloudflare.com"
+url = "https://august-manufacturers-circuits-fleece.trycloudflare.com"
 subpath = "v1"
 prefix = "a"
 
