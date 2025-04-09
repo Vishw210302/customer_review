@@ -45,7 +45,7 @@ function StoreReviewListing({ storeReviews, updateStoreReviewStatus, deleteStore
             review: review.reviewMessage,
             date: review.createdAt,
             isActive: review.isActive !== undefined ? review.isActive : true,
-            images: review.reviewImages ? review.reviewImages.map(img => `https://checklist.codecrewinfotech.com//uploads/${img}`) : []
+            images: review.reviewImages ? review.reviewImages.map(img => `https://checklist.codecrewinfotech.com/uploads/${img}`) : []
         }));
     }, []);
 

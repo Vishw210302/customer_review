@@ -194,9 +194,8 @@ const RecommendedAppsSkeleton = () => (
 
 const Index = () => {
   const [isThemeSelectionLoading, setIsThemeSelectionLoading] = useState(true);
-  const [isRecommendedAppsLoading, setIsRecommendedAppsLoading] =
-    useState(true);
-  const { themeNames, activeTheme, session, appId } = useLoaderData();
+  const [isRecommendedAppsLoading, setIsRecommendedAppsLoading] = useState(true);
+  const { themeNames, activeTheme, session, blockID } = useLoaderData();
   const [showAll, setShowAll] = useState(false);
   const fetcher = useFetcher();
   const [embedStatus, setEmbedStatus] = useState(null);
@@ -418,7 +417,7 @@ const Index = () => {
                   <a
                     ref={refLink}
                     target="_blank"
-                    href={`https://admin.shopify.com/store/${session.shop.split(".")[0]}/themes/current/editor?context=apps&activateAppId=${appId}/app-embed`}
+                    href={`https://admin.shopify.com/store/${session.shop.split(".")[0]}/themes/current/editor?context=apps&activateAppId=${blockID}/app-embed`}
                     style={{ display: "none" }}
                   >
                     Activate App Embed
