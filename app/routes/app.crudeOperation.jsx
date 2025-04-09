@@ -10,9 +10,9 @@ import {
 } from "@shopify/polaris";
 import "@shopify/polaris/build/esm/styles.css";
 import React, { useCallback, useEffect, useState } from "react";
+import { authenticate } from "../shopify.server";
 import ProductReview from "./app.ProductReview";
 import StoreReviewListing from "./app.StoreReviewListing";
-import { authenticate } from "../shopify.server";
 
 export async function loader({ request }) {
   const APIURL = process.env.API_URL;

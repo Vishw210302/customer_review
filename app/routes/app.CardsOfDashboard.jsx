@@ -1,4 +1,4 @@
-import { useNavigation, useNavigate } from "@remix-run/react";
+import { useNavigate, useNavigation } from "@remix-run/react";
 import { Spinner } from "@shopify/polaris";
 import React from "react";
 

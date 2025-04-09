@@ -1,8 +1,8 @@
 import { useLoaderData, useNavigation } from "@remix-run/react";
 import { Spinner } from "@shopify/polaris";
 import React from "react";
-import CardsOfDashboard from "./app.CardsOfDashboard";
 import { authenticate } from "../shopify.server";
+import CardsOfDashboard from "./app.CardsOfDashboard";
 
 export async function loader({ request }) {
   const apiurl = process.env.API_URL;
