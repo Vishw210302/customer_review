@@ -29,7 +29,8 @@ const ProductRatingWidget = () => {
                 <div style={{
                     display: 'flex',
                     alignItems: 'center',
-                    gap: '8px'
+                    gap: '8px',
+                    justifyContent:'center'
                 }}>
                     <span style={{
                         fontWeight: '600',
@@ -51,7 +52,7 @@ const ProductRatingWidget = () => {
                         color: '#4a5568',
                         fontSize: '14px',
                         fontWeight: '500',
-                        backgroundColor: '#edf2f7',
+                        // backgroundColor: '#edf2f7',
                         padding: '3px 8px',
                         borderRadius: '12px'
                     }}>

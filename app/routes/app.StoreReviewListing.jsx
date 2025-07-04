@@ -10,11 +10,18 @@ import {
     Select,
     Text,
     TextField,
-    Toast
+    Toast,
+    Icon
 } from '@shopify/polaris';
 import { DeleteIcon } from '@shopify/polaris-icons';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import DeleteButtonModal from './modals/DeleteButtonModal';
+import {
+  ChevronLeftIcon
+} from '@shopify/polaris-icons';
+import {
+  ChevronRightIcon
+} from '@shopify/polaris-icons';
 
 function StoreReviewListing({ storeReviews, updateStoreReviewStatus, deleteStoreReview }) {
 
@@ -247,13 +254,12 @@ function StoreReviewListing({ storeReviews, updateStoreReviewStatus, deleteStore
 
     const containerStyle = {
         display: 'flex',
-        overflowX: 'scroll',
+        overflowX: 'auto',
         gap: '8px',
         padding: '10px 15px',
         msOverflowStyle: 'none',
         scrollbarWidth: 'thin',
     };
-
     const imgStyle = {
         height: '100px',
         minWidth: '100px',
@@ -349,17 +355,35 @@ function StoreReviewListing({ storeReviews, updateStoreReviewStatus, deleteStore
             <div key={`images-${review.id}`} style={{ width: "250px" }}>
                 {renderImageThumbnails(review.images)}
             </div>,
-            <div key={`product-${review.id}`}>
-                <div style={{ fontSize: '15px', color: '#637381', fontWeight: 'bold' }}>{review.customer}</div>
-                <div style={{ fontSize: "12px" }}>{review.product}</div>
-            </div>,
+            <div key={`product-${review.id}`} style={{ maxWidth: '250px' }}>
+  <div style={{
+    fontSize: '15px',
+    color: '#637381',
+    fontWeight: 'bold',
+    maxWidth: '250px',
+  wordBreak: 'break-word',
+  whiteSpace: 'normal'
+  }}>
+    {review.customer}
+  </div>
+  <div style={{
+    fontSize: "12px",
+    maxWidth: '250px',
+  wordBreak: 'break-word',
+  whiteSpace: 'normal'
+  }}>
+    {review.product}
+  </div>
+</div>,
             <div key={`rating-${review.id}`} style={{ color: '#FFB900', fontSize: "18px" }}>
                 {renderStarRating(review.rating)}
             </div>,
-            <div key={`reviewTitle-${review.id}`} style={{ width: "250px", whiteSpace: "normal" }}>
+            <div key={`reviewTitle-${review.id}`} style={{ width: "250px", whiteSpace: "normal" ,maxWidth: '250px',wordBreak: 'break-word'}}>
                 {review.reviewTitle}
             </div>,
-            <div key={`review-${review.id}`} style={{ textWrap: "wrap", width: "250px" }}>
+            <div key={`review-${review.id}`} style={{ textWrap: "wrap", width: "250px",  maxWidth: '250px',
+  wordBreak: 'break-word',
+  whiteSpace: 'normal'}}>
                 {review.review}
             </div>,
             <div key={`date-${review.id}`}>
@@ -455,6 +479,7 @@ function StoreReviewListing({ storeReviews, updateStoreReviewStatus, deleteStore
                     hasZebraStripingOnData
                     increasedTableDensity
                     hideScrollIndicator={true}
+                    
                 />
 
                 <LegacyCard.Section>
@@ -480,10 +505,7 @@ function StoreReviewListing({ storeReviews, updateStoreReviewStatus, deleteStore
                 open={showImageModal}
                 onClose={handleModalClose}
                 title="Product Images"
-                primaryAction={{
-                    content: 'Close',
-                    onAction: handleModalClose,
-                }}
+                
             >
                 <Modal.Section>
                     {selectedImagesArray?.length > 0 && selectedImageIndex !== null && (
@@ -497,9 +519,15 @@ function StoreReviewListing({ storeReviews, updateStoreReviewStatus, deleteStore
                             </div>
                             {selectedImagesArray?.length > 1 && (
                                 <div style={{ display: 'flex', justifyContent: 'center', alignItems: "center", gap: '10px' }}>
-                                    <Button onClick={() => handleImageNavigation('prev')}>Previous</Button>
+                                    <Button onClick={() => handleImageNavigation('prev')}><Icon
+  source={ChevronLeftIcon}
+  tone="base"
+/></Button>
                                     <Text>Image {selectedImageIndex + 1} of {selectedImagesArray?.length}</Text>
-                                    <Button onClick={() => handleImageNavigation('next')}>Next</Button>
+                                    <Button onClick={() => handleImageNavigation('next')}><Icon
+  source={ChevronRightIcon}
+  tone="base"
+/></Button>
                                 </div>
                             )}
                         </div>

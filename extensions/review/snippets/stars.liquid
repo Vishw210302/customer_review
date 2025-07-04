@@ -1,69 +1,8 @@
 {% assign product_id = product.id %}
 {% assign shop_name = shop.metafields.shopName.shopName %}
+<div class="review-popup-opener"></div> 
 
-<div class="container">
-  <h1 style="text-align: center; margin-bottom: 10px; margin-top: 0;">Customer Reviews</h1>
-
-  <div class="reviews-summary">
-    <div class="overall-rating">
-      <div class="stars">★★★★★</div>
-      <div class="rating-number"></div>
-      <div class="review-count"></div>
-    </div>
-
-    <div class="rating-breakdown">
-      <div class="rating-bar">
-        <div class="rating-label-star">★★★★★</div>
-        <div class="progress-container">
-          <div class="progress-bar" style="width: 96%;"></div>
-        </div>
-        <div class="rating-count"></div>
-      </div>
-
-      <div class="rating-bar">
-        <div class="rating-label-star">★★★★</div>
-        <div class="progress-container">
-          <div class="progress-bar" style="width: 1.5%;"></div>
-        </div>
-        <div class="rating-count"></div>
-      </div>
-
-      <div class="rating-bar">
-        <div class="rating-label-star">★★★</div>
-        <div class="progress-container">
-          <div class="progress-bar" style="width: 0.6%;"></div>
-        </div>
-        <div class="rating-count"></div>
-      </div>
-
-      <div class="rating-bar">
-        <div class="rating-label-star">★★</div>
-        <div class="progress-container">
-          <div class="progress-bar" style="width: 0.2%;"></div>
-        </div>
-        <div class="rating-count"></div>
-      </div>
-
-      <div class="rating-bar">
-        <div class="rating-label-star">★</div>
-        <div class="progress-container">
-          <div class="progress-bar" style="width: 0.4%;"></div>
-        </div>
-        <div class="rating-count"></div>
-      </div>
-    </div>
-
-    <div class="review-button-container">
-      <button class="write-review-button">Write a Store Review</button>
-    </div>
-  </div>
-
-  <div class="divider"></div>
-
-  <div id="reviews-container"></div>
-</div>
-
-<div id="review-modal" class="review-modal" aria-hidden="true" role="dialog">
+<div id="review-modal" class="review-modal page-width" aria-hidden="true" role="dialog">
   <div class="modal-content" role="document">
     <div class="modal-header">
       <h2>Share Your Experience</h2>
@@ -157,6 +96,68 @@
     </form>
   </div>
 </div>
+<div class="container summary-container">
+  <h1 style="text-align: center; margin-bottom: 10px; margin-top: 0;">Customer Reviews</h1>
+
+  <div class="reviews-summary">
+    <div class="overall-rating">
+      <div class="stars">★★★★★</div>
+      <div class="rating-number"></div>
+      <div class="review-count"></div>
+    </div>
+
+    <div class="rating-breakdown">
+      <div class="rating-bar">
+        <div class="rating-label-star">★★★★★</div>
+        <div class="progress-container">
+          <div class="progress-bar" style="width: 96%;"></div>
+        </div>
+        <div class="rating-count"></div>
+      </div>
+
+      <div class="rating-bar">
+        <div class="rating-label-star">★★★★☆</div>
+        <div class="progress-container">
+          <div class="progress-bar" style="width: 1.5%;"></div>
+        </div>
+        <div class="rating-count"></div>
+      </div>
+
+      <div class="rating-bar">
+        <div class="rating-label-star">★★★☆☆</div>
+        <div class="progress-container">
+          <div class="progress-bar" style="width: 0.6%;"></div>
+        </div>
+        <div class="rating-count"></div>
+      </div>
+
+      <div class="rating-bar">
+        <div class="rating-label-star">★★☆☆☆</div>
+        <div class="progress-container">
+          <div class="progress-bar" style="width: 0.2%;"></div>
+        </div>
+        <div class="rating-count"></div>
+      </div>
+
+      <div class="rating-bar">
+        <div class="rating-label-star">★☆☆☆☆</div>
+        <div class="progress-container">
+          <div class="progress-bar" style="width: 0.4%;"></div>
+        </div>
+        <div class="rating-count"></div>
+      </div>
+    </div>
+
+    <div class="review-button-container">
+      <button class="write-review-button">Write a Review</button>
+    </div>
+  </div>
+
+  
+
+</div>
+
+
 
 <div id="toast" class="toast" role="alert">
   <div class="toast-content">
@@ -179,27 +180,27 @@
 </div>
 
 <style>
-  body {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans',
-      sans-serif;
-    background-color: #f0f2f5;
-    margin: 0;
-    padding: 20px;
-    color: #333;
-  }
-
-  .container {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 20px;
-  }
-
-  h1 {
-    color: #0a2240;
-    font-size: 42px;
-    margin-bottom: 40px;
-  }
-
+   .review-popup-opener{
+  display: none;
+    position: fixed;
+   
+    left: 0;
+    top: 0;
+    width: 100%;
+    background: rgba(0, 0, 0, 0.5);
+   
+    overflow-y: auto;
+        opacity: 1;
+    visibility: visible;
+    z-index: 101;
+    }
+.review-modal.page-width {
+max-width:100%;
+}
+.summary-container{
+  max-width:1200px;
+  margin:0 auto;
+}
   .reviews-summary {
     display: flex;
     justify-content: space-between;
@@ -210,18 +211,20 @@
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
     margin-bottom: 30px;
   }
-
+.progress-bar{
+display:block !important;
+}
   .overall-rating {
     flex: 1;
     display: flex;
     flex-direction: column;
     align-items: center;
-    border-right: 1px solid #eee;
+    
     padding-right: 20px;
   }
 
   .stars {
-    color: #ff9d2d;
+    color: #f59e0b;
     font-size: 28px;
     letter-spacing: 3px;
   }
@@ -240,6 +243,8 @@
 
   .rating-breakdown {
     border-right: 1px solid #eee;
+    border-left: 1px solid #eee;
+
     flex: 2;
     padding: 0 30px;
   }
@@ -258,7 +263,7 @@
 
   .progress-container {
     flex: 1;
-    height: 12px;
+    height: 6px;
     background-color: #eee;
     border-radius: 10px;
     margin: 0 15px;
@@ -266,8 +271,8 @@
   }
 
   .progress-bar {
-    height: 100%;
-    background-color: #ff5447;
+    height: 6px ;  
+    background-color: #f59e0b;
     border-radius: 10px;
   }
 
@@ -277,17 +282,17 @@
   }
 
   .review-button-container {
-    flex: 1;
-    display: flex;
+        display: flex;
     justify-content: center;
+    padding-left: 20px;
   }
 
   .write-review-button {
-    background-color: #003087;
-    color: white;
+    background-color: #000000;
+    color: #ffffff;
     border: none;
-    border-radius: 25px;
-    padding: 12px 25px;
+    border-radius: 50px;
+    padding: 10px 15px;
     font-size: 16px;
     font-weight: 600;
     cursor: pointer;
@@ -295,7 +300,9 @@
   }
 
   .write-review-button:hover {
-    background-color: #00256e;
+    background-color: #ffffff;
+    color: #000000;
+    border: 1px solid;
   }
 
   .divider {
@@ -311,7 +318,7 @@
 
     .overall-rating {
       border-right: none;
-      border-bottom: 1px solid #eee;
+      
       padding: 0 0 20px 0;
       margin-bottom: 20px;
     }
@@ -319,6 +326,7 @@
     .rating-breakdown {
       width: 100%;
       padding: 20px 0;
+      border:none;
     }
 
     .review-button-container {
@@ -515,24 +523,30 @@
   .review-modal {
     display: none;
     position: fixed;
-    z-index: 1000;
+   
     left: 0;
-    top: -40px;
+    top: 0;
+    bottom:0;
     width: 100%;
     background: rgba(0, 0, 0, 0.5);
     backdrop-filter: blur(3px);
     overflow-y: auto;
+        opacity: 1;
+    visibility: visible;
+    z-index: 101;
   }
 
   .modal-content {
     background: #fff;
-    margin: 5% auto;
-    width: 90%;
-    max-width: 480px;
+    margin: 20px auto;
+    width: 100%;
+    max-width: 600px;
     border-radius: 12px;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
     animation: modalFadeIn 0.3s;
     overflow: hidden;
+    height: max-content;
+    align-self: anchor-center;
   }
 
   @keyframes modalFadeIn {
@@ -931,7 +945,18 @@
 </style>
 
 <script>
+ document.addEventListener('DOMContentLoaded', () => {
+  const modal = document.querySelector('#review-modal');
+  const target = document.querySelector('.page-width.scroll-trigger.animate--slide-in');
+
+  if (modal && target) {
+    target.parentNode.insertBefore(modal, target);
+  }
+});
+
+
   document.addEventListener('DOMContentLoaded', function () {
+  
     const modal = document.getElementById('review-modal');
     const openButton = document.querySelector('.write-review-button');
     const closeButton = document.querySelector('.close-modal');
@@ -945,7 +970,7 @@
     const charCount = document.getElementById('char-count');
     const recommendBtns = document.querySelectorAll('.recommend-btn');
     const recommendInput = document.getElementById('recommend');
-    const reviewsContainer = document.getElementById('reviews-container');
+    {% comment %} const reviewsContainer = document.getElementById('reviews-container'); {% endcomment %}
     const nameInput = document.getElementById('review-name');
     const emailInput = document.getElementById('review-email');
     const numberInput = document.getElementById('review-number');
@@ -963,16 +988,23 @@
 
     fetchReviews();
 
-    openButton.addEventListener('click', function () {
-      modal.style.display = 'flex';
-      document.body.style.overflow = 'hidden';
-    });
+    const overlay = document.querySelector('.review-popup-opener');
 
-    function closeModal() {
-      modal.style.display = 'none';
-      document.body.style.overflow = '';
-      resetForm();
-    }
+openButton.addEventListener('click', function () {
+  modal.style.display = 'flex';
+  overlay.style.overflow = 'hidden';
+  overlay.style.display = 'block'; // ensure overlay is visible
+   document.body.style.overflow = 'hidden';
+});
+
+function closeModal() {
+  modal.style.display = 'none';
+  overlay.style.overflow = '';
+  overlay.style.display = 'none'; // hide overlay again
+  document.body.style.overflow = '';
+  resetForm();
+}
+
 
     closeButton.addEventListener('click', closeModal);
 

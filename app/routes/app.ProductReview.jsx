@@ -434,7 +434,7 @@ function ProductReview({
               <div
                 style={{ display: "flex", alignItems: "center", gap: "10px" }}
               >
-                <div style={{ width: "100%" }}>
+                <div style={{ width: "100%"}}>
                   <span style={{ padding: "10px" }}>Search :</span>
                   <Filters
                     style={{ height: "40px" }}
@@ -503,7 +503,7 @@ function ProductReview({
                       "text",
                     ]}
                     headings={[
-                      "Reviewer",
+                      "Customer",
                       "Product",
                       "Email",
                       "Mobile Number",
@@ -567,6 +567,14 @@ function ProductReview({
               onDismiss={toggleToast}
             />
           )}
+           <style>
+          {`
+            .Polaris-Filters__Container{
+             border-bottom:none;
+            }
+
+          `}
+        </style>
         </Page>
       </Frame>
     </AppProvider>

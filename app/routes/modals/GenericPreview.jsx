@@ -65,12 +65,12 @@ const GenericPreview = () => {
 
     const styles = {
         container: {
-            backgroundColor: "#f8fafc",
+             background: 'linear-gradient(to right, #EFF6FF, #DBEAFE)',
             padding: "20px",
             borderRadius: "12px",
             fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
             boxShadow: "0 2px 10px rgba(0, 0, 0, 0.05)",
-            maxWidth: "600px",
+            // maxWidth: "600px",
             margin: "0 auto"
         },
         headerContainer: {
@@ -165,7 +165,7 @@ const GenericPreview = () => {
             display: "flex",
             flexDirection: "column",
             alignItems: "center",
-            borderRight: isWideScreen ? "1px solid #e2e8f0" : "none",
+            // borderRight: isWideScreen ? "1px solid #e2e8f0" : "none",
             borderBottom: isWideScreen ? "none" : "1px solid #e2e8f0",
             paddingRight: isWideScreen ? "20px" : 0,
             paddingBottom: isWideScreen ? 0 : "20px",
@@ -192,12 +192,14 @@ const GenericPreview = () => {
             flex: 2,
             padding: isWideScreen ? "0 30px" : "20px 0",
             borderRight: isWideScreen ? "1px solid #e2e8f0" : "none",
+            borderLeft: isWideScreen ? "1px solid #e2e8f0" : "none",
             width: "100%"
         },
         ratingBar: {
             display: "flex",
             alignItems: "center",
-            marginBottom: "10px"
+            marginBottom: "10px",
+            gap:"25px"
         },
         ratingLabelStar: {
             minWidth: "80px",
@@ -206,7 +208,7 @@ const GenericPreview = () => {
             fontWeight: "600"
         },
         ratingCount: {
-            textAlign: "right",
+            textAlign: "center",
             color: "#718096",
             minWidth: "40px",
             fontSize: "14px"
@@ -220,16 +222,16 @@ const GenericPreview = () => {
             width: isWideScreen ? "auto" : "100%"
         },
         writeReviewButton: {
-            backgroundColor: "#4f46e5",
+            backgroundColor: "#000000",
             color: "white",
             border: "none",
-            borderRadius: "8px",
-            padding: "14px 28px",
+            borderRadius: "50px",
+            padding: "5px 25px",
             fontSize: "15px",
             fontWeight: 600,
             cursor: "pointer",
             transition: "all 0.2s",
-            boxShadow: "0 4px 12px rgba(79, 70, 229, 0.2)"
+            boxShadow: "0 4px 12px rgba(0, 0, 0, 0.2)"
         },
         verifiedBadge: {
             display: "inline-flex",
@@ -267,7 +269,7 @@ const GenericPreview = () => {
                 <div style={styles.overallRating}>
                     <div style={styles.stars}>★★★★★</div>
                     <div style={styles.ratingNumber}>5</div>
-                    <div style={styles.reviewCount}>from 834 reviews</div>
+                    <div style={styles.reviewCount}>From 834 reviews</div>
                 </div>
 
                 <div style={styles.ratingBreakdown}>
@@ -278,22 +280,22 @@ const GenericPreview = () => {
                     </div>
 
                     <div style={styles.ratingBar}>
-                        <div style={styles.ratingLabelStar}>4 ★★★★</div>
+                        <div style={styles.ratingLabelStar}>4 ★★★★☆</div>
                         <div style={styles.ratingCount}>12</div>
                     </div>
 
                     <div style={styles.ratingBar}>
-                        <div style={styles.ratingLabelStar}>3 ★★★</div>
+                        <div style={styles.ratingLabelStar}>3 ★★★☆☆</div>
                         <div style={styles.ratingCount}>5</div>
                     </div>
 
                     <div style={styles.ratingBar}>
-                        <div style={styles.ratingLabelStar}>2 ★★</div>
+                        <div style={styles.ratingLabelStar}>2 ★★☆☆☆</div>
                         <div style={styles.ratingCount}>2</div>
                     </div>
 
                     <div style={styles.ratingBar}>
-                        <div style={styles.ratingLabelStar}>1 ★</div>
+                        <div style={styles.ratingLabelStar}>1 ★☆☆☆☆</div>
                         <div style={styles.ratingCount}>3</div>
                     </div>
 

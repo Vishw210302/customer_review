@@ -399,12 +399,14 @@ function ReviewsManager() {
       <Frame>
         <Page fullWidth title="Reviews Management Dashboard">
           <Card>
+            <div className="custom-tabs-wrapper" style={{ width: '50%', margin: '0 auto' }}>
             <Tabs
               tabs={tabs}
               selected={selectedTab}
               onSelect={handleTabChange}
               fitted
             />
+             </div>
             <LegacyStack vertical>
               {selectedTab === 0 && (
                 <ProductReview
@@ -433,6 +435,7 @@ function ReviewsManager() {
                 />
               )}
             </LegacyStack>
+           
           </Card>
 
           {toast.active && (
@@ -442,6 +445,19 @@ function ReviewsManager() {
               onDismiss={toggleToast}
             />
           )}
+           {/* Inline style block */}
+        <style>
+          {`
+            .custom-tabs-wrapper .Polaris-Tabs__Tab:not(.Polaris-Tabs__Tab--selected) {
+              border: 1px solid #dcdcdc;
+              border-radius: 8px;
+            }
+
+            .custom-tabs-wrapper .Polaris-Tabs__Tab:not(.Polaris-Tabs__Tab--selected):hover {
+              background-color: #f9f9f9;
+            }
+          `}
+        </style>
         </Page>
       </Frame>
     </AppProvider>

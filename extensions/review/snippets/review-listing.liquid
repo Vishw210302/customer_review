@@ -1,448 +1,199 @@
-{% assign product_id = product.id %}
-{% assign shop_name = shop.metafields.shopName.shopName %}
+<!-- Slick Slider CSS -->
+<link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/slick-carousel@1.8.1/slick/slick.css"/>
+<link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/slick-carousel@1.8.1/slick/slick-theme.css"/>
 
-<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dynamic Review Slider</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css">
-    <style>
-      :root {
-        --review-primary-color: #333333;
-        --review-accent-color: #ff9d2d;
-        --review-background-color: #ffffff;
-        --review-text-color: #555555;
-        --review-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
-      }
+<style>
+  .review-slider-container {
+    padding: 30px 10px;
+    position: relative;
+    max-width: 1200px;
+    margin: auto;
+  }
+.review-header-main{
+    padding-bottom: 30px;
+}
+  .review-card {
+    background-color: white;
+    border-radius: 18px;
+        padding: 25px;
+    text-align: center;
+    transform 0.3s ease, box-shadow 0.3s ease;
+    opacity: 0.6;
+    transform: scale(0.85);
+  }
 
-      body {
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        margin: 0;
-        padding: 0;
-        background-color: #f9f9f9;
-      }
+  .slick-center .review-card {
+    transform: scale(1);
+    opacity: 1;
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+    z-index: 2;
+  }
 
-      .review-header-main {
-        text-align: center;
-      }
+  .review-author {
+    font-size: 21px;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 10px;
+  }
 
-      .review-header h2 {
-        font-size: 24px;
-        color: var(--review-primary-color);
-        margin-bottom: 10px;
-      }
+  .review-text {
+    font-style: italic;
+    color: #555;
+    font-size: 15px;
+    line-height: 1.6;
+    margin-bottom: 20px;
+  }
 
-      .review-header p {
-        font-size: 21px;
-        color: var(--review-text-color);
-        max-width: 700px;
-        margin: 0 auto;
-      }
+  .review-rating {
+    color: #ff9d2d;
+    font-size: 21px;
+    letter-spacing: 2px;
+  }
 
-      .review-swiper {
-        padding: 30px 10px;
-      }
+  /* Arrows */
+  .slick-prev, .slick-next {
+    width: 45px;
+    height: 45px;
+    background-color: white;
+    border-radius: 50%;
+   
+    z-index: 5;
+  }
 
-      .swiper-slide {
-        opacity: 0.7;
-        transform: scale(0.85);
-        transition: all 0.4s ease;
-        height: auto;
-      }
+  .slick-prev:before, .slick-next:before {
+    color:rgb(0, 0, 0);
+    font-size: 25px;
+  }
 
-      .swiper-slide-active {
-        opacity: 1;
-        transform: scale(1);
-      }
+  .slick-prev:hover, .slick-next:hover {
+    background-color:rgb(0, 0, 0);
+  }
 
-      .review-card {
-        background-color: var(--review-background-color);
-        border-radius: 18px;
-        box-shadow: var(--review-shadow);
-        transition: all 0.3s ease;
-        height: 100%;
-        display: flex;
-        flex-direction: column;
-      }
+  .slick-prev:hover:before, .slick-next:hover:before {
+    color: white;
+  }
 
-      .review-card:hover {
-        transform: translateY(-10px);
-        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
-      }
+  /* Dots */
+  .slick-dots {
+    margin-top: 20px;
+  }
 
-      .review-card-inner {
-        cursor: pointer;
-        padding: 35px 25px;
-        text-align: center;
-        height: 100%;
-        justify-content: space-between;
-      }
+  .slick-dots li button:before {
+    font-size: 10px;
+    color: #ff9d2d;
+    opacity: 0.3;
+  }
 
-      .review-icon {
-        color: var(--review-accent-color);
-        width: 45px;
-        height: 45px;
-        margin: 0 auto 20px;
-      }
+  .slick-dots li.slick-active button:before {
+    opacity: 1;
+    color: #ff9d2d;
+    font-size: 12px;
+  }
 
-      .review-icon svg {
-        width: 100%;
-        height: 100%;
-      }
+  /* Responsive */
+  @media (max-width: 768px) {
+    .review-card {
+      padding: 20px;
+    }
+  }
+</style>
 
-      .review-author {
-        font-size: 21px;
-        font-weight: 600;
-        margin-bottom: 8px;
-        color: var(--review-primary-color);
-      }
+<div class="review-slider-container">
+  <div class="review-header-main" id="review-header">
+    <h1 style="margin: 0; text-align:center;">What Our Customers Say</h1>
+    <p style="margin: 0; text-align:center;">Discover why our customers love our products and services</p>
+  </div>
 
-      .review-text {
-        font-style: italic;
-        color: var(--review-text-color);
-        margin-bottom: 20px;
-        font-size: 15px;
-        line-height: 1.6;
-        flex-grow: 1;
-      }
-
-      .review-rating {
-        color: var(--review-accent-color);
-        font-size: 21px;
-        letter-spacing: 3px;
-      }
-
-      .swiper-button-next,
-      .swiper-button-prev {
-        color: var(--review-accent-color) !important;
-        background-color: white;
-        width: 50px;
-        height: 50px;
-        border-radius: 50%;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-        top: 50%;
-        transform: translateY(-50%);
-      }
-
-      .swiper-button-next:after,
-      .swiper-button-prev:after {
-        font-size: 20px;
-        font-weight: bold;
-      }
-
-      .swiper-button-next:hover,
-      .swiper-button-prev:hover {
-        background-color: var(--review-accent-color);
-        color: white !important;
-      }
-
-      .swiper-pagination {
-        position: relative;
-        margin-top: 30px;
-      }
-
-      .swiper-pagination-bullet {
-        background-color: var(--review-accent-color);
-        opacity: 0.3;
-        width: 10px;
-        height: 10px;
-        margin: 0 6px;
-      }
-
-      .swiper-pagination-bullet-active {
-        opacity: 1;
-        width: 25px;
-        border-radius: 5px;
-      }
-
-      .error-message p {
-        font-size: 21px;
-        margin-bottom: 15px;
-      }
-
-      .retry-button {
-        background-color: var(--review-accent-color);
-        color: white;
-        border: none;
-        padding: 12px 25px;
-        border-radius: 8px;
-        cursor: pointer;
-        font-size: 1rem;
-        font-weight: 600;
-        transition: all 0.2s ease;
-      }
-
-      .retry-button:hover {
-        background-color: #e95858;
-        transform: translateY(-3px);
-        box-shadow: 0 5px 15px rgba(255, 107, 107, 0.3);
-      }
-
-      .loading-spinner {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        height: 200px;
-      }
-
-      .spinner {
-        width: 50px;
-        height: 50px;
-        border: 5px solid rgba(255, 107, 107, 0.2);
-        border-top-color: var(--review-accent-color);
-        border-radius: 50%;
-        animation: spin 1s linear infinite;
-      }
-
-      .hidden {
-        display: none !important;
-      }
-
-      @keyframes spin {
-        to {
-          transform: rotate(360deg);
-        }
-      }
-
-      @media (max-width: 991px) {
-        .swiper-slide {
-          transform: scale(0.9);
-        }
-      }
-
-      @media (max-width: 768px) {
-        .review-swiper {
-          padding: 20px 5px;
-        }
-
-        .review-card-inner {
-          cursor: pointer;
-          padding: 25px 20px;
-        }
-
-        .review-header h2 {
-          font-size: 21px;
-        }
-
-        .swiper-button-next,
-        .swiper-button-prev {
-          display: none !important;
-        }
-      }
-
-      @media (max-width: 576px) {
-        .review-text {
-          font-size: 1rem;
-        }
-
-        .review-author {
-          font-size: 1.1rem;
-        }
-      }
-    </style>
-  </head>
-  <body>
-    <div class="review-slider-container">
-      <div class="review-header-main" id="review-header">
-        <h1 style="margin: 0;">What Our Customers Say</h1>
-        <p style="margin: 0;">Discover why our customers love our products and services</p>
-      </div>
-      <div class="swiper review-swiper" id="review-swiper">
-        <div id="dynamic-reviews" class="swiper-wrapper">
-          <div class="swiper-slide">
-            <div class="loading-spinner">
-              <div class="spinner"></div>
-            </div>
-          </div>
-        </div>
-        <div class="swiper-pagination"></div>
-        <div class="swiper-button-next"></div>
-        <div class="swiper-button-prev"></div>
+  <div class="review-slider" id="dynamic-reviews">
+    <div>
+      <div class="loading-spinner">
+        <div class="spinner"></div>
       </div>
     </div>
+  </div>
+</div>
 
-    <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js" defer></script>
-    <script>
-      document.addEventListener('DOMContentLoaded', function () {
-        const API_ENDPOINT = `https://checklist.codecrewinfotech.com/api/getReview/{{ shop_name }}/{{ product_id }}`;
-        let swiperInstance = null;
-        let currentRetry = 0;
+<!-- Slick Slider JS -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js" defer></script>
+<script src="https://cdn.jsdelivr.net/npm/slick-carousel@1.8.1/slick/slick.min.js" defer></script>
 
-        const reviewHeader = document.getElementById('review-header');
-        const reviewSwiper = document.getElementById('review-swiper');
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+   const API_ENDPOINT = "https://checklist.codecrewinfotech.com/api/getReview/{{ shop.metafields.shopName.shopName }}/{{ product.id }}";
 
-        initializeSwiper();
-        fetchReviews();
+    const dynamicReviewsContainer = document.getElementById('dynamic-reviews');
+    const reviewHeader = document.getElementById('review-header');
 
-        async function fetchReviews() {
-          try {
-            const response = await fetch(API_ENDPOINT, {
-              method: 'GET',
-              headers: { 'ngrok-skip-browser-warning': true },
-            });
+    fetchReviews();
 
-            if (!response.ok) {
-              throw new Error(`HTTP error! status: ${response.status}`);
-            }
+    async function fetchReviews() {
+      try {
+        const response = await fetch(API_ENDPOINT, {
+          method: 'GET',
+          headers: { 'ngrok-skip-browser-warning': true },
+        });
 
-            const reviews = await response.json();
+        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
 
-            if (!reviews || !reviews.reviews || reviews.reviews.length === 0) {
-              if (reviewHeader) reviewHeader.classList.add('hidden');
-              if (reviewSwiper) reviewSwiper.classList.add('hidden');
-              return;
-            }
+        const reviews = await response.json();
 
-            if (reviewHeader) reviewHeader.classList.remove('hidden');
-            if (reviewSwiper) reviewSwiper.classList.remove('hidden');
-
-            renderReviews(reviews);
-          } catch (error) {
-            console.error('Error fetching reviews:', error);
-            currentRetry++;
-
-            if (reviewHeader) reviewHeader.classList.add('hidden');
-            if (reviewSwiper) reviewSwiper.classList.add('hidden');
-          }
+        if (!reviews || !reviews.reviews || reviews.reviews.length === 0) {
+          reviewHeader?.classList.add('hidden');
+          dynamicReviewsContainer?.classList.add('hidden');
+          return;
         }
 
-        function displayError(message, isRetryPossible) {
-          const dynamicReviewsContainer = document.getElementById('dynamic-reviews');
-          dynamicReviewsContainer.innerHTML = '';
+        reviewHeader?.classList.remove('hidden');
+        dynamicReviewsContainer?.classList.remove('hidden');
 
-          const errorSlide = document.createElement('div');
-          errorSlide.classList.add('swiper-slide');
+        renderReviews(reviews.reviews);
+      } catch (error) {
+        console.error('Error fetching reviews:', error);
+        dynamicReviewsContainer.innerHTML = '<p>Error loading reviews</p>';
+      }
+    }
 
-          errorSlide.innerHTML = `
-              <div class="error-message">
-                  <p>${message}</p>
-              </div>
-            `;
+    function renderReviews(reviews) {
+      dynamicReviewsContainer.innerHTML = '';
 
-          dynamicReviewsContainer.appendChild(errorSlide);
+      reviews.forEach((review) => {
+        const reviewEl = document.createElement('div');
+        const stars = '★'.repeat(review.rating || 0) + '☆'.repeat(5 - (review.rating || 0));
 
-          if (swiperInstance) {
-            swiperInstance.destroy();
-          }
+        reviewEl.innerHTML = `
+          <div class="review-card">
+            <h3 class="review-author">${review.name || 'Anonymous'}</h3>
+            <div class="review-rating">${stars}</div>
+            <p class="review-text">${review.reviewText || 'No comment provided'}</p>
+          </div>
+        `;
 
-          initializeSwiper();
-
-          const retryBtn = document.getElementById('retry-btn');
-          if (retryBtn) {
-            retryBtn.addEventListener('click', function () {
-              currentRetry = 0;
-              dynamicReviewsContainer.innerHTML = `
-                  <div class="swiper-slide">
-                    <div class="loading-spinner">
-                      <div class="spinner"></div>
-                    </div>
-                  </div>
-                `;
-              fetchReviews();
-            });
-          }
-        }
-
-        function renderReviews(reviews) {
-          const dynamicReviewsContainer = document.getElementById('dynamic-reviews');
-          if (!dynamicReviewsContainer) return;
-
-          dynamicReviewsContainer.innerHTML = '';
-
-          reviews.reviews.forEach((review) => {
-            const slideElement = document.createElement('div');
-            slideElement.classList.add('swiper-slide');
-
-            const stars = '★'.repeat(review.rating || 0) + '☆'.repeat(5 - (review.rating || 0));
-
-            slideElement.innerHTML = `
-                <div class="review-card">
-                  <div class="review-card-inner">
-                    <div>
-                      <h3 class="review-author">${review.name || 'Anonymous'}</h3>
-                      <div class="review-rating">${stars}</div>
-                    </div>
-                    <div>
-                      <p class="review-text">${review.reviewText || 'No comment provided'}</p>
-                    </div>
-                  </div>
-                </div>
-              `;
-
-            dynamicReviewsContainer.appendChild(slideElement);
-          });
-
-          if (swiperInstance) {
-            swiperInstance.destroy();
-          }
-
-          initializeSwiper();
-        }
-
-        function initializeSwiper() {
-          if (swiperInstance) {
-            swiperInstance.destroy();
-            swiperInstance = null;
-          }
-
-          swiperInstance = new Swiper('.review-swiper', {
-            slidesPerView: 1,
-            spaceBetween: 30,
-            centeredSlides: true,
-            loop: true,
-            autoplay: {
-              delay: 5000,
-              disableOnInteraction: false,
-            },
-            effect: 'coverflow',
-            coverflowEffect: {
-              rotate: 0,
-              stretch: 0,
-              depth: 100,
-              modifier: 1,
-              slideShadows: false,
-            },
-            pagination: {
-              el: '.swiper-pagination',
-              clickable: true,
-              dynamicBullets: true,
-            },
-            navigation: {
-              nextEl: '.swiper-button-next',
-              prevEl: '.swiper-button-prev',
-            },
-            breakpoints: {
-              640: {
-                slidesPerView: 1,
-                spaceBetween: 20,
-              },
-              768: {
-                slidesPerView: 2,
-                spaceBetween: 30,
-              },
-              1024: {
-                slidesPerView: 3,
-                spaceBetween: 40,
-              },
-            },
-            on: {
-              init: function () {
-                setTimeout(() => {
-                  this.update();
-                }, 100);
-              },
-            },
-          });
-
-          window.addEventListener('resize', function () {
-            if (swiperInstance) {
-              swiperInstance.update();
-            }
-          });
-        }
+        dynamicReviewsContainer.appendChild(reviewEl);
       });
-    </script>
-  </body>
-</html>
+
+      $(dynamicReviewsContainer).slick({
+        slidesToShow: 3,
+        centerMode: true,
+        centerPadding: '0px',
+        autoplay: false,
+        
+        arrows: true,
+        dots: true,
+        responsive: [
+          {
+            breakpoint: 1024,
+            settings: {
+              slidesToShow: 2
+            }
+          },
+          {
+            breakpoint: 768,
+            settings: {
+              slidesToShow: 1
+            }
+          }
+        ]
+      });
+    }
+  });
+</script>

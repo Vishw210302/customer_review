@@ -1,12 +1,14 @@
+{% comment %} backup of store review listing {% endcomment %}
+
 {% assign shop_name = shop.metafields.shopName.shopName %}
 
 <style>
-  .container {
+  {% comment %} .container {
     max-width: 1200px;
     margin: 0 auto;
     padding: 20px;
     position: relative;
-  }
+  } {% endcomment %}
 
   .store-rating {
     width: 3%;
@@ -15,8 +17,9 @@
     top: 50%;
     transform: translateY(-50%);
     background-color: #fff;
-    padding: 15px;
-    border-radius: 8px;
+    padding: 16px 8px;
+    border-top-left-radius: 8px;
+    border-bottom-left-radius: 8px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
     z-index: 100;
     cursor: pointer;
@@ -24,8 +27,7 @@
   }
 
   .store-rating:hover {
-    transform: translateY(-50%) scale(1.05);
-    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
   }
 
   .average-store-rating {
@@ -48,7 +50,7 @@
 
   .store-stars {
     color: #ff9d2d;
-    font-size: 24px;
+    font-size: 20px;
   }
 
   .review-store-modal {
@@ -143,7 +145,7 @@
     display: block;
     width: 100%;
     padding: 16px;
-    background-color: #4a90e2;
+    background-color: #000000;
     color: white;
     border: none;
     border-radius: 12px;
@@ -156,9 +158,10 @@
   }
 
   .review-add-store-review-btn:hover {
-    background-color: #3a80d2;
-    box-shadow: 0 8px 15px rgba(74, 144, 226, 0.3);
-    transform: translateY(-3px);
+    background-color: #ffffff;
+    border:1px solid #000000;
+    color: #000000;
+   
   }
 
   .review-store-form {
@@ -346,15 +349,19 @@
     position: relative;
   }
 
-  .input-highlight {
+  {% comment %} .input-highlight {
     position: absolute;
     bottom: 0;
     left: 0;
     height: 2px;
     width: 0;
-    background-color: #4a90e2;
+    {% comment %} background-color: #4a90e2; {% endcomment %}
     transition: width 0.3s ease;
-  }
+  } {% endcomment %}
+  .input-highlight {
+  background-color: transparent !important;
+}
+
 
   .review-form-store-group input:focus + .input-highlight,
   .review-form-store-group textarea:focus + .input-highlight {
@@ -362,8 +369,8 @@
   }
 
   .progress-bar {
-    height: 100%;
-    background-color: #4a90e2;
+    height: 6px ;
+    background-color: #f59e0b;
     width: 0%;
     transition: width 0.3s ease;
   }
@@ -383,6 +390,7 @@
     color: #ff3860;
     font-size: 12px;
     margin-top: 5px;
+    display:none;
   }
 
   @keyframes checkmarkDraw {
@@ -575,8 +583,7 @@
   }
 
   .card-store-review:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+       box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
   }
 
   .review-container {
@@ -598,17 +605,17 @@
     color: #333;
     margin-bottom: 2px;
     font-size: 14px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    max-width: 250px;
+    word-break: break-word;
+    white-space: normal;
   }
 
   .reviewer-email {
     font-size: 13px;
     color: #888;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+   max-width: 250px;
+    word-break: break-word;
+    white-space: normal;
   }
 
   .review-rating {
@@ -625,6 +632,9 @@
     font-size: 15px;
     margin-bottom: 6px;
     color: #333;
+    max-width: 250px;
+    word-break: break-word;
+    white-space: normal;
   }
 
   .review-message {
@@ -632,19 +642,22 @@
     font-size: 13px;
     line-height: 1.5;
     margin-bottom: 10px;
-    display: -webkit-box;
+   
     -webkit-line-clamp: 3;
     -webkit-box-orient: vertical;
     overflow: hidden;
+    max-width: 250px;
+    word-break: break-word;
+    white-space: normal;
   }
 
   .review-images {
     display: flex;
-    overflow-x: auto;
+    {% comment %} overflow-x: auto; {% endcomment %}
     gap: 8px;
     padding: 10px 15px;
     -ms-overflow-style: none;
-    scrollbar-width: thin;
+    {% comment %} scrollbar-width: thin; {% endcomment %}
     cursor: pointer;
   }
 
@@ -663,8 +676,7 @@
 
   .review-footer {
     padding: 8px 15px;
-    background-color: #f8f9fa;
-    border-top: 1px solid #eee;
+    
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -728,7 +740,7 @@
 
   .current-page {
     font-weight: bold;
-    color: #007bff;
+    color: #000000;
     font-size: 16px;
   }
 
@@ -793,9 +805,9 @@
     <button class="review-add-store-review-btn" id="addReviewBtn">Share Your Experience</button>
 
     <div class="review-store-form" id="reviewForm">
-      <div class="form-progress">
+      {% comment %} <div class="form-progress">
         <div class="progress-bar" id="formProgress"></div>
-      </div>
+      </div> {% endcomment %}
 
       <div class="review-user-rating">
         <div class="emoji-rating-container">
@@ -1351,9 +1363,9 @@
     }
 
     const averageRatingDisplay = document.createElement('div');
-    document.querySelector('.review-modal-store-description').textContent = `average ${data.averageRating.toFixed(
+    document.querySelector('.review-modal-store-description').textContent = `Average ${data.averageRating.toFixed(
       1
-    )} Based on ${data.totalReviews} Rating verified reviews`;
+    )} Based on ${data.totalReviews} Rating Verified Reviews`;
 
     const storeRatingLabel = document.querySelector('.review-rating-store-label');
     if (storeRatingLabel) {

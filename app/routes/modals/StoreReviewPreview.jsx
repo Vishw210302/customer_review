@@ -6,7 +6,7 @@ function StoreReviewPreview() {
     const styles = {
         container: {
             width: '100%',
-            maxWidth: '28rem',
+            // maxWidth: '28rem',
             margin: '0 auto',
             backgroundColor: 'white',
             boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)',
@@ -44,11 +44,12 @@ function StoreReviewPreview() {
             marginTop: '0.25rem'
         },
         writeReviewButton: {
-            backgroundColor: '#2563EB',
+            backgroundColor: '#000000',
             color: 'white',
             padding: '0.625rem 1.25rem',
-            borderRadius: '0.5rem',
-            boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
+            borderRadius: '50px',
+            boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
+            border:'none'
         },
         reviewSection: {
             padding: '1.25rem'
@@ -85,6 +86,13 @@ function StoreReviewPreview() {
             WebkitBoxOrient: 'vertical',
             overflow: 'hidden'
         },
+          stars: {
+            color: "#f59e0b",
+            fontSize: "28px",
+            letterSpacing: "3px",
+              display: 'inline-block',
+              padding: "10px 0"
+        },
     };
 
     const reviews = [
@@ -98,18 +106,18 @@ function StoreReviewPreview() {
         },
     ];
 
-    const renderStars = (rating) => {
-        return Array.from({ length: 5 }).map((_, index) => (
-            <Star
-                key={index}
-                style={{
-                    display: 'inline-block',
-                    color: index < rating ? '#FFC107' : '#D1D5DB',
-                    fill: index < rating ? '#FFC107' : 'none'
-                }}
-            />
-        ));
-    };
+    // const renderStars = (rating) => {
+    //     return Array.from({ length: 5 }).map((_, index) => (
+    //         <Star
+    //             key={index}
+    //             style={{
+    //                 display: 'inline-block',
+    //                 color: index < rating ? '#FFC107' : '#D1D5DB',
+    //                 fill: index < rating ? '#FFC107' : 'none'
+    //             }}
+    //         />
+    //     ));
+    // };
 
     return (
         <div style={styles.container}>
@@ -118,7 +126,9 @@ function StoreReviewPreview() {
                     <div>
                         <h2 style={styles.headerTitle}>Store Rating</h2>
                         <div style={styles.starContainer}>
-                            {renderStars(4)}
+                            
+                             <div style={styles.stars}>★★★★☆</div>
+                    
                             <span style={styles.starSubtext}>(3.5)</span>
                         </div>
                         <p style={styles.reviewCountText}>Based on 458 verified reviews</p>
@@ -141,7 +151,8 @@ function StoreReviewPreview() {
                         <div style={styles.reviewHeader}>
                             <div style={{ display: 'flex', alignItems: 'center' }}>
                                 <h4 style={styles.reviewName}>{review.name}</h4>
-                                {renderStars(review.rating)}
+                               
+                                 <div style={styles.stars}>★★★★☆</div>
                             </div>
                             <span style={styles.reviewDate}>{review.date}</span>
                         </div>

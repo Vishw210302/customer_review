@@ -231,10 +231,10 @@ const ThemeStatus = () => {
   };
 
   const buttonStyle = {
-    backgroundColor: "#2c3e50",
+    backgroundColor: "#000000",
     color: "white",
     border: "none",
-    borderRadius: "6px",
+    borderRadius: "50px",
     padding: "8px 16px",
     fontSize: "14px",
     fontWeight: "500",
@@ -244,15 +244,58 @@ const ThemeStatus = () => {
     display: "inline-block",
     textAlign: "center",
   };
-
+const titleStyle = {
+  marginBottom: "30px"
+};
   return (
     <Page fullWidth>
       <Card sectioned>
+        <div style={titleStyle}>
         <Text variant="headingLg" as="h5">
           Widget Gallery
         </Text>
-
+        </div>
         <Grid columns={{ xs: 1, sm: 2, md: 2, lg: 2, xl: 2 }} gap="4">
+           <Grid.Cell>
+            <div style={cardStyle}>
+              <Card>
+                <div style={cardContentStyle}>
+                  <div style={{ flex: 1 }}>
+                    <GenericPreview />
+                  </div>
+                  <div style={buttonContainerStyle}>
+                    <a
+                      target="_blank"
+                      href={`https://${session?.shop}/admin/themes/${themeId}/editor?template=product&addAppBlockId=${blockId}/custom-block&target=section`}
+                      style={buttonStyle}
+                    >
+                      Install Widget
+                    </a>
+                  </div>
+                </div>
+              </Card>
+            </div>
+          </Grid.Cell>
+          <Grid.Cell>
+            <div style={cardStyle}>
+              <Card>
+                <div style={cardContentStyle}>
+                  <div style={{ flex: 1 }}>
+                    <StoreReviewPreview />
+                  </div>
+                  <div style={buttonContainerStyle}>
+                    <a
+                      target="_blank"
+                      href={`https://${session?.shop}/admin/themes/${themeId}/editor?template=product&addAppBlockId=${blockId}/store-review&target=body`}
+                      style={buttonStyle}
+                    >
+                      Install Widget
+                    </a>
+                  </div>
+                </div>
+              </Card>
+            </div>
+          </Grid.Cell>
           <Grid.Cell>
             <div style={cardStyle}>
               <Card>
@@ -274,47 +317,9 @@ const ThemeStatus = () => {
             </div>
           </Grid.Cell>
 
-          <Grid.Cell>
-            <div style={cardStyle}>
-              <Card>
-                <div style={cardContentStyle}>
-                  <div style={{ flex: 1 }}>
-                    <GenericPreview />
-                  </div>
-                  <div style={buttonContainerStyle}>
-                    <a
-                      target="_blank"
-                      href={`https://${session?.shop}/admin/themes/${themeId}/editor?template=product&addAppBlockId=${blockId}/custom-block&target=section`}
-                      style={buttonStyle}
-                    >
-                      Install Widget
-                    </a>
-                  </div>
-                </div>
-              </Card>
-            </div>
-          </Grid.Cell>
+         
 
-          <Grid.Cell>
-            <div style={cardStyle}>
-              <Card>
-                <div style={cardContentStyle}>
-                  <div style={{ flex: 1 }}>
-                    <StoreReviewPreview />
-                  </div>
-                  <div style={buttonContainerStyle}>
-                    <a
-                      target="_blank"
-                      href={`https://${session?.shop}/admin/themes/${themeId}/editor?template=product&addAppBlockId=${blockId}/store-review&target=body`}
-                      style={buttonStyle}
-                    >
-                      Install Widget
-                    </a>
-                  </div>
-                </div>
-              </Card>
-            </div>
-          </Grid.Cell>
+          
         </Grid>
       </Card>
     </Page>
