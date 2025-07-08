@@ -1,6 +1,5 @@
 import { useLoaderData, useNavigation } from "@remix-run/react";
 import { Spinner } from "@shopify/polaris";
-import React from "react";
 import { authenticate } from "../shopify.server";
 import CardsOfDashboard from "./app.CardsOfDashboard";
 
@@ -113,78 +112,16 @@ const MainDashboard = () => {
     );
   }
 
-  const headerStyles = {
-    container: {
-      padding: "24px 32px",
-      backgroundColor: "white",
-      boxShadow:
-        "0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)",
-    },
-    title: {
-      fontSize: "24px",
-      fontWeight: "700",
-      margin: "0 0 8px 0",
-    },
-    subtitle: {
-      fontSize: "16px",
-      color: "#6B7280",
-      margin: "0 0 16px 0",
-    },
-    actions: {
-      display: "flex",
-      justifyContent: "space-between",
-      alignItems: "center",
-    },
-    button: {
-      backgroundColor: "#2563EB",
-      color: "white",
-      border: "none",
-      padding: "8px 16px",
-      borderRadius: "4px",
-      fontWeight: "500",
-      cursor: "pointer",
-      marginRight: "8px",
-    },
-    secondaryButton: {
-      backgroundColor: "white",
-      color: "#4B5563",
-      border: "1px solid #D1D5DB",
-      padding: "8px 16px",
-      borderRadius: "4px",
-      fontWeight: "500",
-      cursor: "pointer",
-    },
-  };
-
   const layoutStyles = {
     container: {
       padding: "32px",
       backgroundColor: "#F3F4F6",
       minHeight: "calc(100vh - 76px)",
     },
-    row: {
-      display: "flex",
-      flexWrap: "wrap",
-      margin: "0 -12px",
-    },
-    column: {
-      padding: "0 12px",
-      marginBottom: "24px",
-    },
-    full: {
-      width: "100%",
-    },
   };
 
   return (
     <div>
-      <div style={headerStyles.container}>
-        <h1 style={headerStyles.title}>Reviews Dashboard</h1>
-        <p style={headerStyles.subtitle}>
-          Monitor and manage customer feedback
-        </p>
-      </div>
-
       <div style={layoutStyles.container}>
         <CardsOfDashboard data={data} storeReviewData={storeReviewData} />
       </div>
