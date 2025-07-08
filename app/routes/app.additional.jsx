@@ -1,6 +1,6 @@
 import { json } from "@remix-run/node";
 import { useLoaderData, useNavigation } from "@remix-run/react";
-import { Card, Grid, Page, Spinner, Text } from "@shopify/polaris";
+import { Card, Grid, Page, Spinner, Text, Tabs } from "@shopify/polaris";
 import React, { useEffect, useState } from "react";
 import { authenticate } from "../shopify.server";
 import GenericPreview from "./modals/GenericPreview";
@@ -145,6 +145,7 @@ const ThemeStatus = () => {
   const [selectedTheme, setSelectedTheme] = useState(null);
   const navigate = useNavigation();
   const isPageLoading = navigate.state === "loading";
+const [selectedTab, setSelectedTab] = useState(0);
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -249,80 +250,81 @@ const titleStyle = {
 };
   return (
     <Page fullWidth>
-      <Card sectioned>
-        <div style={titleStyle}>
-        <Text variant="headingLg" as="h5">
-          Widget Gallery
-        </Text>
-        </div>
-        <Grid columns={{ xs: 1, sm: 2, md: 2, lg: 2, xl: 2 }} gap="4">
-           <Grid.Cell>
-            <div style={cardStyle}>
-              <Card>
-                <div style={cardContentStyle}>
-                  <div style={{ flex: 1 }}>
-                    <GenericPreview />
-                  </div>
-                  <div style={buttonContainerStyle}>
-                    <a
-                      target="_blank"
-                      href={`https://${session?.shop}/admin/themes/${themeId}/editor?template=product&addAppBlockId=${blockId}/custom-block&target=section`}
-                      style={buttonStyle}
-                    >
-                      Install Widget
-                    </a>
-                  </div>
-                </div>
-              </Card>
-            </div>
-          </Grid.Cell>
-          <Grid.Cell>
-            <div style={cardStyle}>
-              <Card>
-                <div style={cardContentStyle}>
-                  <div style={{ flex: 1 }}>
-                    <StoreReviewPreview />
-                  </div>
-                  <div style={buttonContainerStyle}>
-                    <a
-                      target="_blank"
-                      href={`https://${session?.shop}/admin/themes/${themeId}/editor?template=product&addAppBlockId=${blockId}/store-review&target=body`}
-                      style={buttonStyle}
-                    >
-                      Install Widget
-                    </a>
-                  </div>
-                </div>
-              </Card>
-            </div>
-          </Grid.Cell>
-          <Grid.Cell>
-            <div style={cardStyle}>
-              <Card>
-                <div style={cardContentStyle}>
-                  <div style={{ flex: 1 }}>
-                    <ProductRatingWidget />
-                  </div>
-                  <div style={buttonContainerStyle}>
-                    <a
-                      target="_blank"
-                      href={`https://${session?.shop}/admin/themes/${themeId}/editor?template=product&addAppBlockId=${blockId}/particular-product&target=mainSection`}
-                      style={buttonStyle}
-                    >
-                      Install Widget
-                    </a>
-                  </div>
-                </div>
-              </Card>
-            </div>
-          </Grid.Cell>
+  <Card sectioned>
+    <div style={titleStyle}>
+      <Text variant="headingLg" as="h5">
+        Widget Gallery
+      </Text>
+    </div>
 
-         
+    <Tabs
+      tabs={[
+        { id: "generic", content: "Generic Widget" },
+        { id: "store-review", content: "Store Review Widget" },
+        { id: "product-rating", content: "Product Rating Widget" },
+      ]}
+      selected={selectedTab}
+      onSelect={setSelectedTab}
+    >
+      <style jsx>{`
+  .Polaris-Tabs{
+        gap:15px;
+  }
+    .Polaris-Tabs__Tab:not(.Polaris-Tabs__Tab--selected) {
+  border-bottom: 2px solid #ccc;
+}
 
-          
-        </Grid>
-      </Card>
-    </Page>
+`}</style>
+      <div style={{ padding: "16px" }}>
+        {selectedTab === 0 && (
+          <>
+            <GenericPreview />
+            <div style={buttonContainerStyle}>
+              <a
+                target="_blank"
+                href={`https://${session?.shop}/admin/themes/${themeId}/editor?template=product&addAppBlockId=${blockId}/custom-block&target=section`}
+                style={buttonStyle}
+              >
+                Install Widget
+              </a>
+            </div>
+          </>
+        )}
+
+        {selectedTab === 1 && (
+          <>
+            <StoreReviewPreview />
+            <div style={buttonContainerStyle}>
+              <a
+                target="_blank"
+                href={`https://${session?.shop}/admin/themes/${themeId}/editor?template=product&addAppBlockId=${blockId}/store-review&target=body`}
+                style={buttonStyle}
+              >
+                Install Widget
+              </a>
+            </div>
+          </>
+        )}
+
+        {selectedTab === 2 && (
+          <>
+            <ProductRatingWidget />
+            <div style={buttonContainerStyle}>
+              <a
+                target="_blank"
+                href={`https://${session?.shop}/admin/themes/${themeId}/editor?template=product&addAppBlockId=${blockId}/particular-product&target=mainSection`}
+                style={buttonStyle}
+              >
+                Install Widget
+              </a>
+            </div>
+          </>
+        )}
+      </div>
+    </Tabs>
+  </Card>
+</Page>
+
   );
 };
 

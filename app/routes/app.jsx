@@ -4,7 +4,11 @@ import polarisStyles from "@shopify/polaris/build/esm/styles.css?url";
 import { AppProvider } from "@shopify/shopify-app-remix/react";
 import { boundary } from "@shopify/shopify-app-remix/server";
 import { authenticate } from "../shopify.server";
-import { Spinner } from "@shopify/polaris";
+import { Spinner ,  SkeletonPage,
+  Layout,
+  SkeletonBodyText,
+  SkeletonDisplayText,
+  Card} from "@shopify/polaris";
 
 export const links = () => [{ rel: "stylesheet", href: polarisStyles }];
 
@@ -15,26 +19,9 @@ export const loader = async ({ request }) => {
 };
 
 export default function App() {
-
   const { apiKey } = useLoaderData();
   const navigate = useNavigation();
   const isPageLoading = navigate.state === "loading";
-
-  if (isPageLoading) {
-    return (
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          background: "#e3e3e3",
-          height: "100vh",
-        }}
-      >
-        <Spinner accessibilityLabel="Loading widgets" size="large" />
-      </div>
-    );
-  }
 
   return (
     <AppProvider isEmbeddedApp apiKey={apiKey}>
@@ -46,10 +33,28 @@ export default function App() {
         <Link to="/app/crudeOperation">All Reviews</Link>
         <Link to="/app/additional">Widgets</Link>
       </NavMenu>
-      <Outlet />
+
+      {isPageLoading ? (
+        <SkeletonPage primaryAction>
+          <Layout>
+            <Layout.Section>
+              <Card sectioned>
+                <SkeletonDisplayText size="large" />
+                <SkeletonBodyText />
+              </Card>
+              <Card sectioned>
+                <SkeletonBodyText lines={3} />
+              </Card>
+            </Layout.Section>
+          </Layout>
+        </SkeletonPage>
+      ) : (
+        <Outlet />
+      )}
     </AppProvider>
   );
 }
+
 
 export function ErrorBoundary() {
   return boundary.error(useRouteError());

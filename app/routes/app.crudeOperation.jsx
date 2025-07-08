@@ -18,6 +18,7 @@ export async function loader({ request }) {
   const APIURL = process.env.API_URL;
   const url = new URL(request.url);
   const { session } = await authenticate.admin(request);
+  console.log("heyyy",session)
   const shopName = session.shop;
   const reviewType = url.searchParams.get("reviewType") || "product";
   const searchQuery = url.searchParams.get("searchQuery") || "";
@@ -28,6 +29,25 @@ export async function loader({ request }) {
   const page = parseInt(url.searchParams.get("page") || "1", 10);
   const limit = parseInt(url.searchParams.get("limit") || "10", 10);
   const isInitialLoad = url.searchParams.get("isInitialLoad") === "true";
+
+  // const { admin } = await authenticate.admin(request);
+
+// const response = await admin.graphql(
+//   `#graphql
+//   query ProductMetafields($ownerId: ID!) {
+//     product(id: $ownerId) {
+//   title
+//     }
+//   }`,
+//   {
+//     variables: {
+//       "ownerId": "gid://shopify/Product/6622581555298"
+//     },
+//   },
+// );
+
+// const data = await response.json();
+// console.log("tttt",data)
 
   var reviewsResponse = {
     success: false,
