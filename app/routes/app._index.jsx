@@ -210,7 +210,7 @@ const Index = () => {
   );
 
   const handleNavigateWidgetsPage = () => {
-    navigate("/app/additional");
+    navigate("/app/widgetGallery");
   };
 
   const appData = [

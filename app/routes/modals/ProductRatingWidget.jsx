@@ -25,7 +25,7 @@ const ProductRatingWidget = () => {
 
     return (
         <>
-            <div style={{ padding: '12px' }}>
+            <div style={{ padding: '12px', boxShadow: 'rgba(0, 0, 0, 0.1) 0px 10px 15px -3px' }}>
                 <div style={{
                     display: 'flex',
                     alignItems: 'center',
