@@ -30,8 +30,9 @@ export default function App() {
           Home
         </Link>
         <Link to="/app/mainDashboard">Dashboard</Link>
-        <Link to="/app/crudeOperation">All Reviews</Link>
-        <Link to="/app/additional">Widgets</Link>
+        <Link to="/app/manageReviews">All Reviews</Link>
+        <Link to="/app/widgetGallery">Widgets</Link>
+     
       </NavMenu>
 
       {isPageLoading ? (

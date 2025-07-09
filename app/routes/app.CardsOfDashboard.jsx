@@ -391,11 +391,11 @@ function CardsOfDashboard({ data, storeReviewData }) {
   );
 
   const handleNavigateProductReviewCard = () => {
-    navigate("/app/crudeOperation");
+    navigate("/app/manageReviews");
   };
 
   const handleNavigateStoreReviewPage = () => {
-    navigate("/app/crudeOperation");
+    navigate("/app/manageReviews");
   };
 
   const handleClearFilters = () => {

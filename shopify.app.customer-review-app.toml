@@ -3,7 +3,7 @@
 client_id = "c29a652fd037af8072820aafaddedf78"
 name = "customer-review-app"
 handle = "customer-review-app-5"
-application_url = "https://private-sites-den-announcement.trycloudflare.com"
+application_url = "https://instances-brazilian-premier-ministry.trycloudflare.com"
 embedded = true
 
 [build]
@@ -18,7 +18,7 @@ api_version = "2025-04"
 scopes = "read_themes,write_products,read_products"
 
 [auth]
-redirect_urls = ["https://private-sites-den-announcement.trycloudflare.com/auth/callback", "https://private-sites-den-announcement.trycloudflare.com/auth/shopify/callback", "https://private-sites-den-announcement.trycloudflare.com/api/auth/callback"]
+redirect_urls = ["https://instances-brazilian-premier-ministry.trycloudflare.com/auth/callback", "https://instances-brazilian-premier-ministry.trycloudflare.com/auth/shopify/callback", "https://instances-brazilian-premier-ministry.trycloudflare.com/api/auth/callback"]
 
 [pos]
 embedded = false
