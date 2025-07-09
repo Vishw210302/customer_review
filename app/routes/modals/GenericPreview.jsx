@@ -1,37 +1,64 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { Settings, Star, Type, Palette, Layout, Timer, Users, Eye } from 'lucide-react';
 
 const ReviewWidgetSettings = () => {
+  const [activeTab, setActiveTab] = useState('general');
   const [settings, setSettings] = useState({
-    // Text settings
-    widgetTitle: 'Customer Reviews',
-    widgetSubTitle: 'See what our customers are saying about us',
-        writeButtonText: 'Write a Review',
-    cancelButtonText: 'Cancel review',
-    headerWithReviews: 'Based on {{ number_of_reviews }} review/reviews',
-    headerNoReviews: 'Be the first to write a review',
+    title: "Customer Reviews",
+    subtitle: "See what our customers are saying about us",
+    primaryColor: "#f59e0b",
     
-    // Colors
-    primaryColor: '#108474',
-    starColor: '#f59e0b',
+   
+    showRatingBreakdown: true,
+    showWriteReviewButton: true,
     
-    // Features
-    showPhotosVideos: false,
-    showMedals: true,
-    roundCorners: false,
     
-    // Review data
-    overallRating: 5.0,
-    totalReviews: 834,
-    ratingBreakdown: {
-      5: 802,
-      4: 12,
-      3: 5,
-      2: 2,
-      1: 3
-    }
+    
+    showPagination: true,
+    buttonText: "Write a Review",
+    
+    showOverallRating: true,
+    
+  
+    
   });
 
-  const [activeTab, setActiveTab] = useState('text');
+  const [activeReview, setActiveReview] = useState(0);
+
+  const reviewData = [
+    {
+      name: "Sarah J.",
+      rating: 5,
+      text: "This product exceeded all my expectations. The quality is outstanding, and it arrived earlier than expected!",
+    },
+    {
+      name: "Michael T.",
+      rating: 5,
+      text: "Absolutely worth every penny. This has become an essential part of my daily routine.",
+    },
+    {
+      name: "Elena R.",
+      rating: 4,
+      text: "Great product, very satisfied with my purchase. Would definitely recommend to friends.",
+    }
+  ];
+
+  const ratingBreakdown = [
+    { stars: 5, count: 802 },
+    { stars: 4, count: 12 },
+    { stars: 3, count: 5 },
+    { stars: 2, count: 2 },
+    { stars: 1, count: 3 }
+  ];
+
+  useEffect(() => {
+   
+      const intervalId = setInterval(() => {
+        setActiveReview((prev) => (prev + 1) % 3);
+      }, 5000 );
+      return () => clearInterval(intervalId);
+
+  },);
 
   const handleSettingChange = (key, value) => {
     setSettings(prev => ({
@@ -40,551 +67,485 @@ const ReviewWidgetSettings = () => {
     }));
   };
 
-  const resetToDefault = () => {
-    setSettings({
-      widgetTitle: 'Customer Reviews',
-        widgetSubTitle: 'See what our customers are saying about us',
-    
-      writeButtonText: 'Write a Review',
-      cancelButtonText: 'Cancel review',
-      headerWithReviews: 'Based on {{ number_of_reviews }} review/reviews',
-      headerNoReviews: 'Be the first to write a review',
-      primaryColor: '#108474',
-      starColor: '#f59e0b',
-      showPhotosVideos: false,
-      showMedals: true,
-      roundCorners: false,
-      overallRating: 5.0,
-      totalReviews: 834,
-      ratingBreakdown: {
-        5: 802,
-        4: 12,
-        3: 5,
-        2: 2,
-        1: 3
-      }
-    });
-  };
-
-  const renderStars = (rating) => {
-    return '★'.repeat(Math.floor(rating)) + '☆'.repeat(5 - Math.floor(rating));
-  };
-
-  const styles = {
+  const getWidgetStyles = () => ({
     container: {
-      display: 'flex',
-      height: '100vh',
-      backgroundColor: '#f8f9fa',
-      fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif"
-    },
-    settingsPanel: {
-      width: '400px',
-      backgroundColor: '#ffffff',
-      borderRight: '1px solid #e2e8f0',
-      overflow: 'auto'
-    },
-    header: {
-      display: 'flex',
-      alignItems: 'center',
-      padding: '20px',
-      borderBottom: '1px solid #e2e8f0',
-      backgroundColor: '#ffffff'
-    },
-    backButton: {
-      backgroundColor: 'transparent',
-      border: 'none',
-      marginRight: '12px',
-      cursor: 'pointer',
-      padding: '8px',
-      borderRadius: '4px',
-      color: '#6b7280'
-    },
-    headerTitle: {
-      fontSize: '18px',
-      fontWeight: '600',
-      color: '#1f2937',
-      margin: 0
-    },
-    tabContainer: {
-      display: 'flex',
-      borderBottom: '1px solid #e2e8f0',
-      backgroundColor: '#ffffff'
-    },
-    tab: (isActive) => ({
-      padding: '12px 20px',
-      backgroundColor: isActive ? '#f3f4f6' : 'transparent',
-      border: 'none',
-      borderBottom: isActive ? '2px solid #3b82f6' : '2px solid transparent',
-      cursor: 'pointer',
-      fontSize: '14px',
-      fontWeight: '500',
-      color: isActive ? '#3b82f6' : '#6b7280'
-    }),
-    settingsContent: {
-      padding: '20px'
-    },
-    section: {
-      marginBottom: '24px'
-    },
-    sectionTitle: {
-      fontSize: '14px',
-      fontWeight: '600',
-      color: '#374151',
-      marginBottom: '12px'
-    },
-    inputGroup: {
-      marginBottom: '16px'
-    },
-    label: {
-      display: 'block',
-      fontSize: '13px',
-      fontWeight: '500',
-      color: '#6b7280',
-      marginBottom: '6px'
-    },
-    input: {
-      width: '100%',
-      padding: '8px 12px',
-      border: '1px solid #d1d5db',
-      borderRadius: '6px',
-      fontSize: '14px',
-      backgroundColor: '#ffffff'
-    },
-    colorInput: {
-      width: '40px',
-      height: '40px',
-      border: '1px solid #d1d5db',
-      borderRadius: '8px',
-      cursor: 'pointer',
-      padding: '2px'
-    },
-    colorGroup: {
-      display: 'flex',
-      alignItems: 'center',
-      gap: '12px',
-      marginBottom: '16px'
-    },
-    colorInfo: {
-      flex: 1
-    },
-    colorLabel: {
-      fontSize: '14px',
-      fontWeight: '500',
-      color: '#374151',
-      marginBottom: '4px'
-    },
-    colorCode: {
-      fontSize: '12px',
-      color: '#6b7280',
-      fontFamily: 'monospace'
-    },
-    colorDescription: {
-      fontSize: '12px',
-      color: '#6b7280',
-      marginTop: '4px'
-    },
-    checkbox: {
-      marginRight: '8px'
-    },
-    checkboxLabel: {
-      fontSize: '14px',
-      color: '#374151',
-      cursor: 'pointer'
-    },
-    resetButton: {
-      color: '#3b82f6',
-      textDecoration: 'none',
-      fontSize: '14px',
-      cursor: 'pointer',
-      border: 'none',
-      backgroundColor: 'transparent'
-    },
-    previewPanel: {
-      flex: 1,
-      backgroundColor: '#f8f9fa',
-      padding: '20px',
-      overflow: 'auto'
-    },
-    previewHeader: {
-      fontSize: '16px',
-      fontWeight: '600',
-      color: '#374151',
-      marginBottom: '20px'
-    },
-    // Preview styles
-    previewContainer: {
-      background: 'linear-gradient(to right, #EFF6FF, #DBEAFE)',
-      padding: '20px',
-      borderRadius: settings.roundCorners ? '24px' : '12px',
-      boxShadow: '0 2px 10px rgba(0, 0, 0, 0.05)',
-      maxWidth: '600px',
-      margin: '0 auto'
-    },
-    previewTitle: {
-      fontSize: '20px',
-      fontWeight: '700',
-      color: '#2d3748',
-      margin: '0 0 8px 0',
-      textAlign: 'center'
-    },
-    previewSubtitle: {
-      fontSize: '15px',
-      color: '#718096',
-      margin: '0 0 24px 0',
-      textAlign: 'center'
-    },
-    summaryCard: {
-      backgroundColor: '#ffffff',
-      borderRadius: settings.roundCorners ? '20px' : '12px',
-      padding: '24px',
-      boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)',
-      marginBottom: '30px',
-      display: 'flex',
-      justifyContent: 'space-between',
-      alignItems: 'center'
-    },
-    ratingSection: {
-      flex: 1,
-      textAlign: 'center',
-      borderRight: '1px solid #e2e8f0',
-      paddingRight: '20px'
-    },
-    ratingStars: {
-      color: settings.starColor,
-      fontSize: '28px',
-      letterSpacing: '3px'
-    },
-    ratingNumber: {
-      fontSize: '24px',
-      fontWeight: '700',
-      marginTop: '8px',
+      padding: "20px",
+      
+      fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
+      boxShadow: "0 2px 10px rgba(0, 0, 0, 0.1)",
+      margin: "0 auto",
       color: '#2d3748'
     },
-    reviewCount: {
-      fontSize: '15px',
-      color: '#718096',
-      marginTop: '5px'
+    title: {
+      fontSize: "20px",
+      fontWeight: "700",
+      color: '#2d3748',
+      margin: "0 0 8px 0",
+      textAlign: "center"
     },
-    breakdownSection: {
-      flex: 2,
-      padding: '0 30px'
+    subtitle: {
+      fontSize: "15px",
+      color: '#718096',
+      margin: 0,
+      textAlign: "center"
+    },
+    reviewsSummary: {
+      backgroundColor: '#ffffff',
+      borderRadius: `${settings.borderRadius}px`,
+      padding: "24px",
+      
+      marginBottom: "30px",
+      display: "flex",
+      flexDirection: "column",
+      gap: "20px",
+      marginTop: "20px"
+    },
+    overallRating: {
+      display: "flex",
+      flexDirection: "column",
+      alignItems: "center",
+      borderBottom: "1px solid #e2e8f0",
+      paddingBottom: "20px"
+    },
+    stars: {
+      color: settings.primaryColor,
+      fontSize: "28px",
+      letterSpacing: "3px"
+    },
+    ratingNumber: {
+      fontSize: "24px",
+      fontWeight: 700,
+      marginTop: "8px",
+      color: '#2d3749'
+    },
+    reviewCount: {
+      fontSize: "15px",
+      color: '#718096',
+      marginTop: "5px"
+    },
+    ratingBreakdown: {
+      width: "100%",
+      padding: "20px 0"
     },
     ratingBar: {
-      display: 'flex',
-      alignItems: 'center',
-      marginBottom: '8px',
-      gap: '15px'
+      display: "flex",
+      justifyContent: "center",
+      alignItems: "center",
+      marginBottom: "10px"
     },
-    ratingLabel: {
-      minWidth: '80px',
-      color: settings.starColor,
-      fontSize: '14px',
-      fontWeight: '600'
-    },
-    ratingBarFill: {
-      height: '6px',
-      backgroundColor: settings.primaryColor,
-      borderRadius: '3px',
-      flex: 1
-    },
-    ratingBarEmpty: {
-      height: '6px',
-      backgroundColor: '#e2e8f0',
-      borderRadius: '3px',
-      flex: 1
+    ratingLabelStar: {
+      color: settings.primaryColor,
+      fontSize: "16px",
+      fontWeight: "600",
+      minWidth: "120px"
     },
     ratingCount: {
-      minWidth: '30px',
       color: '#718096',
-      fontSize: '14px',
-      textAlign: 'right'
+      fontSize: "14px"
     },
-    buttonSection: {
-      flex: 1,
-      display: 'flex',
-      justifyContent: 'center',
-      alignItems: 'center',
-      paddingLeft: '20px',
-      borderLeft: '1px solid #e2e8f0'
+    writeReviewButton: {
+      backgroundColor:'#000000',
+      color: '#ffffff',
+      border: "none",
+      borderRadius: "50px",
+      padding: "12px 24px",
+      fontSize: "15px",
+      fontWeight: 600,
+      cursor: "pointer",
+      transition: "all 0.2s",
+      boxShadow: "0 4px 12px rgba(0, 0, 0, 0.2)"
     },
-    writeButton: {
-      backgroundColor: settings.primaryColor,
-      color: 'white',
-      border: 'none',
-      borderRadius: settings.roundCorners ? '25px' : '50px',
-      padding: '12px 24px',
-      fontSize: '14px',
-      fontWeight: '600',
-      cursor: 'pointer',
-      boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)'
+    reviewsContainer: {
+      position: "relative",
+      minHeight: "180px",
+      display: "flex",
+      overflow: "hidden"
     },
-    medalsSection: {
-      display: settings.showMedals ? 'block' : 'none',
-      backgroundColor: '#ffffff',
-      borderRadius: settings.roundCorners ? '20px' : '12px',
-      padding: '16px',
-      marginBottom: '20px',
-      boxShadow: '0 2px 8px rgba(0, 0, 0, 0.05)'
+    reviewCard: (index) => ({
+      backgroundColor:'#ffffff',
+      borderRadius: `${settings.borderRadius}px`,
+      padding: "24px",
+      boxShadow: "0 10px 25px rgba(0, 0, 0, 0.1)",
+      flexShrink: 0,
+      width: "100%",
+      position: "absolute",
+      top: 0,
+      left: 0,
+      transition: "all 0.5s ease",
+      transform: `translateX(${(index - activeReview) * 100}%)`,
+      opacity: index === activeReview ? 1 : 0.7,
+      pointerEvents: index === activeReview ? "auto" : "none"
+    }),
+    reviewContent: {
+      textAlign: "center"
     },
-    medalsTitle: {
-      fontSize: '14px',
-      fontWeight: '600',
-      color: '#374151',
-      marginBottom: '12px',
-      display: 'flex',
-      alignItems: 'center',
-      gap: '8px'
+    authorName: {
+      fontSize: "17px",
+      fontWeight: "600",
+      color: '#2d3748',
+      margin: "0 0 8px 0"
     },
-    verifiedBadge: {
-      backgroundColor: '#ebf8ff',
+    ratingStars: {
       color: settings.primaryColor,
-      padding: '4px 8px',
-      borderRadius: '12px',
-      fontSize: '12px',
-      fontWeight: '600'
-    }
-  };
+      fontSize: "20px",
+      margin: "10px 0",
+      letterSpacing: "3px"
+    },
+    reviewText: {
+      fontStyle: "italic",
+      color: 
+      '#4a5568',
+      fontSize: "15px",
+      lineHeight: 1.7,
+      margin: "12px 0",
+      maxWidth: "500px",
+      display: "inline-block"
+    },
+    paginationContainer: {
+      display: "flex",
+      justifyContent: "center",
+      marginTop: "24px",
+      gap: "8px"
+    },
+    paginationDot: (isActive) => ({
+      width: isActive ? "30px" : "10px",
+      height: "10px",
+      borderRadius: isActive ? "5px" : "50%",
+      backgroundColor: isActive ? settings.primaryColor : `${settings.primaryColor}30`,
+      cursor: "pointer",
+      transition: "all 0.3s ease"
+    })
+  });
 
-  const renderSettingsContent = () => {
-    switch(activeTab) {
-      case 'text':
-        return (
-          <div style={styles.settingsContent}>
-            <div style={styles.section}>
-              <div style={styles.sectionTitle}>Widget title</div>
-              <div style={styles.inputGroup}>
-                <input
-                  type="text"
-                  value={settings.widgetTitle}
-                  onChange={(e) => handleSettingChange('widgetTitle', e.target.value)}
-                  style={styles.input}
-                />
-              </div>
-            </div>
-
-            <div style={styles.section}>
-              <div style={styles.sectionTitle}>Widget subtitle</div>
-              <div style={styles.inputGroup}>
-                <input
-                  type="text"
-                  value={settings.widgetSubTitle}
-                  onChange={(e) => handleSettingChange('widgetSubTitle', e.target.value)}
-                  style={styles.input}
-                />
-              </div>
-            </div>  
-                       <div style={styles.section}>
-              <div style={styles.sectionTitle}>Write button text</div>
-              <div style={styles.inputGroup}>
-                <input
-                  type="text"
-                  value={settings.writeButtonText}
-                  onChange={(e) => handleSettingChange('writeButtonText', e.target.value)}
-                  style={styles.input}
-                />
-              </div>
-            </div>
-
-            <div style={styles.section}>
-              <div style={styles.sectionTitle}>Cancel button text</div>
-              <div style={styles.inputGroup}>
-                <input
-                  type="text"
-                  value={settings.cancelButtonText}
-                  onChange={(e) => handleSettingChange('cancelButtonText', e.target.value)}
-                  style={styles.input}
-                />
-              </div>
-            </div>
-
-           
-
-            <div style={styles.section}>
-              <div style={styles.sectionTitle}>Text header</div>
-              <div style={styles.inputGroup}>
-                <label style={styles.label}>Header (with reviews) label</label>
-                <input
-                  type="text"
-                  value={settings.headerWithReviews}
-                  onChange={(e) => handleSettingChange('headerWithReviews', e.target.value)}
-                  style={styles.input}
-                />
-              </div>
-              <div style={styles.inputGroup}>
-                <label style={styles.label}>Header (no reviews) label</label>
-                <input
-                  type="text"
-                  value={settings.headerNoReviews}
-                  onChange={(e) => handleSettingChange('headerNoReviews', e.target.value)}
-                  style={styles.input}
-                />
-              </div>
-            </div>
-          </div>
-        );
-
-      case 'appearance':
-        return (
-          <div style={styles.settingsContent}>
-            <div style={styles.section}>
-              <div style={styles.sectionTitle}>
-                Colors
-                <button onClick={resetToDefault} style={styles.resetButton}>
-                  Reset to default
-                </button>
-              </div>
-              
-              <div style={styles.colorGroup}>
-                <input
-                  type="color"
-                  value={settings.primaryColor}
-                  onChange={(e) => handleSettingChange('primaryColor', e.target.value)}
-                  style={styles.colorInput}
-                />
-                <div style={styles.colorInfo}>
-                  <div style={styles.colorLabel}>Primary color</div>
-                  <div style={styles.colorCode}>{settings.primaryColor}</div>
-                  <div style={styles.colorDescription}>
-                    Used for buttons, links and interactive elements
-                  </div>
-                </div>
-              </div>
-
-              <div style={styles.colorGroup}>
-                <input
-                  type="color"
-                  value={settings.starColor}
-                  onChange={(e) => handleSettingChange('starColor', e.target.value)}
-                  style={styles.colorInput}
-                />
-                <div style={styles.colorInfo}>
-                  <div style={styles.colorLabel}>Star color</div>
-                  <div style={styles.colorCode}>{settings.starColor}</div>
-                  <div style={styles.colorDescription}>
-                    Used only for star ratings in the Review Widget
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div style={styles.section}>
-              <div style={styles.sectionTitle}>Style Options</div>
-              <div style={styles.inputGroup}>
-                <label style={styles.checkboxLabel}>
-                  <input
-                    type="checkbox"
-                    checked={settings.roundCorners}
-                    onChange={(e) => handleSettingChange('roundCorners', e.target.checked)}
-                    style={styles.checkbox}
-                  />
-                  Round corners
-                </label>
-              </div>
-            </div>
-
-            <div style={styles.section}>
-              <div style={styles.sectionTitle}>Photos and Videos</div>
-              <div style={styles.inputGroup}>
-                <label style={styles.checkboxLabel}>
-                  <input
-                    type="checkbox"
-                    checked={settings.showPhotosVideos}
-                    onChange={(e) => handleSettingChange('showPhotosVideos', e.target.checked)}
-                    style={styles.checkbox}
-                  />
-                  Show recent photos and videos in a grid
-                </label>
-              </div>
-            </div>
-
-            <div style={styles.section}>
-              <div style={styles.sectionTitle}>Judge.me Medals</div>
-              <div style={styles.inputGroup}>
-                <label style={styles.checkboxLabel}>
-                  <input
-                    type="checkbox"
-                    checked={settings.showMedals}
-                    onChange={(e) => handleSettingChange('showMedals', e.target.checked)}
-                    style={styles.checkbox}
-                  />
-                  Show product medals
-                </label>
-              </div>
-            </div>
-          </div>
-        );
-
-      default:
-        return null;
-    }
+  const renderStars = (rating) => {
+    return '★'.repeat(rating) + '☆'.repeat(5 - rating);
   };
 
   return (
-    <div style={styles.container}>
-      <div style={styles.settingsPanel}>
-        <div style={styles.header}>
-         
-          <h2 style={styles.headerTitle}>Customize Text</h2>
+    <div style={{ display: 'flex', gap: '20px', padding: '20px', minHeight: '100vh', backgroundColor: '#f8f9fa' }}>
+      {/* Settings Panel */}
+      <div style={{ 
+        width: '400px', 
+        backgroundColor: 'white', 
+        padding: '20px', 
+        borderRadius: '12px', 
+        boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
+        height: 'fit-content',
+        position: 'sticky',
+        top: '20px'
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', marginBottom: '20px' }}>
+          <Settings style={{ marginRight: '8px' }} />
+          <h2 style={{ margin: 0, fontSize: '18px', fontWeight: '600' }}>Widget Settings</h2>
         </div>
 
-        <div style={styles.tabContainer}>
+        {/* Tab Navigation */}
+        <div style={{ 
+          display: 'flex', 
+          marginBottom: '20px', 
+          borderBottom: '1px solid #e2e8f0',
+          gap: '0'
+        }}>
           <button
-            style={styles.tab(activeTab === 'text')}
-            onClick={() => setActiveTab('text')}
+            onClick={() => setActiveTab('general')}
+            style={{
+              flex: 1,
+              padding: '12px 16px',
+              border: 'none',
+              backgroundColor: 'transparent',
+              cursor: 'pointer',
+              fontSize: '14px',
+              fontWeight: '500',
+              color: activeTab === 'general' ? '#3b82f6' : '#64748b',
+              borderBottom: activeTab === 'general' ? '2px solid #3b82f6' : '2px solid transparent',
+              transition: 'all 0.2s',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '6px'
+            }}
           >
-            Text
+            <Settings size={16} />
+            General
           </button>
           <button
-            style={styles.tab(activeTab === 'appearance')}
-            onClick={() => setActiveTab('appearance')}
+            onClick={() => setActiveTab('style')}
+            style={{
+              flex: 1,
+              padding: '12px 16px',
+              border: 'none',
+              backgroundColor: 'transparent',
+              cursor: 'pointer',
+              fontSize: '14px',
+              fontWeight: '500',
+              color: activeTab === 'style' ? '#3b82f6' : '#64748b',
+              borderBottom: activeTab === 'style' ? '2px solid #3b82f6' : '2px solid transparent',
+              transition: 'all 0.2s',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '6px'
+            }}
           >
-            Appearance
+            <Palette size={16} />
+            Style
+          </button>
+          <button
+            onClick={() => setActiveTab('layout')}
+            style={{
+              flex: 1,
+              padding: '12px 16px',
+              border: 'none',
+              backgroundColor: 'transparent',
+              cursor: 'pointer',
+              fontSize: '14px',
+              fontWeight: '500',
+              color: activeTab === 'layout' ? '#3b82f6' : '#64748b',
+              borderBottom: activeTab === 'layout' ? '2px solid #3b82f6' : '2px solid transparent',
+              transition: 'all 0.2s',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '6px'
+            }}
+          >
+            <Layout size={16} />
+            Layout
           </button>
         </div>
 
-        {renderSettingsContent()}
+        {/* General Tab */}
+        {activeTab === 'general' && (
+          <div>
+
+        <div style={{ marginBottom: '20px' }}>
+          <label style={{ display: 'block', marginBottom: '5px', fontWeight: '500', fontSize: '14px' }}>
+            <Type size={16} style={{ display: 'inline', marginRight: '5px' }} />
+            Title
+          </label>
+          <input
+            type="text"
+            value={settings.title}
+            onChange={(e) => handleSettingChange('title', e.target.value)}
+            style={{
+              width: '100%',
+              padding: '8px',
+              border: '1px solid #e2e8f0',
+              borderRadius: '6px',
+              fontSize: '14px'
+            }}
+          />
+        </div>
+
+        <div style={{ marginBottom: '20px' }}>
+          <label style={{ display: 'block', marginBottom: '5px', fontWeight: '500', fontSize: '14px' }}>
+            <Type size={16} style={{ display: 'inline', marginRight: '5px' }} />
+            Subtitle
+          </label>
+          <input
+            type="text"
+            value={settings.subtitle}
+            onChange={(e) => handleSettingChange('subtitle', e.target.value)}
+            style={{
+              width: '100%',
+              padding: '8px',
+              border: '1px solid #e2e8f0',
+              borderRadius: '6px',
+              fontSize: '14px'
+            }}
+          />
+        </div>
+
+       
+
+        
+
+        <div style={{ marginBottom: '20px' }}>
+          <label style={{ display: 'block', marginBottom: '5px', fontWeight: '500', fontSize: '14px' }}>
+            <Type size={16} style={{ display: 'inline', marginRight: '5px' }} />
+            Button Text
+          </label>
+          <input
+            type="text"
+            value={settings.buttonText}
+            onChange={(e) => handleSettingChange('buttonText', e.target.value)}
+            style={{
+              width: '100%',
+              padding: '8px',
+              border: '1px solid #e2e8f0',
+              borderRadius: '6px',
+              fontSize: '14px'
+            }}
+          />
+        </div>
+
+       
+
+        
+        
+        
+          </div>
+        )}
+
+        {/* Style Tab */}
+        {activeTab === 'style' && (
+          <div>
+
+        <div style={{ marginBottom: '20px' }}>
+          <label style={{ display: 'block', marginBottom: '5px', fontWeight: '500', fontSize: '14px' }}>
+            <Palette size={16} style={{ display: 'inline', marginRight: '5px' }} />
+            Primary Color
+          </label>
+          <input
+            type="color"
+            value={settings.primaryColor}
+            onChange={(e) => handleSettingChange('primaryColor', e.target.value)}
+            style={{
+              width: '100%',
+              padding: '4px',
+              border: '1px solid #e2e8f0',
+              borderRadius: '6px',
+              height: '40px'
+            }}
+          />
+        </div>
+
+       
+
+       
+
+       
+       
+          </div>
+        )}
+
+        {/* Layout Tab */}
+        {activeTab === 'layout' && (
+          <div>
+
+        <div style={{ marginBottom: '20px' }}>
+          <label style={{ display: 'flex', alignItems: 'center', fontSize: '14px', fontWeight: '500' }}>
+            <input
+              type="checkbox"
+              checked={settings.showOverallRating}
+              onChange={(e) => handleSettingChange('showOverallRating', e.target.checked)}
+              style={{ marginRight: '8px' }}
+            />
+            Show Overall Rating
+          </label>
+        </div>
+
+        <div style={{ marginBottom: '20px' }}>
+          <label style={{ display: 'flex', alignItems: 'center', fontSize: '14px', fontWeight: '500' }}>
+            <input
+              type="checkbox"
+              checked={settings.showRatingBreakdown}
+              onChange={(e) => handleSettingChange('showRatingBreakdown', e.target.checked)}
+              style={{ marginRight: '8px' }}
+            />
+            Show Rating Breakdown
+          </label>
+        </div>
+
+        <div style={{ marginBottom: '20px' }}>
+          <label style={{ display: 'flex', alignItems: 'center', fontSize: '14px', fontWeight: '500' }}>
+            <input
+              type="checkbox"
+              checked={settings.showWriteReviewButton}
+              onChange={(e) => handleSettingChange('showWriteReviewButton', e.target.checked)}
+              style={{ marginRight: '8px' }}
+            />
+            Show Write Review Button
+          </label>
+        </div>
+
+        <div style={{ marginBottom: '20px' }}>
+          <label style={{ display: 'flex', alignItems: 'center', fontSize: '14px', fontWeight: '500' }}>
+            <input
+              type="checkbox"
+              checked={settings.showPagination}
+              onChange={(e) => handleSettingChange('showPagination', e.target.checked)}
+              style={{ marginRight: '8px' }}
+            />
+            Show Pagination Dots
+          </label>
+        </div>
+
+    
+          </div>
+        )}
       </div>
 
-      <div style={styles.previewPanel}>
-        <div style={styles.previewHeader}>Preview</div>
-        
-        <div style={styles.previewContainer}>
-          <h3 style={styles.previewTitle}>{settings.widgetTitle}</h3>
-          <p style={styles.previewSubtitle}>{ settings.widgetSubTitle}</p>
-
-          <div style={styles.summaryCard}>
-            <div style={styles.ratingSection}>
-              <div style={styles.ratingStars}>★★★★★</div>
-              <div style={styles.ratingNumber}>{settings.overallRating}</div>
-              <div style={styles.reviewCount}>
-                {settings.headerWithReviews.replace('{{ number_of_reviews }}', settings.totalReviews)}
-              </div>
+      {/* Preview */}
+      <div style={{ flex: 1, minWidth: '600px' }}>
+        <div style={{ padding: '20px', borderRadius: '12px', marginBottom: '20px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', marginBottom: '16px' }}>
+            <Eye size={20} style={{ marginRight: '8px' }} />
+            <h3 style={{ margin: 0, fontSize: '16px', fontWeight: '600' }}>Live Preview</h3>
+          </div>
+          
+          <div style={getWidgetStyles().container}>
+            <div style={{ marginBottom: '24px' }}>
+              <h3 style={getWidgetStyles().title}>{settings.title}</h3>
+              <p style={getWidgetStyles().subtitle}>{settings.subtitle}</p>
             </div>
 
-            <div style={styles.breakdownSection}>
-              {[5, 4, 3, 2, 1].map(rating => {
-                const count = settings.ratingBreakdown[rating];
-                const percentage = (count / settings.totalReviews) * 100;
-                return (
-                  <div key={rating} style={styles.ratingBar}>
-                    <div style={styles.ratingLabel}>
-                      {rating} {renderStars(rating)}
+            <div style={getWidgetStyles().reviewsSummary}>
+              {settings.showOverallRating && (
+              <div style={getWidgetStyles().overallRating}>
+                    <div style={getWidgetStyles().stars}>★★★★★</div>
+                    <div style={getWidgetStyles().ratingNumber}>5</div>
+                    <div style={getWidgetStyles().reviewCount}>From 834 reviews</div>
+                </div>
+              )}
+
+              {settings.showRatingBreakdown && (
+                <div style={getWidgetStyles().ratingBreakdown}>
+                  {ratingBreakdown.map((item, index) => (
+                    <div key={index} style={getWidgetStyles().ratingBar}>
+                      <div style={getWidgetStyles().ratingLabelStar}>
+                        {item.stars} {renderStars(item.stars)}
+                      </div>
+                      <div style={getWidgetStyles().ratingCount}>{item.count}</div>
                     </div>
-                    <div style={{ flex: 1, backgroundColor: '#e2e8f0', borderRadius: '3px', height: '6px' }}>
-                      <div style={{
-                        ...styles.ratingBarFill,
-                        width: `${percentage}%`
-                      }} />
-                    </div>
-                    <div style={styles.ratingCount}>{count}</div>
+                  ))}
+                </div>
+              )}
+
+              {settings.showWriteReviewButton && (
+                <div style={{ display: 'flex', justifyContent: 'center', marginTop: '20px' }}>
+                  <button style={getWidgetStyles().writeReviewButton}>
+                    {settings.buttonText}
+                  </button>
+                </div>
+              )}
+            </div>
+
+            <div style={getWidgetStyles().reviewsContainer}>
+              {reviewData.map((review, index) => (
+                <div key={index} style={getWidgetStyles().reviewCard(index)}>
+                  <div style={getWidgetStyles().reviewContent}>
+                    <h4 style={getWidgetStyles().authorName}>{review.name}</h4>
+                    <div style={getWidgetStyles().ratingStars}>{renderStars(review.rating)}</div>
+                    <p style={getWidgetStyles().reviewText}>
+                      "{review.text}"
+                    </p>
                   </div>
-                );
-              })}
+                </div>
+              ))}
             </div>
 
-            <div style={styles.buttonSection}>
-              <button style={styles.writeButton}>{settings.writeButtonText}</button>
-            </div>
+            {settings.showPagination && (
+              <div style={getWidgetStyles().paginationContainer}>
+                {[0, 1, 2].map(index => (
+                  <div
+                    key={index}
+                    onClick={() => setActiveReview(index)}
+                    style={getWidgetStyles().paginationDot(index === activeReview)}
+                  />
+                ))}
+              </div>
+            )}
           </div>
         </div>
       </div>

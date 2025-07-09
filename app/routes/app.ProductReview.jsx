@@ -5,7 +5,6 @@ import {
   Button,
   Card,
   DataTable,
-  Filters,
   Frame,
   Page,
   Pagination,
@@ -46,13 +45,10 @@ function ProductReview({
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [selectedReviewId, setSelectedReviewId] = useState(null);
   const [toast, setToast] = useState({ active: false, message: "", error: false });
-  const [searchQuery, setSearchQuery] = useState(initialSearchQuery || "");
-  const [ratingFilter, setRatingFilter] = useState(initialRating || "");
-  const [statusFilter, setStatusFilter] = useState(initialStatus || "");
-  const [localSearchQuery, setLocalSearchQuery] = useState(initialSearchQuery || "");
+  const [productTitles, setProductTitles] = useState({});
   const [processingAction, setProcessingAction] = useState(false);
   const [isFiltering, setIsFiltering] = useState(false);
-  const [productTitles, setProductTitles] = useState({}); // 👈 new
+
   const [reviewStatuses, setReviewStatuses] = useState(
     reviews.reduce((acc, review) => {
       acc[review._id] = review.isActive;
@@ -60,81 +56,45 @@ function ProductReview({
     }, {})
   );
 
-  const filteredReviews = useMemo(() => {
-    return reviews.filter((review) => {
-      const matchesSearch =
-        !searchQuery ||
-        review.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        review.email?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        review.productId?.toLowerCase().includes(searchQuery.toLowerCase());
-      const matchesStatus =
-        !statusFilter || String(review.isActive) === statusFilter;
-      const matchesRating =
-        !ratingFilter || String(review.rating) === ratingFilter;
-      return matchesSearch && matchesStatus && matchesRating;
-    });
-  }, [reviews, searchQuery, statusFilter, ratingFilter]);
-
-  useEffect(() => {
-    setReviewStatuses(
-      reviews.reduce((acc, review) => {
-        acc[review._id] = review.isActive;
-        return acc;
-      }, {})
-    );
-    setSearchQuery(initialSearchQuery || "");
-    setStatusFilter(initialStatus || "");
-    setRatingFilter(initialRating || "");
-    setLocalSearchQuery(initialSearchQuery || "");
-    setIsFiltering(false);
-  }, [reviews, initialSearchQuery, initialStatus, initialRating]);
-
   useEffect(() => {
     fetchProductTitles();
   }, [reviews]);
 
- const fetchProductTitles = async () => {
-  console.log("getting here")
-  const titles = {};
-  
-  for (const review of reviews) {
-    const productId = review?.productId;
-    if (!productId || titles[productId]) continue;
-    
-    try {
-      // Try corsproxy.io instead
-      const response = await fetch(
-        `https://corsproxy.io/?https://jitali2103.myshopify.com/admin/api/2025-07/graphql.json`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'X-Shopify-Access-Token': 'shpua_2ec21b539fb65088d3820d6e7f763997',
-          },
-          body: JSON.stringify({
-            query: `
-              query ProductTitle($ownerId: ID!) {
-                product(id: $ownerId) {
-                  title
+  const fetchProductTitles = async () => {
+    const titles = {};
+    for (const review of reviews) {
+      const productId = review?.productId;
+      if (!productId || titles[productId]) continue;
+
+      try {
+        const response = await fetch(
+          `https://corsproxy.io/?https://jitali2103.myshopify.com/admin/api/2025-07/graphql.json`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "X-Shopify-Access-Token": "shpua_2ec21b539fb65088d3820d6e7f763997",
+            },
+            body: JSON.stringify({
+              query: `
+                query ProductTitle($ownerId: ID!) {
+                  product(id: $ownerId) {
+                    title
+                  }
                 }
-              }
-            `,
-            variables: { ownerId: `gid://shopify/Product/${productId}` },
-          }),
-        }
-      );
-      
-      const data = await response.json();
-      console.log("data", data);
-      titles[productId] = data?.data?.product?.title || "Unknown Product";
-    } catch (error) {
-      console.error("Error fetching product:", productId, error);
-      titles[productId] = "Unknown Product";
+              `,
+              variables: { ownerId: `gid://shopify/Product/${productId}` },
+            }),
+          }
+        );
+        const data = await response.json();
+        titles[productId] = data?.data?.product?.title || "Unknown Product";
+      } catch (error) {
+        titles[productId] = "Unknown Product";
+      }
     }
-  }
-  
-  setProductTitles(titles);
-};
+    setProductTitles(titles);
+  };
 
   const handleDeleteModalOpen = (id) => {
     setSelectedReviewId(id);
@@ -206,18 +166,8 @@ function ProductReview({
   };
 
   const statusOptions = [
-    { label: "All", value: "" },
     { label: "Active", value: "true" },
     { label: "Inactive", value: "false" },
-  ];
-
-  const ratingOptions = [
-    { label: "All Ratings", value: "" },
-    { label: "Very Poor", value: "1" },
-    { label: "Poor", value: "2" },
-    { label: "Average", value: "3" },
-    { label: "Good", value: "4" },
-    { label: "Excellent", value: "5" },
   ];
 
   const handlePageChange = (newPage) => {
@@ -229,33 +179,49 @@ function ProductReview({
     submit(formData, { method: "get", replace: true });
   };
 
-  const rows = filteredReviews.map((review, index) => [
-    <Text key={index + "name"}>{review?.name || "Unknown"}</Text>,
-    <Text key={`product-${review?._id}`}>{productTitles[review?.productId] || "Loading…"}</Text>,
-    review?.email,
-    review?.mobile || "N/A",
-    <Badge key={`rating-${review?._id}`} tone={getRatingTone(review?.rating)}>
+  const rows = reviews.map((review, index) => [
+    <Text truncate>{review?.name || "Unknown"}</Text>,
+
+    <Text truncate>{productTitles[review?.productId] || "Loading…"}</Text>,
+
+    <Text truncate>{review?.email || "N/A"}</Text>,
+
+    <Text tone={review?.mobile ? "default" : "subdued"}>
+      {review?.mobile || "N/A"}
+    </Text>,
+
+    <Badge tone={getRatingTone(review?.rating)}>
       {getRatingText(review?.rating)}
     </Badge>,
-    <Text key={`date-${review?._id}`}>
-      {new Date(review?.createdAt).toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" })}
-      <br />
-      <Text variant="bodySm" tone="subdued">{getTimeAgo(review?.createdAt)}</Text>
+
+    <div>
+      <Text>
+        {new Date(review?.createdAt).toLocaleDateString("en-US", {
+          year: "numeric", month: "short", day: "numeric"
+        })}
+      </Text>
+      <Text variant="bodySm" tone="subdued">
+        {getTimeAgo(review?.createdAt)}
+      </Text>
+    </div>,
+
+    <Text truncate title={review?.reviewText}>
+      {review?.reviewText || "N/A"}
     </Text>,
-    review?.reviewText || "N/A",
-    <Badge key={`rec-${review?._id}`} tone={review?.recommend ? "success" : "critical"}>
+
+    <Badge tone={review?.recommend ? "success" : "critical"}>
       {review?.recommend ? "Recommended" : "Not Recommended"}
     </Badge>,
+
     <Select
-      key={`status-${review?._id}`}
       labelInline
-      options={statusOptions.filter((o) => o.value !== "")}
+      options={statusOptions}
       onChange={(val) => handleStatusChange(review?._id, val)}
       value={String(reviewStatuses[review?._id])}
       disabled={processingAction || isLoading || isFiltering}
     />,
+
     <Button
-      key={`delete-${review?._id}`}
       icon={DeleteIcon}
       tone="critical"
       onClick={() => handleDeleteModalOpen(review?._id)}
@@ -269,15 +235,27 @@ function ProductReview({
       <Frame>
         <Page fullWidth title="Product Reviews">
           <Card>
-            <DataTable
-              columnContentTypes={Array(10).fill("text")}
-              headings={[
-                "Customer", "Product", "Email", "Mobile", "Rating", "Date",
-                "Review", "Recommended", "Status", "Actions"
-              ]}
-              rows={rows}
-              hideScrollIndicator
-            />
+            <div style={{ maxHeight: "600px", overflowY: "auto" }}>
+              <DataTable
+                columnContentTypes={Array(10).fill("text")}
+                headings={[
+                  <Text variant="bodyMd" fontWeight="bold">Customer</Text>,
+                  <Text variant="bodyMd" fontWeight="bold">Product</Text>,
+                  <Text variant="bodyMd" fontWeight="bold">Email</Text>,
+                  <Text variant="bodyMd" fontWeight="bold">Mobile</Text>,
+                  <Text variant="bodyMd" fontWeight="bold">Rating</Text>,
+                  <Text variant="bodyMd" fontWeight="bold">Date</Text>,
+                  <Text variant="bodyMd" fontWeight="bold">Review</Text>,
+                  <Text variant="bodyMd" fontWeight="bold">Recommended</Text>,
+                  <Text variant="bodyMd" fontWeight="bold">Status</Text>,
+                  <Text variant="bodyMd" fontWeight="bold">Actions</Text>,
+                ]}
+                rows={rows}
+                truncate
+                increasedTableDensity
+              />
+            </div>
+
             <Pagination
               label={`Page ${pagination.currentPage} of ${pagination.totalPages}`}
               hasPrevious={pagination.currentPage > 1}

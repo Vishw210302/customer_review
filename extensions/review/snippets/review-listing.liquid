@@ -1,199 +1,325 @@
-<!-- Slick Slider CSS -->
-<link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/slick-carousel@1.8.1/slick/slick.css"/>
-<link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/slick-carousel@1.8.1/slick/slick-theme.css"/>
-
-<style>
-  .review-slider-container {
-    padding: 30px 10px;
-    position: relative;
-    max-width: 1200px;
-    margin: auto;
-  }
-.review-header-main{
-    padding-bottom: 30px;
-}
-  .review-card {
-    background-color: white;
-    border-radius: 18px;
-        padding: 25px;
-    text-align: center;
-    transform 0.3s ease, box-shadow 0.3s ease;
-    opacity: 0.6;
-    transform: scale(0.85);
-  }
-
-  .slick-center .review-card {
-    transform: scale(1);
-    opacity: 1;
-    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
-    z-index: 2;
-  }
-
-  .review-author {
-    font-size: 21px;
-    font-weight: 600;
-    color: #333;
-    margin-bottom: 10px;
-  }
-
-  .review-text {
-    font-style: italic;
-    color: #555;
-    font-size: 15px;
-    line-height: 1.6;
-    margin-bottom: 20px;
-  }
-
-  .review-rating {
-    color: #ff9d2d;
-    font-size: 21px;
-    letter-spacing: 2px;
-  }
-
-  /* Arrows */
-  .slick-prev, .slick-next {
-    width: 45px;
-    height: 45px;
-    background-color: white;
-    border-radius: 50%;
-   
-    z-index: 5;
-  }
-
-  .slick-prev:before, .slick-next:before {
-    color:rgb(0, 0, 0);
-    font-size: 25px;
-  }
-
-  .slick-prev:hover, .slick-next:hover {
-    background-color:rgb(0, 0, 0);
-  }
-
-  .slick-prev:hover:before, .slick-next:hover:before {
-    color: white;
-  }
-
-  /* Dots */
-  .slick-dots {
-    margin-top: 20px;
-  }
-
-  .slick-dots li button:before {
-    font-size: 10px;
-    color: #ff9d2d;
-    opacity: 0.3;
-  }
-
-  .slick-dots li.slick-active button:before {
-    opacity: 1;
-    color: #ff9d2d;
-    font-size: 12px;
-  }
-
-  /* Responsive */
-  @media (max-width: 768px) {
-    .review-card {
-      padding: 20px;
-    }
-  }
-</style>
-
-<div class="review-slider-container">
-  <div class="review-header-main" id="review-header">
-    <h1 style="margin: 0; text-align:center;">What Our Customers Say</h1>
-    <p style="margin: 0; text-align:center;">Discover why our customers love our products and services</p>
-  </div>
-
-  <div class="review-slider" id="dynamic-reviews">
-    <div>
-      <div class="loading-spinner">
-        <div class="spinner"></div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- Slick Slider JS -->
-<script src="https://code.jquery.com/jquery-3.6.0.min.js" defer></script>
-<script src="https://cdn.jsdelivr.net/npm/slick-carousel@1.8.1/slick/slick.min.js" defer></script>
-
-<script>
-  document.addEventListener('DOMContentLoaded', function () {
-   const API_ENDPOINT = "https://checklist.codecrewinfotech.com/api/getReview/{{ shop.metafields.shopName.shopName }}/{{ product.id }}";
-
-    const dynamicReviewsContainer = document.getElementById('dynamic-reviews');
-    const reviewHeader = document.getElementById('review-header');
-
-    fetchReviews();
-
-    async function fetchReviews() {
-      try {
-        const response = await fetch(API_ENDPOINT, {
-          method: 'GET',
-          headers: { 'ngrok-skip-browser-warning': true },
-        });
-
-        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-
-        const reviews = await response.json();
-
-        if (!reviews || !reviews.reviews || reviews.reviews.length === 0) {
-          reviewHeader?.classList.add('hidden');
-          dynamicReviewsContainer?.classList.add('hidden');
-          return;
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fixed Review Slider</title>
+    <!-- Slick Slider CSS -->
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/slick-carousel@1.8.1/slick/slick.css"/>
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/slick-carousel@1.8.1/slick/slick-theme.css"/>
+    
+    <style>
+        .review-slider-container {
+            padding: 30px 10px;
+            position: relative;
+            max-width: 1200px;
+            margin: auto;
+        }
+        
+        .review-header-main {
+            padding-bottom: 30px;
+        }
+        
+        #dynamic-reviews {
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        #dynamic-reviews.slick-initialized {
+            opacity: 1;
+        }
+        
+        .review-card {
+            background-color: white;
+            border-radius: 18px;
+            padding: 25px;
+            text-align: center;
+            transition: transform 0.3s ease, box-shadow 0.3s ease, opacity 0.3s ease;
+            opacity: 0.6;
+            transform: scale(0.85);
+            margin: 0 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            min-height: 200px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
         }
 
-        reviewHeader?.classList.remove('hidden');
-        dynamicReviewsContainer?.classList.remove('hidden');
+        .slick-center .review-card {
+            transform: scale(1);
+            opacity: 1;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+            z-index: 2;
+        }
 
-        renderReviews(reviews.reviews);
-      } catch (error) {
-        console.error('Error fetching reviews:', error);
-        dynamicReviewsContainer.innerHTML = '<p>Error loading reviews</p>';
-      }
-    }
+        .review-author {
+            font-size: 21px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 10px;
+        }
 
-    function renderReviews(reviews) {
-      dynamicReviewsContainer.innerHTML = '';
+        .review-text {
+            font-style: italic;
+            color: #555;
+            font-size: 15px;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
 
-      reviews.forEach((review) => {
-        const reviewEl = document.createElement('div');
-        const stars = '★'.repeat(review.rating || 0) + '☆'.repeat(5 - (review.rating || 0));
+        .review-rating {
+            color: #ff9d2d;
+            font-size: 21px;
+            letter-spacing: 2px;
+        }
 
-        reviewEl.innerHTML = `
-          <div class="review-card">
-            <h3 class="review-author">${review.name || 'Anonymous'}</h3>
-            <div class="review-rating">${stars}</div>
-            <p class="review-text">${review.reviewText || 'No comment provided'}</p>
-          </div>
-        `;
+        /* Arrows */
+        .slick-prev, .slick-next {
+            width: 45px;
+            height: 45px;
+            background-color: white;
+            border-radius: 50%;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            z-index: 5;
+            transition: all 0.3s ease;
+        }
 
-        dynamicReviewsContainer.appendChild(reviewEl);
-      });
+        .slick-prev:before, .slick-next:before {
+            color: rgb(0, 0, 0);
+            font-size: 25px;
+        }
 
-      $(dynamicReviewsContainer).slick({
-        slidesToShow: 3,
-        centerMode: true,
-        centerPadding: '0px',
-        autoplay: false,
-        
-        arrows: true,
-        dots: true,
-        responsive: [
-          {
-            breakpoint: 1024,
-            settings: {
-              slidesToShow: 2
+        .slick-prev:hover, .slick-next:hover {
+            background-color: rgb(0, 0, 0);
+            transform: scale(1.1);
+        }
+
+        .slick-prev:hover:before, .slick-next:hover:before {
+            color: white;
+        }
+
+        /* Dots */
+        .slick-dots {
+            margin-top: 20px;
+        }
+
+        .slick-dots li button:before {
+            font-size: 10px;
+            color: #ff9d2d;
+            opacity: 0.3;
+        }
+
+        .slick-dots li.slick-active button:before {
+            opacity: 1;
+            color: #ff9d2d;
+            font-size: 12px;
+        }
+
+        /* Loading spinner */
+        .loading-spinner {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 200px;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #ff9d2d;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .error-message {
+            text-align: center;
+            color: #666;
+            padding: 40px;
+            font-style: italic;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .review-card {
+                padding: 20px;
+                margin: 0 5px;
             }
-          },
-          {
-            breakpoint: 768,
-            settings: {
-              slidesToShow: 1
+            
+            .review-author {
+                font-size: 18px;
             }
-          }
-        ]
-      });
-    }
-  });
-</script>
+            
+            .review-text {
+                font-size: 14px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="review-slider-container">
+        <div class="review-header-main" id="review-header">
+            <h1 style="margin: 0; text-align:center;">What Our Customers Say</h1>
+            <p style="margin: 0; text-align:center;">Discover why our customers love our products and services</p>
+        </div>
+
+        <div class="review-slider" id="dynamic-reviews">
+            <div>
+                <div class="loading-spinner">
+                    <div class="spinner"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- jQuery and Slick Slider JS -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/slick-carousel@1.8.1/slick/slick.min.js"></script>
+
+    <script>
+        $(document).ready(function() {
+            const dynamicReviewsContainer = $('#dynamic-reviews');
+            const reviewHeader = $('#review-header');
+
+            // Fetch dynamic reviews from API
+            fetchReviews();
+
+            async function fetchReviews() {
+                try {
+                    // Replace these placeholders with your actual values
+                    const shopName = "{{ shop.metafields.shopName.shopName }}";
+                    const productId = "{{ product.id }}";
+                    const API_ENDPOINT = `https://checklist.codecrewinfotech.com/api/getReview/${shopName}/${productId}`;
+                    
+                    const response = await fetch(API_ENDPOINT, {
+                        method: 'GET',
+                        headers: { 
+                            'ngrok-skip-browser-warning': true,
+                            'Content-Type': 'application/json'
+                        },
+                    });
+                    
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    
+                    const reviews = await response.json();
+                    
+                    if (!reviews || !reviews.reviews || reviews.reviews.length === 0) {
+                        reviewHeader.addClass('hidden');
+                        dynamicReviewsContainer.addClass('hidden');
+                        return;
+                    }
+
+                    reviewHeader.removeClass('hidden');
+                    dynamicReviewsContainer.removeClass('hidden');
+
+                    renderReviews(reviews.reviews);
+
+                } catch (error) {
+                    console.error('Error fetching reviews:', error);
+                    dynamicReviewsContainer.html('<div class="error-message">Unable to load reviews at this time</div>');
+                }
+            }
+
+            function renderReviews(reviews) {
+                // Clear existing content
+                dynamicReviewsContainer.html('');
+
+                // Destroy existing slider if it exists
+                if (dynamicReviewsContainer.hasClass('slick-initialized')) {
+                    dynamicReviewsContainer.slick('unslick');
+                }
+
+                // Build HTML string for better performance
+                let reviewsHtml = '';
+                reviews.forEach((review) => {
+                    const stars = '★'.repeat(review.rating || 0) + '☆'.repeat(5 - (review.rating || 0));
+                    reviewsHtml += `
+                        <div>
+                            <div class="review-card">
+                                <h3 class="review-author">${review.name || 'Anonymous'}</h3>
+                                <div class="review-rating">${stars}</div>
+                                <p class="review-text">${review.reviewText || 'No comment provided'}</p>
+                            </div>
+                        </div>
+                    `;
+                });
+
+                // Add all content at once
+                dynamicReviewsContainer.html(reviewsHtml);
+
+                // Wait for DOM to be ready and then initialize slider
+                setTimeout(() => {
+                    initializeSlider();
+                }, 100);
+            }
+
+            function initializeSlider() {
+                // Double check that we have content
+                if (dynamicReviewsContainer.children().length === 0) {
+                    console.warn('No reviews to display in slider');
+                    return;
+                }
+
+                // Ensure container is visible
+                dynamicReviewsContainer.css('opacity', '1');
+
+                try {
+                    // Initialize new slider
+                    dynamicReviewsContainer.slick({
+                        slidesToShow: 3,
+                        centerMode: true,
+                        centerPadding: '0px',
+                        autoplay: true,
+                        autoplaySpeed: 3000,
+                        arrows: true,
+                        dots: true,
+                        infinite: true,
+                        speed: 500,
+                        cssEase: 'ease-in-out',
+                        adaptiveHeight: false,
+                        variableWidth: false,
+                        waitForAnimate: false,
+                        responsive: [
+                            {
+                                breakpoint: 1024,
+                                settings: {
+                                    slidesToShow: 2,
+                                    centerMode: true,
+                                    centerPadding: '0px'
+                                }
+                            },
+                            {
+                                breakpoint: 768,
+                                settings: {
+                                    slidesToShow: 1,
+                                    centerMode: true,
+                                    centerPadding: '0px'
+                                }
+                            }
+                        ]
+                    });
+
+                    // Force refresh after initialization
+                    setTimeout(() => {
+                        dynamicReviewsContainer.slick('refresh');
+                    }, 200);
+
+                } catch (error) {
+                    console.error('Error initializing slider:', error);
+                }
+            }
+        });
+    </script>
+</body>
+</html>

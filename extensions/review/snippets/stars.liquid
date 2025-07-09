@@ -154,7 +154,16 @@
     </div>
   </div>
 
-  
+    <!-- Add this new section for the no reviews message -->
+  <div id="no-reviews-message" class="no-reviews-message" style="display: none;">
+    <div class="stars">☆☆☆☆☆</div>
+    <p>Be the first to write a review</p>
+    
+    <button class="write-review-button">Write a Review</button>
+  </div>
+
+  <!-- Your existing reviews container -->
+  <div id="reviews-container" class="reviews-list"></div>
 
 </div>
 
@@ -181,6 +190,25 @@
 </div>
 
 <style>
+  .no-reviews-message {
+  text-align: center;
+  padding: 30px;
+border-left: 0;
+  border-radius: 8px;
+  margin-top: 20px;
+}
+
+.no-reviews-message .stars {
+  font-size: 24px;
+  color: #ccc;
+  margin-bottom: 10px;
+}
+
+.no-reviews-message p {
+  font-size: 16px;
+  color: #666;
+  margin-bottom: 20px;
+}
    .review-popup-opener{
   display: none;
     position: fixed;
@@ -464,13 +492,7 @@ display:block !important;
     color: #666;
   }
 
-  .no-reviews-message {
-    text-align: center;
-    padding: 20px;
-    color: #666;
-    background-color: #f9f9f9;
-    border-radius: 8px;
-  }
+ 
 
   /* Review Item */
   .review-item {
@@ -991,6 +1013,12 @@ display:block !important;
 
     const overlay = document.querySelector('.review-popup-opener');
 
+    document.querySelector('#no-reviews-message .write-review-button').addEventListener('click', function() {
+  modal.style.display = 'flex';
+  overlay.style.overflow = 'hidden';
+  overlay.style.display = 'block';
+  document.body.style.overflow = 'hidden';
+});
 openButton.addEventListener('click', function () {
   modal.style.display = 'flex';
   overlay.style.overflow = 'hidden';
@@ -1172,37 +1200,47 @@ function closeModal() {
       }
     }
 
-    function updateReviewSummary(data) {
-      const formattedRating = data.averageRating?.toFixed(2);
+   function updateReviewSummary(data) {
+  const noReviewsMessage = document.getElementById('no-reviews-message');
+  const reviewsContainer = document.getElementById('reviews-container');
+  
+  // Show/hide based on whether there are reviews
+  if (data.totalReviews === 0) {
+    noReviewsMessage.style.display = 'block';
+    reviewsContainer.style.display = 'none';
+    
+    // Hide the summary section when there are no reviews
+    document.querySelector('.reviews-summary').style.display = 'none';
+  } else {
+    noReviewsMessage.style.display = 'none';
+    reviewsContainer.style.display = 'block';
+    document.querySelector('.reviews-summary').style.display = 'flex';
+    
+    // Rest of your existing summary update code
+    const formattedRating = data.averageRating?.toFixed(2);
+    starsElement.innerHTML = generateStars(data.averageRating);
+    ratingNumberElement.textContent = `${formattedRating} out of 5`;
+    reviewCountElement.textContent = `Based on ${data.totalReviews} reviews`;
 
-      starsElement.innerHTML = generateStars(data.averageRating);
+    const ratingCounts = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
 
-      ratingNumberElement.textContent = `${formattedRating} out of 5`;
-
-      reviewCountElement.textContent = `Based on ${data.totalReviews} reviews`;
-
-      const ratingCounts = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
-
-      data.reviews.forEach((review) => {
-        const rating = review.rating;
-        if (rating >= 1 && rating <= 5) {
-          ratingCounts[rating]++;
-        }
-      });
-
-      for (let i = 5; i >= 1; i--) {
-        const index = 5 - i;
-
-        const percentage = data.totalReviews > 0 ? (ratingCounts[i] / data.totalReviews) * 100 : 0;
-
-        const progressBar = ratingBars[index].querySelector('.progress-bar');
-        const countElement = ratingBars[index].querySelector('.rating-count');
-
-        progressBar.style.width = `${percentage}%`;
-
-        countElement.textContent = ratingCounts[i];
+    data.reviews.forEach((review) => {
+      const rating = review.rating;
+      if (rating >= 1 && rating <= 5) {
+        ratingCounts[rating]++;
       }
+    });
+
+    for (let i = 5; i >= 1; i--) {
+      const index = 5 - i;
+      const percentage = data.totalReviews > 0 ? (ratingCounts[i] / data.totalReviews) * 100 : 0;
+      const progressBar = ratingBars[index].querySelector('.progress-bar');
+      const countElement = ratingBars[index].querySelector('.rating-count');
+      progressBar.style.width = `${percentage}%`;
+      countElement.textContent = ratingCounts[i];
     }
+  }
+}
 
     function generateStars(rating) {
       let starsHTML = '';
@@ -1225,4 +1263,5 @@ function closeModal() {
       });
     }
   });
+  
 </script>
