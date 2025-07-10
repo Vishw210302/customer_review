@@ -6,15 +6,11 @@ const ReviewWidgetSettings = () => {
   const [settings, setSettings] = useState({
     title: "Customer Reviews",
     subtitle: "See what our customers are saying about us",
+    mainTitle: "What Our Customers Say",
+  mainSubtitle: "Discover why our customers love our products and services",
     primaryColor: "#f59e0b",
+    showRatingBreakdown: true,   
     
-   
-    showRatingBreakdown: true,
-    showWriteReviewButton: true,
-    
-    
-    
-    showPagination: true,
     buttonText: "Write a Review",
     
     showOverallRating: true,
@@ -30,16 +26,19 @@ const ReviewWidgetSettings = () => {
       name: "Sarah J.",
       rating: 5,
       text: "This product exceeded all my expectations. The quality is outstanding, and it arrived earlier than expected!",
+      date: "27/05/2025",
     },
     {
       name: "Michael T.",
       rating: 5,
       text: "Absolutely worth every penny. This has become an essential part of my daily routine.",
+      date: "01/06/2025",
     },
     {
       name: "Elena R.",
       rating: 4,
       text: "Great product, very satisfied with my purchase. Would definitely recommend to friends.",
+      date: "15/12/2024",
     }
   ];
 
@@ -112,6 +111,10 @@ const ReviewWidgetSettings = () => {
       fontSize: "28px",
       letterSpacing: "3px"
     },
+    allReviews: {
+      display:"flex",
+      justifyContent:"space-between"
+    },
     ratingNumber: {
       fontSize: "24px",
       fontWeight: 700,
@@ -177,7 +180,7 @@ const ReviewWidgetSettings = () => {
       pointerEvents: index === activeReview ? "auto" : "none"
     }),
     reviewContent: {
-      textAlign: "center"
+      textAlign: "left"
     },
     authorName: {
       fontSize: "17px",
@@ -192,14 +195,16 @@ const ReviewWidgetSettings = () => {
       letterSpacing: "3px"
     },
     reviewText: {
-      fontStyle: "italic",
-      color: 
-      '#4a5568',
+      color:'#4a5568',
       fontSize: "15px",
       lineHeight: 1.7,
       margin: "12px 0",
-      maxWidth: "500px",
+      
       display: "inline-block"
+    },
+    reviewDate:{
+      color:'#4a5568',
+        fontSize: "15px",
     },
     paginationContainer: {
       display: "flex",
@@ -381,7 +386,44 @@ const ReviewWidgetSettings = () => {
 
        
 
-        
+        <div style={{ marginBottom: '20px' }}>
+  <label style={{ display: 'block', marginBottom: '5px', fontWeight: '500', fontSize: '14px' }}>
+    <Type size={16} style={{ display: 'inline', marginRight: '5px' }} />
+    Main Title
+  </label>
+  <input
+    type="text"
+    value={settings.mainTitle}
+    onChange={(e) => handleSettingChange('mainTitle', e.target.value)}
+    style={{
+      width: '100%',
+      padding: '8px',
+      border: '1px solid #e2e8f0',
+      borderRadius: '6px',
+      fontSize: '14px'
+    }}
+  />
+</div>
+
+<div style={{ marginBottom: '20px' }}>
+  <label style={{ display: 'block', marginBottom: '5px', fontWeight: '500', fontSize: '14px' }}>
+    <Type size={16} style={{ display: 'inline', marginRight: '5px' }} />
+    Main Subtitle
+  </label>
+  <input
+    type="textarea"
+    value={settings.mainSubtitle}
+    onChange={(e) => handleSettingChange('mainSubtitle', e.target.value)}
+    style={{
+      width: '100%',
+      padding: '8px',
+      border: '1px solid #e2e8f0',
+      borderRadius: '6px',
+      fontSize: '14px'
+    }}
+  />
+</div>
+
         
         
           </div>
@@ -394,7 +436,7 @@ const ReviewWidgetSettings = () => {
         <div style={{ marginBottom: '20px' }}>
           <label style={{ display: 'block', marginBottom: '5px', fontWeight: '500', fontSize: '14px' }}>
             <Palette size={16} style={{ display: 'inline', marginRight: '5px' }} />
-            Primary Color
+            Star Color
           </label>
           <input
             type="color"
@@ -447,29 +489,9 @@ const ReviewWidgetSettings = () => {
           </label>
         </div>
 
-        <div style={{ marginBottom: '20px' }}>
-          <label style={{ display: 'flex', alignItems: 'center', fontSize: '14px', fontWeight: '500' }}>
-            <input
-              type="checkbox"
-              checked={settings.showWriteReviewButton}
-              onChange={(e) => handleSettingChange('showWriteReviewButton', e.target.checked)}
-              style={{ marginRight: '8px' }}
-            />
-            Show Write Review Button
-          </label>
-        </div>
+      
 
-        <div style={{ marginBottom: '20px' }}>
-          <label style={{ display: 'flex', alignItems: 'center', fontSize: '14px', fontWeight: '500' }}>
-            <input
-              type="checkbox"
-              checked={settings.showPagination}
-              onChange={(e) => handleSettingChange('showPagination', e.target.checked)}
-              style={{ marginRight: '8px' }}
-            />
-            Show Pagination Dots
-          </label>
-        </div>
+       
 
     
           </div>
@@ -478,12 +500,13 @@ const ReviewWidgetSettings = () => {
 
       {/* Preview */}
       <div style={{ flex: 1, minWidth: '600px' }}>
+        
         <div style={{ padding: '20px', borderRadius: '12px', marginBottom: '20px' }}>
           <div style={{ display: 'flex', alignItems: 'center', marginBottom: '16px' }}>
             <Eye size={20} style={{ marginRight: '8px' }} />
             <h3 style={{ margin: 0, fontSize: '16px', fontWeight: '600' }}>Live Preview</h3>
           </div>
-          
+         
           <div style={getWidgetStyles().container}>
             <div style={{ marginBottom: '24px' }}>
               <h3 style={getWidgetStyles().title}>{settings.title}</h3>
@@ -512,40 +535,62 @@ const ReviewWidgetSettings = () => {
                 </div>
               )}
 
-              {settings.showWriteReviewButton && (
+             
                 <div style={{ display: 'flex', justifyContent: 'center', marginTop: '20px' }}>
                   <button style={getWidgetStyles().writeReviewButton}>
                     {settings.buttonText}
                   </button>
                 </div>
-              )}
+              
             </div>
 
-            <div style={getWidgetStyles().reviewsContainer}>
-              {reviewData.map((review, index) => (
-                <div key={index} style={getWidgetStyles().reviewCard(index)}>
-                  <div style={getWidgetStyles().reviewContent}>
-                    <h4 style={getWidgetStyles().authorName}>{review.name}</h4>
-                    <div style={getWidgetStyles().ratingStars}>{renderStars(review.rating)}</div>
-                    <p style={getWidgetStyles().reviewText}>
-                      "{review.text}"
-                    </p>
-                  </div>
-                </div>
-              ))}
-            </div>
 
-            {settings.showPagination && (
-              <div style={getWidgetStyles().paginationContainer}>
-                {[0, 1, 2].map(index => (
-                  <div
-                    key={index}
-                    onClick={() => setActiveReview(index)}
-                    style={getWidgetStyles().paginationDot(index === activeReview)}
-                  />
-                ))}
-              </div>
-            )}
+
+           <div style={{
+  display: "flex",
+  flexDirection: "column",
+
+  marginTop: "20px"
+}}>
+  <div style={{ marginBottom: '20px', textAlign: 'center' }}>
+  <h1 style={{ fontSize: '28px', fontWeight: '700', margin: '0', color: '#2d3748' }}>
+    {settings.mainTitle || "What Our Customers Say"}
+  </h1>
+  <p style={{ fontSize: '16px', color: '#718096', margin: '8px 0 24px 0' }}>
+    {settings.mainSubtitle || "Discover why our customers love our products and services"}
+  </p>
+</div>
+
+  {reviewData.map((review, index) => (
+    <div
+      key={index}
+      style={{
+        backgroundColor: '#ffffff',
+        borderRadius: `${settings.borderRadius}px`,
+        padding: "24px",
+           borderTop: "1px solid #8080802b",
+           borderBottom: "1px solid #8080802b",
+      }}
+    >
+      <div style={getWidgetStyles().allReviews}>
+      <div style={getWidgetStyles().reviewContent}>
+        <h4 style={getWidgetStyles().authorName}>{review.name}</h4>
+        <div style={getWidgetStyles().ratingStars}>{renderStars(review.rating)}</div>
+        <p style={getWidgetStyles().reviewText}>
+          {review.text}
+        </p>
+      </div>
+      <div className='reiview-date'>
+         <p style={getWidgetStyles().reviewDate}>
+          {review.date}
+        </p>
+        </div>
+        </div>
+    </div>
+  ))}
+</div>
+
+          
           </div>
         </div>
       </div>

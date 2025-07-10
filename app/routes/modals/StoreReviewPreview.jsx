@@ -29,7 +29,7 @@ function StoreReviewSettings() {
         buttonText: 'Write a Review',
         reviewSectionTitle: 'Recent Reviews',
         showReviewDates: true,
-        truncateReviews: true
+        
     });
 
     const [activeTab, setActiveTab] = useState('general');
@@ -159,10 +159,10 @@ function StoreReviewSettings() {
         },
         reviewMessage: {
             color: '#374151',
-            display: settings.truncateReviews ? '-webkit-box' : 'block',
-            WebkitLineClamp: settings.truncateReviews ? 2 : 'none',
+            display: 'block',
+            WebkitLineClamp: 'none',
             WebkitBoxOrient: 'vertical',
-            overflow: settings.truncateReviews ? 'hidden' : 'visible'
+            overflow: 'hidden'
         }
     });
 
@@ -232,8 +232,8 @@ function StoreReviewSettings() {
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                             <div>
                                 <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '500' }}>
-                                    Store Name
-                                </label>
+                                Title
+                                    </label>
                                 <input
                                     type="text"
                                     value={settings.storeName}
@@ -252,7 +252,7 @@ function StoreReviewSettings() {
 
                             <div>
                                 <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '500' }}>
-                                    Total Reviews
+                                    Total Reviews Text
                                 </label>
                                 <input
                                     type="text"
@@ -329,16 +329,7 @@ function StoreReviewSettings() {
                                 </label>
                             </div>
 
-                            <div>
-                                <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: '500' }}>
-                                    <input
-                                        type="checkbox"
-                                        checked={settings.truncateReviews}
-                                        onChange={(e) => updateSetting('truncateReviews', e.target.checked)}
-                                    />
-                                    Truncate Long Reviews
-                                </label>
-                            </div>
+                            
                         </div>
                     )}
 
