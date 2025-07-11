@@ -285,13 +285,7 @@ function ProductRatingSettings() {
                                         }}
                                     />
                                 </div>
-                            )}
-
-                           
-
-                          
-
-                          
+                            )}                     
                         </div>
                     )}
 
