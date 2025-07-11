@@ -12,18 +12,20 @@ function StoreReviewSettings() {
         
         // Style Settings
         primaryColor: '#000000',
-        accentColor: '#EFF6FF',
+        writeButtonTextColor: '#ffffff',
         starColor: '#f59e0b',
         textColor: '#1F2937',
         backgroundColor: '#ffffff',
         borderRadius: '0.75rem',
-        shadowIntensity: 'medium',
-        
+      
         // Layout Settings
-        headerGradient: true,
-        buttonStyle: 'rounded',
-       
-        compactMode: false,
+        titleFontSize: '16px',
+        subTitleFontSize: '15px',
+        reviewNameFontSize: '15px',
+        reviewMessageFontSize: '15px',
+        dateFontSize: '15px',
+        starSize: '20px',
+        starSpacing: '2px',
         
         // Content Settings
         buttonText: 'Write a Review',
@@ -31,6 +33,7 @@ function StoreReviewSettings() {
         showReviewDates: true,
         
     });
+
 
     const [activeTab, setActiveTab] = useState('general');
 
@@ -65,8 +68,9 @@ function StoreReviewSettings() {
                 key={index}
                 style={{
                     color: index < rating ? settings.starColor : '#D1D5DB',
-                    fontSize: '24px',
-                    marginRight: '2px'
+                    fontSize: settings.starSize,
+                    marginRight: '2px',
+                      padding: `0 ${settings.starSpacing}`,
                 }}
             >
                 ★
@@ -81,15 +85,13 @@ function StoreReviewSettings() {
             boxShadow: settings.shadowIntensity === 'low' ? '0 1px 3px rgba(0,0,0,0.1)' :
                       settings.shadowIntensity === 'medium' ? '0 4px 6px rgba(0,0,0,0.1)' :
                       '0 10px 15px rgba(0,0,0,0.1)',
-            borderRadius: settings.borderRadius,
+          
             overflow: 'hidden',
-            fontSize: settings.compactMode ? '0.875rem' : '1rem'
+            fontSize: '1rem'
         },
         headerGradient: {
-            padding: settings.compactMode ? '1rem' : '1.25rem',
-            background: settings.headerGradient 
-                ? `linear-gradient(to right, ${settings.accentColor}, ${settings.accentColor}dd)` 
-                : settings.backgroundColor
+            padding: '1.25rem',
+            borderBottom: '1px solid grey',
         },
         headerContainer: {
             display: 'flex',
@@ -97,11 +99,12 @@ function StoreReviewSettings() {
             alignItems: 'center'
         },
         headerTitle: {
-            fontSize: settings.compactMode ? '1.25rem' : '1.5rem',
+            fontSize: settings.titleFontSize,
             fontWeight: 'bold',
             color: settings.textColor,
             margin: 0
         },
+
         starContainer: {
             display: 'flex',
             alignItems: 'center',
@@ -114,24 +117,24 @@ function StoreReviewSettings() {
             color: settings.textColor
         },
         reviewCountText: {
-            fontSize: '0.875rem',
-            color: '#6B7280',
+            fontSize: settings.subTitleFontSize,
+            color: settings.textColor,
             marginTop: '0.25rem'
         },
         writeReviewButton: {
             backgroundColor: settings.primaryColor,
-            color: 'white',
-            padding: settings.compactMode ? '0.5rem 1rem' : '0.625rem 1.25rem',
-            borderRadius: settings.buttonStyle === 'rounded' ? '50px' : '0.375rem',
+            color: settings.writeButtonTextColor,
+            padding: '0.625rem 1.25rem',
+            borderRadius: '50px',
             border: 'none',
             cursor: 'pointer',
             fontWeight: '500'
-        },
+        },  
         reviewSection: {
-            padding: settings.compactMode ? '1rem' : '1.25rem'
+            padding: '1.25rem'
         },
         reviewSectionTitle: {
-            fontSize: '1.125rem',
+            fontSize: settings.titleFontSize,
             fontWeight: 'bold',
             marginBottom: '1rem',
             color: settings.textColor,
@@ -151,19 +154,22 @@ function StoreReviewSettings() {
         reviewName: {
             fontWeight: 'bold',
             marginRight: '0.75rem',
-            color: settings.textColor
+            color: settings.textColor,
+            fontSize: settings.reviewNameFontSize
         },
         reviewDate: {
-            fontSize: '0.875rem',
-            color: '#6B7280'
+            fontSize: settings.dateFontSize,
+            color: settings.textColor
         },
         reviewMessage: {
-            color: '#374151',
+            color: settings.textColor,
             display: 'block',
             WebkitLineClamp: 'none',
             WebkitBoxOrient: 'vertical',
-            overflow: 'hidden'
+            overflow: 'hidden',
+            fontSize: settings.reviewMessageFontSize
         }
+       
     });
 
     const styles = getPreviewStyles();
@@ -189,10 +195,11 @@ function StoreReviewSettings() {
                         color: '#1f2937',
                         display: 'flex',
                         alignItems: 'center',
+                      
                         gap: '0.5rem'
                     }}>
                         <Settings size={20} />
-                        Widget Settings
+                        Store Widget Settings
                     </h2>
                 </div>
 
@@ -337,7 +344,7 @@ function StoreReviewSettings() {
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                             <div>
                                 <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '500' }}>
-                                    Primary Color (Button)
+                                    Button Background
                                 </label>
                                 <input
                                     type="color"
@@ -352,14 +359,14 @@ function StoreReviewSettings() {
                                 />
                             </div>
 
-                            <div>
+                        <div>
                                 <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '500' }}>
-                                    Accent Color (Header)
+                                   Button Text
                                 </label>
                                 <input
                                     type="color"
-                                    value={settings.accentColor}
-                                    onChange={(e) => updateSetting('accentColor', e.target.value)}
+                                    value={settings.writeButtonTextColor}
+                                    onChange={(e) => updateSetting('writeButtonTextColor', e.target.value)}
                                     style={{
                                         width: '100%',
                                         height: '40px',
@@ -368,10 +375,9 @@ function StoreReviewSettings() {
                                     }}
                                 />
                             </div>
-
                             <div>
                                 <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '500' }}>
-                                    Star Color
+                                    Star
                                 </label>
                                 <input
                                     type="color"
@@ -388,7 +394,7 @@ function StoreReviewSettings() {
 
                             <div>
                                 <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '500' }}>
-                                    Text Color
+                                    Review Text 
                                 </label>
                                 <input
                                     type="color"
@@ -405,7 +411,7 @@ function StoreReviewSettings() {
 
                             <div>
                                 <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '500' }}>
-                                    Background Color
+                                    Background
                                 </label>
                                 <input
                                     type="color"
@@ -420,62 +426,22 @@ function StoreReviewSettings() {
                                 />
                             </div>
 
-                            <div>
-                                <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '500' }}>
-                                    Border Radius
-                                </label>
-                                <select
-                                    value={settings.borderRadius}
-                                    onChange={(e) => updateSetting('borderRadius', e.target.value)}
-                                    style={{
-                                        width: '100%',
-                                        padding: '0.5rem',
-                                        border: '1px solid #d1d5db',
-                                        borderRadius: '0.375rem',
-                                        fontSize: '0.875rem'
-                                    }}
-                                >
-                                    <option value="0">Sharp (0px)</option>
-                                    <option value="0.25rem">Small (4px)</option>
-                                    <option value="0.5rem">Medium (8px)</option>
-                                    <option value="0.75rem">Large (12px)</option>
-                                    <option value="1rem">Extra Large (16px)</option>
-                                </select>
-                            </div>
+                          
 
-                            <div>
-                                <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '500' }}>
-                                    Shadow Intensity
-                                </label>
-                                <select
-                                    value={settings.shadowIntensity}
-                                    onChange={(e) => updateSetting('shadowIntensity', e.target.value)}
-                                    style={{
-                                        width: '100%',
-                                        padding: '0.5rem',
-                                        border: '1px solid #d1d5db',
-                                        borderRadius: '0.375rem',
-                                        fontSize: '0.875rem'
-                                    }}
-                                >
-                                    <option value="none">None</option>
-                                    <option value="low">Low</option>
-                                    <option value="medium">Medium</option>
-                                    <option value="high">High</option>
-                                </select>
-                            </div>
                         </div>
                     )}
 
                     {activeTab === 'layout' && (
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                            <div>
+                           
+
+                           <div>
                                 <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '500' }}>
-                                    Button Style
+                                    Title Font Size
                                 </label>
                                 <select
-                                    value={settings.buttonStyle}
-                                    onChange={(e) => updateSetting('buttonStyle', e.target.value)}
+                                    value={settings.titleFontSize}
+                                    onChange={(e) => updateSetting('titleFontSize', e.target.value)}
                                     style={{
                                         width: '100%',
                                         padding: '0.5rem',
@@ -484,32 +450,147 @@ function StoreReviewSettings() {
                                         fontSize: '0.875rem'
                                     }}
                                 >
-                                    <option value="rounded">Rounded</option>
-                                    <option value="square">Square</option>
+                                    <option value="14px">Extra Small (14px)</option>
+                                    <option value="16px">Small (16px)</option>
+                                    <option value="18px">Medium (18px)</option>
+                                    <option value="20px">Large (20px)</option>
+                                    <option value="22px">Extra Large (22px)</option>
                                 </select>
                             </div>
 
-                            <div>
-                                <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: '500' }}>
-                                    <input
-                                        type="checkbox"
-                                        checked={settings.headerGradient}
-                                        onChange={(e) => updateSetting('headerGradient', e.target.checked)}
-                                    />
-                                    Header Gradient Background
+ <div>
+              <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '500' }}>
+                  Subtitle Font Size
+              </label>
+              <select
+                  value={settings.subTitleFontSize}
+                  onChange={(e) => updateSetting('subTitleFontSize', e.target.value)}
+                  style={{
+                      width: '100%',
+                      padding: '0.5rem',
+                      border: '1px solid #d1d5db',
+                      borderRadius: '0.375rem',
+                      fontSize: '0.875rem'
+                  }}
+              >
+                  <option value="12px">Extra Small (12px)</option>
+                  <option value="14px">Small (14px)</option>
+                  <option value="15px">Medium (15px)</option>
+                  <option value="16px">Large (16px)</option>
+                  <option value="18px">Extra Large (18px)</option>
+              </select>
+          </div>
+          <div>
+              <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '500' }}>
+                  Reviewer FontSize
+              </label>
+              <select
+                  value={settings.reviewNameFontSize}
+                  onChange={(e) => updateSetting('reviewNameFontSize', e.target.value)}
+                  style={{
+                      width: '100%',
+                      padding: '0.5rem',
+                      border: '1px solid #d1d5db',
+                      borderRadius: '0.375rem',
+                      fontSize: '0.875rem'
+                  }}
+              >
+                  <option value="12px">Extra Small (12px)</option>
+                  <option value="14px">Small (14px)</option>
+                  <option value="15px">Medium (15px)</option>
+                  <option value="16px">Large (16px)</option>
+                  <option value="18px">Extra Large (18px)</option>
+              </select>
+          </div>
+           <div>
+              <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '500' }}>
+                  Reviewer Message FontSize
+              </label>
+              <select
+                  value={settings.reviewMessageFontSize}
+                  onChange={(e) => updateSetting('reviewMessageFontSize', e.target.value)}
+                  style={{
+                      width: '100%',
+                      padding: '0.5rem',
+                      border: '1px solid #d1d5db',
+                      borderRadius: '0.375rem',
+                      fontSize: '0.875rem'
+                  }}
+              >
+                  <option value="12px">Extra Small (12px)</option>
+                  <option value="14px">Small (14px)</option>
+                  <option value="15px">Medium (15px)</option>
+                  <option value="16px">Large (16px)</option>
+                  <option value="18px">Extra Large (18px)</option>
+              </select>
+          </div>
+            <div>
+              <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '500' }}>
+                 Date FontSize
+              </label>
+              <select
+                  value={settings.dateFontSize}
+                  onChange={(e) => updateSetting('dateFontSize', e.target.value)}
+                  style={{
+                      width: '100%',
+                      padding: '0.5rem',
+                      border: '1px solid #d1d5db',
+                      borderRadius: '0.375rem',
+                      fontSize: '0.875rem'
+                  }}
+              >
+                  <option value="12px">Extra Small (12px)</option>
+                  <option value="14px">Small (14px)</option>
+                  <option value="15px">Medium (15px)</option>
+                  <option value="16px">Large (16px)</option>
+                  <option value="18px">Extra Large (18px)</option>
+              </select>
+          </div>
+            <div>
+              <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '500' }}>
+                  Star Size
+              </label>
+              <select
+                  value={settings.starSize}
+                  onChange={(e) => updateSetting('starSize', e.target.value)}
+                  style={{
+                      width: '100%',
+                      padding: '0.5rem',
+                      border: '1px solid #d1d5db',
+                      borderRadius: '0.375rem',
+                      fontSize: '0.875rem'
+                  }}
+              >
+                  <option value="16px">Small (16px)</option>
+                  <option value="18px">Medium (18px)</option>
+                  <option value="20px">Large (20px)</option>
+                  <option value="24px">Extra Large (24px)</option>
+                  <option value="28px">Huge (28px)</option>
+              </select>
+          </div>
+          <div>
+                                <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '500' }}>
+                                    Star Spacing
                                 </label>
+                                <select
+                                    value={settings.starSpacing}
+                                    onChange={(e) => updateSetting('starSpacing', e.target.value)}
+                                    style={{
+                                        width: '100%',
+                                        padding: '0.5rem',
+                                        border: '1px solid #d1d5db',
+                                        borderRadius: '0.375rem',
+                                        fontSize: '0.875rem'
+                                    }}
+                                >
+                                    <option value="0px">None (0px)</option>
+                                    <option value="1px">Tight (1px)</option>
+                                    <option value="2px">Normal (2px)</option>
+                                    <option value="3px">Loose (3px)</option>
+                                    <option value="4px">Extra Loose (4px)</option>
+                                </select>
                             </div>
-
-                            <div>
-                                <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: '500' }}>
-                                    <input
-                                        type="checkbox"
-                                        checked={settings.compactMode}
-                                        onChange={(e) => updateSetting('compactMode', e.target.checked)}
-                                    />
-                                    Compact Mode
-                                </label>
-                            </div>
+                           
                         </div>
                     )}
                 </div>
@@ -568,7 +649,7 @@ function StoreReviewSettings() {
                                         borderBottom: index === Math.min(settings.maxReviewsToShow, sampleReviews.length) - 1 ? 'none' : '1px solid #E5E7EB'
                                     }}>
                                         <div style={styles.reviewHeader}>
-                                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                            <div style={{ display: 'flex', alignItems: 'center'  }}>
                                                 <h4 style={styles.reviewName}>{review.name}</h4>
                                                 {renderStars(review.rating)}
                                             </div>

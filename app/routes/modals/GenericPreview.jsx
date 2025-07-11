@@ -9,16 +9,41 @@ const ReviewWidgetSettings = () => {
     mainTitle: "What Our Customers Say",
   mainSubtitle: "Discover why our customers love our products and services",
     primaryColor: "#f59e0b",
+    textColor: "#000000",
+     writeButtonText: "#ffffff",
+    buttonBackground: "#000000",
     showRatingBreakdown: true,   
     
     buttonText: "Write a Review",
     
     showOverallRating: true,
     
-  
+  titleFontSize: '15px',
+  subTitleFontSize: '15px',
+  starSize: '20px',
     
   });
+const updateSetting = (key, value) => {
+        setSettings(prev => ({ ...prev, [key]: value }));
+    };
+    const renderStars = (rating) => {
+        return Array.from({ length: 5 }).map((_, index) => (
+            <span
+                key={index}
+                style={{
+                    fontSize: settings.starSize,
+                    padding: `0 ${settings.starSpacing}`,
+                    color: index < rating ? settings.starColor : settings.emptyStarColor
+                }}
+                aria-hidden="true"
+            >
+                {index < rating ? '★' : '☆'}
+            </span>
+        ));
+         return '★'.repeat(rating) + '☆'.repeat(5 - rating);
+    };
 
+ 
   const [activeReview, setActiveReview] = useState(0);
 
   const reviewData = [
@@ -73,18 +98,18 @@ const ReviewWidgetSettings = () => {
       fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
       boxShadow: "0 2px 10px rgba(0, 0, 0, 0.1)",
       margin: "0 auto",
-      color: '#2d3748'
+      color: settings.textColor
     },
     title: {
-      fontSize: "20px",
+      fontSize: settings.titleFontSize,
       fontWeight: "700",
-      color: '#2d3748',
+      color: settings.textColor,
       margin: "0 0 8px 0",
       textAlign: "center"
     },
     subtitle: {
-      fontSize: "15px",
-      color: '#718096',
+      fontSize: settings.subTitleFontSize,
+      color: settings.textColor,
       margin: 0,
       textAlign: "center"
     },
@@ -108,8 +133,8 @@ const ReviewWidgetSettings = () => {
     },
     stars: {
       color: settings.primaryColor,
-      fontSize: "28px",
-      letterSpacing: "3px"
+      fontSize: settings.starSize,
+      letterSpacing: settings.starSpacing
     },
     allReviews: {
       display:"flex",
@@ -119,11 +144,11 @@ const ReviewWidgetSettings = () => {
       fontSize: "24px",
       fontWeight: 700,
       marginTop: "8px",
-      color: '#2d3749'
+      color: settings.textColor
     },
     reviewCount: {
       fontSize: "15px",
-      color: '#718096',
+      color: settings.textColor,
       marginTop: "5px"
     },
     ratingBreakdown: {
@@ -143,12 +168,12 @@ const ReviewWidgetSettings = () => {
       minWidth: "120px"
     },
     ratingCount: {
-      color: '#718096',
+      color: settings.textColor,
       fontSize: "14px"
     },
     writeReviewButton: {
-      backgroundColor:'#000000',
-      color: '#ffffff',
+      backgroundColor:settings.buttonBackground,
+      color: settings.writeButtonText,
       border: "none",
       borderRadius: "50px",
       padding: "12px 24px",
@@ -185,7 +210,7 @@ const ReviewWidgetSettings = () => {
     authorName: {
       fontSize: "17px",
       fontWeight: "600",
-      color: '#2d3748',
+      color: settings.textColor,
       margin: "0 0 8px 0"
     },
     ratingStars: {
@@ -195,7 +220,7 @@ const ReviewWidgetSettings = () => {
       letterSpacing: "3px"
     },
     reviewText: {
-      color:'#4a5568',
+      color:settings.textColor,
       fontSize: "15px",
       lineHeight: 1.7,
       margin: "12px 0",
@@ -203,7 +228,7 @@ const ReviewWidgetSettings = () => {
       display: "inline-block"
     },
     reviewDate:{
-      color:'#4a5568',
+      color:settings.textColor,
         fontSize: "15px",
     },
     paginationContainer: {
@@ -222,9 +247,6 @@ const ReviewWidgetSettings = () => {
     })
   });
 
-  const renderStars = (rating) => {
-    return '★'.repeat(rating) + '☆'.repeat(5 - rating);
-  };
 
   return (
     <div style={{ display: 'flex', gap: '20px', padding: '20px', minHeight: '100vh', backgroundColor: '#f8f9fa' }}>
@@ -389,7 +411,7 @@ const ReviewWidgetSettings = () => {
         <div style={{ marginBottom: '20px' }}>
   <label style={{ display: 'block', marginBottom: '5px', fontWeight: '500', fontSize: '14px' }}>
     <Type size={16} style={{ display: 'inline', marginRight: '5px' }} />
-    Main Title
+    Review Title
   </label>
   <input
     type="text"
@@ -408,7 +430,7 @@ const ReviewWidgetSettings = () => {
 <div style={{ marginBottom: '20px' }}>
   <label style={{ display: 'block', marginBottom: '5px', fontWeight: '500', fontSize: '14px' }}>
     <Type size={16} style={{ display: 'inline', marginRight: '5px' }} />
-    Main Subtitle
+    Reviews Subtitle
   </label>
   <input
     type="textarea"
@@ -433,10 +455,64 @@ const ReviewWidgetSettings = () => {
         {activeTab === 'style' && (
           <div>
 
+    <div style={{ marginBottom: '20px' }}>
+          <label style={{ display: 'block', marginBottom: '5px', fontWeight: '500', fontSize: '14px' }}>
+            <Palette size={16} style={{ display: 'inline', marginRight: '5px' }} />
+            Text
+          </label>
+          <input
+            type="color"
+            value={settings.textColor}
+            onChange={(e) => handleSettingChange('textColor', e.target.value)}
+            style={{
+              width: '100%',
+              padding: '4px',
+              border: '1px solid #e2e8f0',
+              borderRadius: '6px',
+              height: '40px'
+            }}
+          />
+        </div>
         <div style={{ marginBottom: '20px' }}>
           <label style={{ display: 'block', marginBottom: '5px', fontWeight: '500', fontSize: '14px' }}>
             <Palette size={16} style={{ display: 'inline', marginRight: '5px' }} />
-            Star Color
+            Button Text
+          </label>
+          <input
+            type="color"
+            value={settings.writeButtonText}
+            onChange={(e) => handleSettingChange('writeButtonText', e.target.value)}
+            style={{
+              width: '100%',
+              padding: '4px',
+              border: '1px solid #e2e8f0',
+              borderRadius: '6px',
+              height: '40px'
+            }}
+          />
+        </div>
+        <div style={{ marginBottom: '20px' }}>
+          <label style={{ display: 'block', marginBottom: '5px', fontWeight: '500', fontSize: '14px' }}>
+            <Palette size={16} style={{ display: 'inline', marginRight: '5px' }} />
+            Button Background
+          </label>
+          <input
+            type="color"
+            value={settings.buttonBackground}
+            onChange={(e) => handleSettingChange('buttonBackground', e.target.value)}
+            style={{
+              width: '100%',
+              padding: '4px',
+              border: '1px solid #e2e8f0',
+              borderRadius: '6px',
+              height: '40px'
+            }}
+          />
+        </div>
+        <div style={{ marginBottom: '20px' }}>
+          <label style={{ display: 'block', marginBottom: '5px', fontWeight: '500', fontSize: '14px' }}>
+            <Palette size={16} style={{ display: 'inline', marginRight: '5px' }} />
+            Star
           </label>
           <input
             type="color"
@@ -452,12 +528,7 @@ const ReviewWidgetSettings = () => {
           />
         </div>
 
-       
-
-       
-
-       
-       
+      
           </div>
         )}
 
@@ -490,9 +561,94 @@ const ReviewWidgetSettings = () => {
         </div>
 
       
-
-       
-
+  <div>
+              <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '500' }}>
+                  Title Font Size
+              </label>
+              <select
+                  value={settings.titleFontSize}
+                  onChange={(e) => updateSetting('titleFontSize', e.target.value)}
+                  style={{
+                      width: '100%',
+                      padding: '0.5rem',
+                      border: '1px solid #d1d5db',
+                      borderRadius: '0.375rem',
+                      fontSize: '0.875rem'
+                  }}
+              >
+                  <option value="14px">Extra Small (14px)</option>
+                                    <option value="16px">Small (16px)</option>
+                                    <option value="18px">Medium (18px)</option>
+                                    <option value="20px">Large (20px)</option>
+                                    <option value="22px">Extra Large (22px)</option>
+              </select>
+          </div>
+           <div>
+              <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '500' }}>
+                  Subtitle Font Size
+              </label>
+              <select
+                  value={settings.subTitleFontSize}
+                  onChange={(e) => updateSetting('subTitleFontSize', e.target.value)}
+                  style={{
+                      width: '100%',
+                      padding: '0.5rem',
+                      border: '1px solid #d1d5db',
+                      borderRadius: '0.375rem',
+                      fontSize: '0.875rem'
+                  }}
+              >
+                  <option value="12px">Extra Small (12px)</option>
+                  <option value="14px">Small (14px)</option>
+                  <option value="15px">Medium (15px)</option>
+                  <option value="16px">Large (16px)</option>
+                  <option value="18px">Extra Large (18px)</option>
+              </select>
+          </div>
+        <div>
+              <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '500' }}>
+                  Star Size
+              </label>
+              <select
+                  value={settings.starSize}
+                  onChange={(e) => updateSetting('starSize', e.target.value)}
+                  style={{
+                      width: '100%',
+                      padding: '0.5rem',
+                      border: '1px solid #d1d5db',
+                      borderRadius: '0.375rem',
+                      fontSize: '0.875rem'
+                  }}
+              >
+                  <option value="16px">Small (16px)</option>
+                  <option value="18px">Medium (18px)</option>
+                  <option value="20px">Large (20px)</option>
+                  <option value="24px">Extra Large (24px)</option>
+                  <option value="28px">Huge (28px)</option>
+              </select>
+          </div>
+  <div>
+                                <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '500' }}>
+                                    Star Spacing
+                                </label>
+                                <select
+                                    value={settings.starSpacing}
+                                    onChange={(e) => updateSetting('starSpacing', e.target.value)}
+                                    style={{
+                                        width: '100%',
+                                        padding: '0.5rem',
+                                        border: '1px solid #d1d5db',
+                                        borderRadius: '0.375rem',
+                                        fontSize: '0.875rem'
+                                    }}
+                                >
+                                    <option value="0px">None (0px)</option>
+                                    <option value="1px">Tight (1px)</option>
+                                    <option value="2px">Normal (2px)</option>
+                                    <option value="3px">Loose (3px)</option>
+                                    <option value="4px">Extra Loose (4px)</option>
+                                </select>
+                            </div>
     
           </div>
         )}
@@ -553,10 +709,10 @@ const ReviewWidgetSettings = () => {
   marginTop: "20px"
 }}>
   <div style={{ marginBottom: '20px', textAlign: 'center' }}>
-  <h1 style={{ fontSize: '28px', fontWeight: '700', margin: '0', color: '#2d3748' }}>
+  <h1 style={{ fontSize: settings.titleFontSize, fontWeight: '700', margin: '0', color: settings.textColor }}>
     {settings.mainTitle || "What Our Customers Say"}
   </h1>
-  <p style={{ fontSize: '16px', color: '#718096', margin: '8px 0 24px 0' }}>
+  <p style={{ fontSize: settings.subTitleFontSize, color: settings.textColor, margin: '8px 0 24px 0' }}>
     {settings.mainSubtitle || "Discover why our customers love our products and services"}
   </p>
 </div>

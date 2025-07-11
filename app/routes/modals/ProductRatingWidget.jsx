@@ -200,7 +200,7 @@ function ProductRatingSettings() {
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                             <div>
                                 <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '500' }}>
-                                    Star Color
+                                    Star
                                 </label>
                                 <input
                                     type="color"
@@ -217,7 +217,7 @@ function ProductRatingSettings() {
 
                             <div>
                                 <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '500' }}>
-                                    Empty Star Color
+                                    Empty Star
                                 </label>
                                 <input
                                     type="color"
@@ -234,7 +234,7 @@ function ProductRatingSettings() {
 
                             <div>
                                 <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '500' }}>
-                                    Title Color
+                                    Title
                                 </label>
                                 <input
                                     type="color"
@@ -251,7 +251,7 @@ function ProductRatingSettings() {
 
                             <div>
                                 <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '500' }}>
-                                    Count Color
+                                    Count
                                 </label>
                                 <input
                                     type="color"
@@ -266,27 +266,12 @@ function ProductRatingSettings() {
                                 />
                             </div>
 
-                            <div>
-                                <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '500' }}>
-                                    Background Color
-                                </label>
-                                <input
-                                    type="color"
-                                    value={settings.backgroundColor}
-                                    onChange={(e) => updateSetting('backgroundColor', e.target.value)}
-                                    style={{
-                                        width: '100%',
-                                        height: '40px',
-                                        border: '1px solid #d1d5db',
-                                        borderRadius: '0.375rem'
-                                    }}
-                                />
-                            </div>
+                            
 
                             {settings.showCountBackground && (
                                 <div>
                                     <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '500' }}>
-                                        Count Background Color
+                                        Count Background
                                     </label>
                                     <input
                                         type="color"
@@ -547,11 +532,11 @@ function ProductRatingSettings() {
                             </span>
 
                             <div style={{ display: 'inline-flex' }}>
-                        <span style={{ fontSize: '20px', padding: '0 2px', color: '#ff9d2d' }} aria-hidden="true">★</span>
-                        <span style={{ fontSize: '20px', padding: '0 2px', color: '#ff9d2d' }} aria-hidden="true">★</span>
-                        <span style={{ fontSize: '20px', padding: '0 2px', color: '#ff9d2d' }} aria-hidden="true">★</span>
-                        <span style={{ fontSize: '20px', padding: '0 2px', color: '#ff9d2d' }} aria-hidden="true">★</span>
-                        <span style={{ fontSize: '20px', padding: '0 2px', color: '#d1d5db' }} aria-hidden="true">☆</span>
+                        <span style={{ fontSize: '20px', padding: '0 2px', color: settings.starColor  }} aria-hidden="true">★</span>
+                        <span style={{ fontSize: '20px', padding: '0 2px', color: settings.starColor  }} aria-hidden="true">★</span>
+                        <span style={{ fontSize: '20px', padding: '0 2px', color: settings.starColor  }} aria-hidden="true">★</span>
+                        <span style={{ fontSize: '20px', padding: '0 2px', color: settings.starColor  }} aria-hidden="true">★</span>
+                        <span style={{ fontSize: '20px', padding: '0 2px', color: settings.emptyStarColor }} aria-hidden="true">☆</span>
                     </div>
 
                            
