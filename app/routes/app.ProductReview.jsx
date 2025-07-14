@@ -14,7 +14,7 @@ import {
 } from "@shopify/polaris";
 import { DeleteIcon } from "@shopify/polaris-icons";
 import "@shopify/polaris/build/esm/styles.css";
-import React, { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { authenticate } from "../shopify.server";
 import DeleteButtonModal from "./modals/DeleteButtonModal";
 
@@ -26,9 +26,6 @@ export async function loader({ request }) {
 function ProductReview({
   reviews,
   pagination,
-  initialSearchQuery,
-  initialStatus,
-  initialRating,
   submit,
   deleteReview,
   updateReviewStatus,
@@ -37,7 +34,6 @@ function ProductReview({
   isLoading: parentIsLoading,
 }) {
   const navigation = useNavigation();
-  const { session } = useLoaderData();
   const isNavigationLoading =
     navigation.state === "loading" || navigation.state === "submitting";
   const isLoading = parentIsLoading || isNavigationLoading;
@@ -133,7 +129,7 @@ function ProductReview({
   const handleStatusChange = async (reviewId, newStatus) => {
     if (isLoading || isFiltering) return;
     try {
-      setProcessingAction(true); 
+      setProcessingAction(true);
       setReviewStatuses((prev) => ({ ...prev, [reviewId]: newStatus === "true" }));
       const result = await updateReviewStatus(reviewId, newStatus);
       if (result?.success) {
@@ -227,7 +223,7 @@ function ProductReview({
       onClick={() => handleDeleteModalOpen(review?._id)}
       accessibilityLabel={`Delete review by ${review?.name || "Unknown"}`}
       disabled={processingAction || isLoading || isFiltering}
-    />, 
+    />,
   ]);
 
   return (
