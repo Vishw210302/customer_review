@@ -11,6 +11,7 @@
     </div>
     <span class="rating-count" id="rating-count">({{ product.metafields.reviews.rating_count | default: 0 }})</span>
   </div>
+  {{ shop_name }}sdfsfdsf
 </div>
 
 <style>
@@ -67,15 +68,10 @@
     color: #4a5568;
     font-size: 14px;
     font-weight: 500;
-    {% comment %} background-color: #edf2f7; {% endcomment %}
     padding: 3px 8px;
     border-radius: 12px;
     transition: background-color 0.2s ease;
   }
-
-  {% comment %} .rating-container:hover .rating-count {
-    background-color: #e2e8f0;
-  } {% endcomment %}
 
   .reviews-loading {
     display: flex;
@@ -185,8 +181,96 @@
     const ratingCountElement = document.getElementById('rating-count');
 
     const GET_REVIEWS_API = `https://checklist.codecrewinfotech.com/api/getReview/{{ shop_name }}/{{ product_id }}`;
+    const GET_RATING_CONFIG_API = `https://00baafa1fe1b.ngrok-free.app/api/ratingConfig/{{ shop_name }}`;
 
-    fetchReviews();
+    fetchRatingConfig();
+
+    async function fetchRatingConfig() {
+      try {
+        const response = await fetch(GET_RATING_CONFIG_API, {
+          method: 'GET',
+          headers: {
+            Accept: 'application/json',
+            'Content-Type': 'application/json',
+            'x-api-key': 'abcdefg',
+            'ngrok-skip-browser-warning': 'true',
+          },
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const configData = await response.json();
+        applyRatingConfig(configData);
+
+        fetchReviews();
+      } catch (error) {
+        console.error('Error fetching rating config:', error);
+        fetchReviews();
+      }
+    }
+
+    function applyRatingConfig(config) {
+      const ratingContainer = document.querySelector('.rating-container');
+      const ratingSummary = document.querySelector('.rating-summary');
+      const ratingLabel = document.querySelector('.rating-label');
+      const starsContainer = document.querySelector('.stars-container');
+      const ratingCount = document.querySelector('.rating-count');
+
+      if (ratingContainer) {
+        ratingContainer.style.backgroundColor = config.backgroundColor || '#ffffff';
+        ratingContainer.style.padding = config.padding || '12px';
+        ratingContainer.style.textAlign = config.alignment || 'center';
+      }
+
+      if (ratingSummary) {
+        ratingSummary.style.gap = config.gap || '8px';
+        if (config.alignment === 'center') {
+          ratingSummary.style.justifyContent = 'center';
+        } else if (config.alignment === 'right') {
+          ratingSummary.style.justifyContent = 'flex-end';
+        } else {
+          ratingSummary.style.justifyContent = 'flex-start';
+        }
+      }
+
+      if (ratingLabel) {
+        ratingLabel.textContent = config.titleText || 'Customer Rating';
+        ratingLabel.style.color = config.titleColor || '#2d3748';
+        ratingLabel.style.fontSize = config.titleFontSize || '15px';
+        ratingLabel.style.fontWeight = config.titleWeight || '600';
+      }
+
+      const stars = document.querySelectorAll('.star');
+      stars.forEach((star) => {
+        star.style.fontSize = config.starSize || '20px';
+      });
+
+      if (ratingCount) {
+        ratingCount.style.color = config.countColor || '#4a5568';
+        ratingCount.style.fontSize = config.countFontSize || '14px';
+        ratingCount.style.fontWeight = config.countWeight || '500';
+      }
+
+      const style = document.createElement('style');
+      style.textContent = `
+        .star.filled {
+          color: ${config.starColor || '#ff9d2d'} !important;
+          text-shadow: 0 0 1px rgba(255, 215, 0, 0.4);
+        }
+        .star.empty {
+          color: ${config.emptyStarColor || '#d1d5db'} !important;
+        }
+        .star.partial {
+          color: ${config.emptyStarColor || '#d1d5db'} !important;
+        }
+        .star.partial::before {
+          color: ${config.starColor || '#ff9d2d'} !important;
+        }
+      `;
+      document.head.appendChild(style);
+    }
 
     async function fetchReviews() {
       try {
@@ -205,7 +289,6 @@
         const data = await response.json();
 
         updateRatingSummary(data);
-        {% comment %} renderReviews(data.reviews); {% endcomment %}
       } catch (error) {
         console.error('Error fetching reviews:', error);
       }
@@ -219,17 +302,14 @@
         const starValue = index + 1;
 
         if (starValue <= Math.floor(averageRating)) {
-          // Full star
           star.className = 'star filled';
           star.textContent = '★';
         } else if (starValue === Math.ceil(averageRating) && averageRating % 1 !== 0) {
-          // Partial star
           star.className = 'star partial';
           star.textContent = '☆';
           const percentFilled = (averageRating % 1) * 100;
           star.style.setProperty('--percent-filled', `${percentFilled}%`);
         } else {
-          // Empty star
           star.className = 'star empty';
           star.textContent = '☆';
         }

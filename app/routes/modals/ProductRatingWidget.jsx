@@ -1,6 +1,7 @@
+import { useLoaderData } from '@remix-run/react';
 import { Button } from '@shopify/polaris';
 import { Eye, Layout, Palette, Settings } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 const TABS = [
     { id: 'general', label: 'General', icon: Settings },
@@ -144,20 +145,11 @@ const STYLES = {
         maxWidth: '600px',
         width: '100%'
     },
-    successMessage: {
-        backgroundColor: '#d4edda',
-        color: '#155724',
+    loadingMessage: {
+        backgroundColor: '#e1f5fe',
+        color: '#0277bd',
         padding: '10px',
-        border: '1px solid #c3e6cb',
-        borderRadius: '4px',
-        marginBottom: '1rem',
-        textAlign: 'center'
-    },
-    errorMessage: {
-        backgroundColor: '#f8d7da',
-        color: '#721c24',
-        padding: '10px',
-        border: '1px solid #f5c6cb',
+        border: '1px solid #b3e5fc',
         borderRadius: '4px',
         marginBottom: '1rem',
         textAlign: 'center'
@@ -167,66 +159,58 @@ const STYLES = {
 function ProductRatingSettings() {
 
     const [activeTab, setActiveTab] = useState('general');
-
     const [loading, setLoading] = useState(false);
+    const [fetchLoading, setFetchLoading] = useState(false);
+    const { shopData } = useLoaderData();
+    const [settings, setSettings] = useState({});
+    const storeName = shopData?.myshopifyDomain;
 
-    const [message, setMessage] = useState('');
-
-    const [messageType, setMessageType] = useState('');
-
-    const [settings, setSettings] = useState({
-        titleText: 'Customer Rating',
-        starColor: '#ff9d2d',
-        emptyStarColor: '#d1d5db',
-        titleColor: '#2d3748',
-        countColor: '#4a5568',
-        backgroundColor: '#ffffff',
-        alignment: 'center',
-        titleFontSize: '15px',
-        starSize: '20px',
-        countFontSize: '14px',
-        gap: '8px',
-        padding: '12px',
-        titleWeight: '600',
-        countWeight: '500'
-    });
-
-    const updateSetting = (key, value) => {
-        setSettings(prev => ({ ...prev, [key]: value }));
+    const fetchRatingConfig = async () => {
+        setFetchLoading(true);
+        try {
+            const response = await fetch(`https://00baafa1fe1b.ngrok-free.app/api/ratingConfig/${storeName}`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'x-api-key': 'abcdefg',
+                    'ngrok-skip-browser-warning': true,
+                }
+            });
+            const detailsData = await response.json();
+            setSettings(detailsData?.data);
+        } catch (error) {
+            console.error('Error fetching rating config:', error);
+        } finally {
+            setFetchLoading(false);
+        }
     };
+
+    useEffect(() => {
+        fetchRatingConfig();
+    }, []);
 
     const saveSettings = async () => {
         setLoading(true);
-        setMessage('');
-        setMessageType('');
-
         try {
-            const response = await fetch('https://checklist.codecrewinfotech.com/api/saveProductRatingSettings', {
+            const response = await fetch(`https://00baafa1fe1b.ngrok-free.app/api/ratingConfig/${storeName}`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
+                    'x-api-key': 'abcdefg',
+                    'ngrok-skip-browser-warning': true,
                 },
                 body: JSON.stringify(settings)
             });
-
-            if (response.ok) {
-                const result = await response.json();
-                setMessage('Settings saved successfully!');
-                setMessageType('success');
-            } else {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
+            console.log("Response", response);
         } catch (error) {
             console.error('Error saving settings:', error);
-            setMessage('Failed to save settings. Please try again.');
-            setMessageType('error');
         } finally {
             setLoading(false);
-            setTimeout(() => {
-                setMessage('');
-                setMessageType('');
-            }, 5000);
         }
+    };
+
+    const handleChange = (key, value) => {
+        setSettings(prev => ({ ...prev, [key]: value }));
     };
 
     const getPreviewStyles = () => ({
@@ -279,23 +263,23 @@ function ProductRatingSettings() {
             {type === 'text' && (
                 <input
                     type="text"
-                    value={settings[key]}
-                    onChange={(e) => updateSetting(key, e.target.value)}
+                    value={settings[key] || ''}
+                    onChange={e => handleChange(key, e.target.value)}
                     style={{ ...STYLES.input, marginBottom: '10px' }}
                 />
             )}
             {type === 'color' && (
                 <input
                     type="color"
-                    value={settings[key]}
-                    onChange={(e) => updateSetting(key, e.target.value)}
+                    value={settings[key] || '#000000'}
+                    onChange={e => handleChange(key, e.target.value)}
                     style={STYLES.colorInput}
                 />
             )}
             {type === 'select' && (
                 <select
-                    value={settings[key]}
-                    onChange={(e) => updateSetting(key, e.target.value)}
+                    value={settings[key] || ''}
+                    onChange={e => handleChange(key, e.target.value)}
                     style={STYLES.input}
                 >
                     {options.map(option => (
@@ -314,9 +298,9 @@ function ProductRatingSettings() {
                 return (
                     <div style={STYLES.formGroup}>
                         {renderFormField('text', 'titleText', 'Title Text')}
-                        {message && (
-                            <div style={messageType === 'success' ? STYLES.successMessage : STYLES.errorMessage}>
-                                {message}
+                        {fetchLoading && (
+                            <div style={STYLES.loadingMessage}>
+                                Loading configuration...
                             </div>
                         )}
                         <Button
@@ -337,7 +321,16 @@ function ProductRatingSettings() {
                         {renderFormField('color', 'titleColor', 'Title')}
                         {renderFormField('color', 'countColor', 'Count')}
                         {renderFormField('color', 'backgroundColor', 'Background')}
+                        <Button
+                            variant="primary"
+                            onClick={saveSettings}
+                            loading={loading}
+                            disabled={loading}
+                        >
+                            {loading ? 'Saving...' : 'Save Product Rating Setting'}
+                        </Button>
                     </div>
+
                 );
             case 'layout':
                 return (
@@ -350,7 +343,16 @@ function ProductRatingSettings() {
                         {renderFormField('select', 'padding', 'Widget Padding', SELECT_OPTIONS.padding)}
                         {renderFormField('select', 'titleWeight', 'Title Font Weight', SELECT_OPTIONS.fontWeight)}
                         {renderFormField('select', 'countWeight', 'Count Font Weight', SELECT_OPTIONS.fontWeight)}
+                        <Button
+                            variant="primary"
+                            onClick={saveSettings}
+                            loading={loading}
+                            disabled={loading}
+                        >
+                            {loading ? 'Saving...' : 'Save Product Rating Setting'}
+                        </Button>
                     </div>
+
                 );
             default:
                 return null;
