@@ -1,24 +1,186 @@
-import { Star, Settings, Palette, Type, Eye, Layout } from 'lucide-react';
-import React, { useState } from 'react';
+import { Button } from '@shopify/polaris';
+import { Eye, Layout, Palette, Settings } from 'lucide-react';
+import { useState } from 'react';
+
+const TABS = [
+    { id: 'general', label: 'General', icon: Settings },
+    { id: 'style', label: 'Style', icon: Palette },
+    { id: 'layout', label: 'Layout', icon: Layout }
+];
+
+const SELECT_OPTIONS = {
+    titleFontSize: [
+        { value: '12px', label: 'Extra Small (12px)' },
+        { value: '14px', label: 'Small (14px)' },
+        { value: '15px', label: 'Medium (15px)' },
+        { value: '16px', label: 'Large (16px)' },
+        { value: '18px', label: 'Extra Large (18px)' }
+    ],
+    starSize: [
+        { value: '16px', label: 'Small (16px)' },
+        { value: '18px', label: 'Medium (18px)' },
+        { value: '20px', label: 'Large (20px)' },
+        { value: '24px', label: 'Extra Large (24px)' },
+        { value: '28px', label: 'Huge (28px)' }
+    ],
+    countFontSize: [
+        { value: '12px', label: 'Extra Small (12px)' },
+        { value: '14px', label: 'Small (14px)' },
+        { value: '16px', label: 'Medium (16px)' },
+        { value: '18px', label: 'Large (18px)' }
+    ],
+    gap: [
+        { value: '4px', label: 'Small (4px)' },
+        { value: '6px', label: 'Medium (6px)' },
+        { value: '8px', label: 'Large (8px)' },
+        { value: '12px', label: 'Extra Large (12px)' }
+    ],
+    padding: [
+        { value: '8px', label: 'Small (8px)' },
+        { value: '12px', label: 'Medium (12px)' },
+        { value: '16px', label: 'Large (16px)' },
+        { value: '20px', label: 'Extra Large (20px)' }
+    ],
+    fontWeight: [
+        { value: '400', label: 'Normal (400)' },
+        { value: '500', label: 'Medium (500)' },
+        { value: '600', label: 'Semi Bold (600)' },
+        { value: '700', label: 'Bold (700)' }
+    ],
+    alignment: [
+        { value: 'flex-start', label: 'Left' },
+        { value: 'center', label: 'Center' },
+        { value: 'flex-end', label: 'Right' },
+        { value: 'space-between', label: 'Space Between' }
+    ]
+};
+
+const STYLES = {
+    container: {
+        display: 'flex',
+        minHeight: '100vh',
+        backgroundColor: '#f8fafc'
+    },
+    settingsPanel: {
+        width: '400px',
+        backgroundColor: 'white',
+        boxShadow: '2px 0 10px rgba(0,0,0,0.1)',
+        overflowY: 'auto'
+    },
+    header: {
+        padding: '1.5rem',
+        borderBottom: '1px solid #e5e7eb',
+        backgroundColor: '#f9fafb'
+    },
+    headerTitle: {
+        margin: 0,
+        fontSize: '1.25rem',
+        fontWeight: 'bold',
+        color: '#1f2937',
+        display: 'flex',
+        alignItems: 'center',
+        gap: '0.5rem'
+    },
+    tabNav: {
+        display: 'flex',
+        borderBottom: '1px solid #e5e7eb'
+    },
+    tabButton: {
+        flex: 1,
+        padding: '0.75rem',
+        border: 'none',
+        cursor: 'pointer',
+        fontSize: '0.875rem',
+        fontWeight: '500',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: '0.25rem'
+    },
+    tabContent: {
+        padding: '1.5rem'
+    },
+    formGroup: {
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '1rem'
+    },
+    label: {
+        display: 'block',
+        marginBottom: '0.5rem',
+        fontWeight: '500'
+    },
+    input: {
+        width: '100%',
+        padding: '0.5rem',
+        border: '1px solid #d1d5db',
+        borderRadius: '0.375rem',
+        fontSize: '0.875rem'
+    },
+    colorInput: {
+        width: '100%',
+        height: '40px',
+        border: '1px solid #d1d5db',
+        borderRadius: '0.375rem'
+    },
+    previewPanel: {
+        flex: 1,
+        padding: '2rem',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        backgroundColor: '#f1f5f9'
+    },
+    previewHeader: {
+        marginBottom: '1rem',
+        display: 'flex',
+        alignItems: 'center',
+        gap: '0.5rem',
+        color: '#64748b',
+        fontSize: '1.125rem',
+        fontWeight: '500'
+    },
+    previewContainer: {
+        maxWidth: '600px',
+        width: '100%'
+    },
+    successMessage: {
+        backgroundColor: '#d4edda',
+        color: '#155724',
+        padding: '10px',
+        border: '1px solid #c3e6cb',
+        borderRadius: '4px',
+        marginBottom: '1rem',
+        textAlign: 'center'
+    },
+    errorMessage: {
+        backgroundColor: '#f8d7da',
+        color: '#721c24',
+        padding: '10px',
+        border: '1px solid #f5c6cb',
+        borderRadius: '4px',
+        marginBottom: '1rem',
+        textAlign: 'center'
+    }
+};
 
 function ProductRatingSettings() {
+
+    const [activeTab, setActiveTab] = useState('general');
+
+    const [loading, setLoading] = useState(false);
+
+    const [message, setMessage] = useState('');
+
+    const [messageType, setMessageType] = useState('');
+
     const [settings, setSettings] = useState({
-        // General Settings
         titleText: 'Customer Rating',
-        rating: 4,
-        totalReviews: 42,
-       
-        
-        // Style Settings
         starColor: '#ff9d2d',
         emptyStarColor: '#d1d5db',
         titleColor: '#2d3748',
         countColor: '#4a5568',
         backgroundColor: '#ffffff',
-     
-        
-        
-        // Layout Settings
         alignment: 'center',
         titleFontSize: '15px',
         starSize: '20px',
@@ -26,48 +188,51 @@ function ProductRatingSettings() {
         gap: '8px',
         padding: '12px',
         titleWeight: '600',
-        countWeight: '500',
-        showCountBackground: false,
-        countBackgroundColor: '#edf2f7',
-        countBorderRadius: '12px',
-        
-        // Advanced Settings
-        starSpacing: '2px',
-        countPadding: '3px 8px',
-        showBorder: false,
-        borderColor: '#e2e8f0',
-        borderWidth: '1px'
+        countWeight: '500'
     });
-
-    const [activeTab, setActiveTab] = useState('general');
 
     const updateSetting = (key, value) => {
         setSettings(prev => ({ ...prev, [key]: value }));
     };
 
-    const renderStars = (rating) => {
-        return Array.from({ length: 5 }).map((_, index) => (
-            <span
-                key={index}
-                style={{
-                    fontSize: settings.starSize,
-                    padding: `0 ${settings.starSpacing}`,
-                    color: index < rating ? settings.starColor : settings.emptyStarColor
-                }}
-                aria-hidden="true"
-            >
-                {index < rating ? '★' : '☆'}
-            </span>
-        ));
+    const saveSettings = async () => {
+        setLoading(true);
+        setMessage('');
+        setMessageType('');
+
+        try {
+            const response = await fetch('https://checklist.codecrewinfotech.com/api/saveProductRatingSettings', {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(settings)
+            });
+
+            if (response.ok) {
+                const result = await response.json();
+                setMessage('Settings saved successfully!');
+                setMessageType('success');
+            } else {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+        } catch (error) {
+            console.error('Error saving settings:', error);
+            setMessage('Failed to save settings. Please try again.');
+            setMessageType('error');
+        } finally {
+            setLoading(false);
+            setTimeout(() => {
+                setMessage('');
+                setMessageType('');
+            }, 5000);
+        }
     };
 
     const getPreviewStyles = () => ({
         container: {
             padding: settings.padding,
-            
-            backgroundColor: settings.backgroundColor,
-            borderRadius: settings.borderRadius,
-            border: settings.showBorder ? `${settings.borderWidth} solid ${settings.borderColor}` : 'none'
+            backgroundColor: settings.backgroundColor
         },
         content: {
             display: 'flex',
@@ -81,72 +246,138 @@ function ProductRatingSettings() {
             fontSize: settings.titleFontSize,
             margin: 0
         },
-        starsContainer: {
-            display: 'inline-flex'
-        },
         count: {
             color: settings.countColor,
             fontSize: settings.countFontSize,
-            fontWeight: settings.countWeight,
-            backgroundColor: settings.showCountBackground ? settings.countBackgroundColor : 'transparent',
-            padding: settings.showCountBackground ? settings.countPadding : '0',
-            borderRadius: settings.showCountBackground ? settings.countBorderRadius : '0'
+            fontWeight: settings.countWeight
         }
     });
 
-    const styles = getPreviewStyles();
+    const renderStars = () => {
+        const stars = [];
+        for (let i = 0; i < 5; i++) {
+            stars.push(
+                <span
+                    key={i}
+                    style={{
+                        fontSize: settings.starSize,
+                        padding: '0 2px',
+                        color: i < 4 ? settings.starColor : settings.emptyStarColor
+                    }}
+                    aria-hidden="true"
+                >
+                    {i < 4 ? '★' : '☆'}
+                </span>
+            );
+        }
+        return stars;
+    };
+
+    const renderFormField = (type, key, label, options = null) => (
+        <div key={key}>
+            <label style={STYLES.label}>{label}</label>
+            {type === 'text' && (
+                <input
+                    type="text"
+                    value={settings[key]}
+                    onChange={(e) => updateSetting(key, e.target.value)}
+                    style={{ ...STYLES.input, marginBottom: '10px' }}
+                />
+            )}
+            {type === 'color' && (
+                <input
+                    type="color"
+                    value={settings[key]}
+                    onChange={(e) => updateSetting(key, e.target.value)}
+                    style={STYLES.colorInput}
+                />
+            )}
+            {type === 'select' && (
+                <select
+                    value={settings[key]}
+                    onChange={(e) => updateSetting(key, e.target.value)}
+                    style={STYLES.input}
+                >
+                    {options.map(option => (
+                        <option key={option.value} value={option.value}>
+                            {option.label}
+                        </option>
+                    ))}
+                </select>
+            )}
+        </div>
+    );
+
+    const renderTabContent = () => {
+        switch (activeTab) {
+            case 'general':
+                return (
+                    <div style={STYLES.formGroup}>
+                        {renderFormField('text', 'titleText', 'Title Text')}
+                        {message && (
+                            <div style={messageType === 'success' ? STYLES.successMessage : STYLES.errorMessage}>
+                                {message}
+                            </div>
+                        )}
+                        <Button
+                            variant="primary"
+                            onClick={saveSettings}
+                            loading={loading}
+                            disabled={loading}
+                        >
+                            {loading ? 'Saving...' : 'Save Product Rating Setting'}
+                        </Button>
+                    </div>
+                );
+            case 'style':
+                return (
+                    <div style={STYLES.formGroup}>
+                        {renderFormField('color', 'starColor', 'Star')}
+                        {renderFormField('color', 'emptyStarColor', 'Empty Star')}
+                        {renderFormField('color', 'titleColor', 'Title')}
+                        {renderFormField('color', 'countColor', 'Count')}
+                        {renderFormField('color', 'backgroundColor', 'Background')}
+                    </div>
+                );
+            case 'layout':
+                return (
+                    <div style={STYLES.formGroup}>
+                        {renderFormField('select', 'alignment', 'Alignment', SELECT_OPTIONS.alignment)}
+                        {renderFormField('select', 'titleFontSize', 'Title Font Size', SELECT_OPTIONS.titleFontSize)}
+                        {renderFormField('select', 'starSize', 'Star Size', SELECT_OPTIONS.starSize)}
+                        {renderFormField('select', 'countFontSize', 'Count Font Size', SELECT_OPTIONS.countFontSize)}
+                        {renderFormField('select', 'gap', 'Element Gap', SELECT_OPTIONS.gap)}
+                        {renderFormField('select', 'padding', 'Widget Padding', SELECT_OPTIONS.padding)}
+                        {renderFormField('select', 'titleWeight', 'Title Font Weight', SELECT_OPTIONS.fontWeight)}
+                        {renderFormField('select', 'countWeight', 'Count Font Weight', SELECT_OPTIONS.fontWeight)}
+                    </div>
+                );
+            default:
+                return null;
+        }
+    };
+
+    const previewStyles = getPreviewStyles();
 
     return (
-        <div style={{ display: 'flex', minHeight: '100vh', backgroundColor: '#f8fafc' }}>
-            {/* Settings Panel */}
-            <div style={{ 
-                width: '400px', 
-                backgroundColor: 'white', 
-                boxShadow: '2px 0 10px rgba(0,0,0,0.1)',
-                overflowY: 'auto'
-            }}>
-                <div style={{ 
-                    padding: '1.5rem', 
-                    borderBottom: '1px solid #e5e7eb',
-                    backgroundColor: '#f9fafb'
-                }}>
-                    <h2 style={{ 
-                        margin: 0, 
-                        fontSize: '1.25rem', 
-                        fontWeight: 'bold',
-                        color: '#1f2937',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '0.5rem'
-                    }}>
+        <div style={STYLES.container}>
+            <div style={STYLES.settingsPanel}>
+                <div style={STYLES.header}>
+                    <h2 style={STYLES.headerTitle}>
                         <Settings size={20} />
                         Product Rating Settings
                     </h2>
                 </div>
 
-                {/* Tab Navigation */}
-                <div style={{ display: 'flex', borderBottom: '1px solid #e5e7eb' }}>
-                    {[
-                        { id: 'general', label: 'General', icon: Settings },
-                        { id: 'style', label: 'Style', icon: Palette },
-                        { id: 'layout', label: 'Layout', icon: Layout }
-                    ].map(tab => (
+                <div style={STYLES.tabNav}>
+                    {TABS.map(tab => (
                         <button
                             key={tab.id}
                             onClick={() => setActiveTab(tab.id)}
                             style={{
-                                flex: 1,
-                                padding: '0.75rem',
-                                border: 'none',
+                                ...STYLES.tabButton,
                                 backgroundColor: activeTab === tab.id ? '#f3f4f6' : 'transparent',
-                                color: activeTab === tab.id ? '#1f2937' : '#6b7280',
-                                cursor: 'pointer',
-                                fontSize: '0.875rem',
-                                fontWeight: '500',
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                gap: '0.25rem'
+                                color: activeTab === tab.id ? '#1f2937' : '#6b7280'
                             }}
                         >
                             <tab.icon size={16} />
@@ -155,389 +386,29 @@ function ProductRatingSettings() {
                     ))}
                 </div>
 
-                <div style={{ padding: '1.5rem' }}>
-                    {activeTab === 'general' && (
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                            <div>
-                                <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '500' }}>
-                                    Title Text
-                                </label>
-                                <input
-                                    type="text"
-                                    value={settings.titleText}
-                                    onChange={(e) => updateSetting('titleText', e.target.value)}
-                                    style={{
-                                        width: '100%',
-                                        padding: '0.5rem',
-                                        border: '1px solid #d1d5db',
-                                        borderRadius: '0.375rem',
-                                        fontSize: '0.875rem'
-                                    }}
-                                />
-                            </div>
-
-                                    
-                          
-
-                           
-
-                            <div>
-                                <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: '500' }}>
-                                    <input
-                                        type="checkbox"
-                                        checked={settings.showCountBackground}
-                                        onChange={(e) => updateSetting('showCountBackground', e.target.checked)}
-                                    />
-                                    Show Count Background
-                                </label>
-                            </div>
-
-                           
-                        </div>
-                    )}
-
-                    {activeTab === 'style' && (
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                            <div>
-                                <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '500' }}>
-                                    Star
-                                </label>
-                                <input
-                                    type="color"
-                                    value={settings.starColor}
-                                    onChange={(e) => updateSetting('starColor', e.target.value)}
-                                    style={{
-                                        width: '100%',
-                                        height: '40px',
-                                        border: '1px solid #d1d5db',
-                                        borderRadius: '0.375rem'
-                                    }}
-                                />
-                            </div>
-
-                            <div>
-                                <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '500' }}>
-                                    Empty Star
-                                </label>
-                                <input
-                                    type="color"
-                                    value={settings.emptyStarColor}
-                                    onChange={(e) => updateSetting('emptyStarColor', e.target.value)}
-                                    style={{
-                                        width: '100%',
-                                        height: '40px',
-                                        border: '1px solid #d1d5db',
-                                        borderRadius: '0.375rem'
-                                    }}
-                                />
-                            </div>
-
-                            <div>
-                                <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '500' }}>
-                                    Title
-                                </label>
-                                <input
-                                    type="color"
-                                    value={settings.titleColor}
-                                    onChange={(e) => updateSetting('titleColor', e.target.value)}
-                                    style={{
-                                        width: '100%',
-                                        height: '40px',
-                                        border: '1px solid #d1d5db',
-                                        borderRadius: '0.375rem'
-                                    }}
-                                />
-                            </div>
-
-                            <div>
-                                <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '500' }}>
-                                    Count
-                                </label>
-                                <input
-                                    type="color"
-                                    value={settings.countColor}
-                                    onChange={(e) => updateSetting('countColor', e.target.value)}
-                                    style={{
-                                        width: '100%',
-                                        height: '40px',
-                                        border: '1px solid #d1d5db',
-                                        borderRadius: '0.375rem'
-                                    }}
-                                />
-                            </div>
-
-                            
-
-                            {settings.showCountBackground && (
-                                <div>
-                                    <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '500' }}>
-                                        Count Background
-                                    </label>
-                                    <input
-                                        type="color"
-                                        value={settings.countBackgroundColor}
-                                        onChange={(e) => updateSetting('countBackgroundColor', e.target.value)}
-                                        style={{
-                                            width: '100%',
-                                            height: '40px',
-                                            border: '1px solid #d1d5db',
-                                            borderRadius: '0.375rem'
-                                        }}
-                                    />
-                                </div>
-                            )}                     
-                        </div>
-                    )}
-
-                    {activeTab === 'layout' && (
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                            <div>
-                                <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '500' }}>
-                                    Alignment
-                                </label>
-                                <select
-                                    value={settings.alignment}
-                                    onChange={(e) => updateSetting('alignment', e.target.value)}
-                                    style={{
-                                        width: '100%',
-                                        padding: '0.5rem',
-                                        border: '1px solid #d1d5db',
-                                        borderRadius: '0.375rem',
-                                        fontSize: '0.875rem'
-                                    }}
-                                >
-                                    <option value="flex-start">Left</option>
-                                    <option value="center">Center</option>
-                                    <option value="flex-end">Right</option>
-                                    <option value="space-between">Space Between</option>
-                                </select>
-                            </div>
-
-                            <div>
-                                <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '500' }}>
-                                    Title Font Size
-                                </label>
-                                <select
-                                    value={settings.titleFontSize}
-                                    onChange={(e) => updateSetting('titleFontSize', e.target.value)}
-                                    style={{
-                                        width: '100%',
-                                        padding: '0.5rem',
-                                        border: '1px solid #d1d5db',
-                                        borderRadius: '0.375rem',
-                                        fontSize: '0.875rem'
-                                    }}
-                                >
-                                    <option value="12px">Extra Small (12px)</option>
-                                    <option value="14px">Small (14px)</option>
-                                    <option value="15px">Medium (15px)</option>
-                                    <option value="16px">Large (16px)</option>
-                                    <option value="18px">Extra Large (18px)</option>
-                                </select>
-                            </div>
-
-                            <div>
-                                <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '500' }}>
-                                    Star Size
-                                </label>
-                                <select
-                                    value={settings.starSize}
-                                    onChange={(e) => updateSetting('starSize', e.target.value)}
-                                    style={{
-                                        width: '100%',
-                                        padding: '0.5rem',
-                                        border: '1px solid #d1d5db',
-                                        borderRadius: '0.375rem',
-                                        fontSize: '0.875rem'
-                                    }}
-                                >
-                                    <option value="16px">Small (16px)</option>
-                                    <option value="18px">Medium (18px)</option>
-                                    <option value="20px">Large (20px)</option>
-                                    <option value="24px">Extra Large (24px)</option>
-                                    <option value="28px">Huge (28px)</option>
-                                </select>
-                            </div>
-
-                            <div>
-                                <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '500' }}>
-                                    Count Font Size
-                                </label>
-                                <select
-                                    value={settings.countFontSize}
-                                    onChange={(e) => updateSetting('countFontSize', e.target.value)}
-                                    style={{
-                                        width: '100%',
-                                        padding: '0.5rem',
-                                        border: '1px solid #d1d5db',
-                                        borderRadius: '0.375rem',
-                                        fontSize: '0.875rem'
-                                    }}
-                                >
-                                    <option value="12px">Extra Small (12px)</option>
-                                    <option value="14px">Small (14px)</option>
-                                    <option value="16px">Medium (16px)</option>
-                                    <option value="18px">Large (18px)</option>
-                                </select>
-                            </div>
-
-                            <div>
-                                <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '500' }}>
-                                    Element Gap
-                                </label>
-                                <select
-                                    value={settings.gap}
-                                    onChange={(e) => updateSetting('gap', e.target.value)}
-                                    style={{
-                                        width: '100%',
-                                        padding: '0.5rem',
-                                        border: '1px solid #d1d5db',
-                                        borderRadius: '0.375rem',
-                                        fontSize: '0.875rem'
-                                    }}
-                                >
-                                    <option value="4px">Small (4px)</option>
-                                    <option value="6px">Medium (6px)</option>
-                                    <option value="8px">Large (8px)</option>
-                                    <option value="12px">Extra Large (12px)</option>
-                                </select>
-                            </div>
-
-                            <div>
-                                <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '500' }}>
-                                    Widget Padding
-                                </label>
-                                <select
-                                    value={settings.padding}
-                                    onChange={(e) => updateSetting('padding', e.target.value)}
-                                    style={{
-                                        width: '100%',
-                                        padding: '0.5rem',
-                                        border: '1px solid #d1d5db',
-                                        borderRadius: '0.375rem',
-                                        fontSize: '0.875rem'
-                                    }}
-                                >
-                                    <option value="8px">Small (8px)</option>
-                                    <option value="12px">Medium (12px)</option>
-                                    <option value="16px">Large (16px)</option>
-                                    <option value="20px">Extra Large (20px)</option>
-                                </select>
-                            </div>
-
-                            <div>
-                                <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '500' }}>
-                                    Star Spacing
-                                </label>
-                                <select
-                                    value={settings.starSpacing}
-                                    onChange={(e) => updateSetting('starSpacing', e.target.value)}
-                                    style={{
-                                        width: '100%',
-                                        padding: '0.5rem',
-                                        border: '1px solid #d1d5db',
-                                        borderRadius: '0.375rem',
-                                        fontSize: '0.875rem'
-                                    }}
-                                >
-                                    <option value="0px">None (0px)</option>
-                                    <option value="1px">Tight (1px)</option>
-                                    <option value="2px">Normal (2px)</option>
-                                    <option value="3px">Loose (3px)</option>
-                                    <option value="4px">Extra Loose (4px)</option>
-                                </select>
-                            </div>
-
-                            <div>
-                                <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '500' }}>
-                                    Title Font Weight
-                                </label>
-                                <select
-                                    value={settings.titleWeight}
-                                    onChange={(e) => updateSetting('titleWeight', e.target.value)}
-                                    style={{
-                                        width: '100%',
-                                        padding: '0.5rem',
-                                        border: '1px solid #d1d5db',
-                                        borderRadius: '0.375rem',
-                                        fontSize: '0.875rem'
-                                    }}
-                                >
-                                    <option value="400">Normal (400)</option>
-                                    <option value="500">Medium (500)</option>
-                                    <option value="600">Semi Bold (600)</option>
-                                    <option value="700">Bold (700)</option>
-                                </select>
-                            </div>
-
-                            <div>
-                                <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '500' }}>
-                                    Count Font Weight
-                                </label>
-                                <select
-                                    value={settings.countWeight}
-                                    onChange={(e) => updateSetting('countWeight', e.target.value)}
-                                    style={{
-                                        width: '100%',
-                                        padding: '0.5rem',
-                                        border: '1px solid #d1d5db',
-                                        borderRadius: '0.375rem',
-                                        fontSize: '0.875rem'
-                                    }}
-                                >
-                                    <option value="400">Normal (400)</option>
-                                    <option value="500">Medium (500)</option>
-                                    <option value="600">Semi Bold (600)</option>
-                                    <option value="700">Bold (700)</option>
-                                </select>
-                            </div>
-                        </div>
-                    )}
+                <div style={STYLES.tabContent}>
+                    {renderTabContent()}
                 </div>
             </div>
 
-            {/* Preview Panel */}
-            <div style={{ 
-                flex: 1, 
-                padding: '2rem',
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                backgroundColor: '#f1f5f9'
-            }}>
-                <div style={{ 
-                    marginBottom: '1rem',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '0.5rem',
-                    color: '#64748b',
-                    fontSize: '1.125rem',
-                    fontWeight: '500'
-                }}>
+            <div style={STYLES.previewPanel}>
+                <div style={STYLES.previewHeader}>
                     <Eye size={20} />
                     Live Preview
                 </div>
-                
-                <div style={{ maxWidth: '600px', width: '100%' }}>
-                    <div style={styles.container}>
-                        <div style={styles.content}>
-                            <span style={styles.title}>
+
+                <div style={STYLES.previewContainer}>
+                    <div style={previewStyles.container}>
+                        <div style={previewStyles.content}>
+                            <span style={previewStyles.title}>
                                 {settings.titleText}
                             </span>
-
                             <div style={{ display: 'inline-flex' }}>
-                        <span style={{ fontSize: '20px', padding: '0 2px', color: settings.starColor  }} aria-hidden="true">★</span>
-                        <span style={{ fontSize: '20px', padding: '0 2px', color: settings.starColor  }} aria-hidden="true">★</span>
-                        <span style={{ fontSize: '20px', padding: '0 2px', color: settings.starColor  }} aria-hidden="true">★</span>
-                        <span style={{ fontSize: '20px', padding: '0 2px', color: settings.starColor  }} aria-hidden="true">★</span>
-                        <span style={{ fontSize: '20px', padding: '0 2px', color: settings.emptyStarColor }} aria-hidden="true">☆</span>
-                    </div>
-
-                           
-                                <span style={styles.count}>
-                                    (42)
-                                </span>
-                           
+                                {renderStars()}
+                            </div>
+                            <span style={previewStyles.count}>
+                                (42)
+                            </span>
                         </div>
                     </div>
                 </div>

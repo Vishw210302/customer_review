@@ -9,16 +9,16 @@ import {
   Toast,
 } from "@shopify/polaris";
 import "@shopify/polaris/build/esm/styles.css";
-import React, { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { authenticate } from "../shopify.server";
 import ProductReview from "./app.ProductReview";
 import StoreReviewListing from "./app.StoreReviewListing";
 
 export async function loader({ request }) {
+
   const APIURL = process.env.API_URL;
   const url = new URL(request.url);
   const { session } = await authenticate.admin(request);
-  console.log("heyyy",session)
   const shopName = session.shop;
   const reviewType = url.searchParams.get("reviewType") || "product";
   const searchQuery = url.searchParams.get("searchQuery") || "";
@@ -29,25 +29,6 @@ export async function loader({ request }) {
   const page = parseInt(url.searchParams.get("page") || "1", 10);
   const limit = parseInt(url.searchParams.get("limit") || "10", 10);
   const isInitialLoad = url.searchParams.get("isInitialLoad") === "true";
-
-  // const { admin } = await authenticate.admin(request);
-
-// const response = await admin.graphql(
-//   `#graphql
-//   query ProductMetafields($ownerId: ID!) {
-//     product(id: $ownerId) {
-//   title
-//     }
-//   }`,
-//   {
-//     variables: {
-//       "ownerId": "gid://shopify/Product/6622581555298"
-//     },
-//   },
-// );
-
-// const data = await response.json();
-// console.log("tttt",data)
 
   var reviewsResponse = {
     success: false,
@@ -420,13 +401,13 @@ function ReviewsManager() {
         <Page fullWidth title="Reviews Management Dashboard">
           <Card>
             <div className="custom-tabs-wrapper" style={{ width: '50%', margin: '0 auto' }}>
-            <Tabs
-              tabs={tabs}
-              selected={selectedTab}
-              onSelect={handleTabChange}
-              fitted
-            />
-             </div>
+              <Tabs
+                tabs={tabs}
+                selected={selectedTab}
+                onSelect={handleTabChange}
+                fitted
+              />
+            </div>
             <LegacyStack vertical>
               {selectedTab === 0 && (
                 <ProductReview
@@ -455,7 +436,7 @@ function ReviewsManager() {
                 />
               )}
             </LegacyStack>
-           
+
           </Card>
 
           {toast.active && (
@@ -465,9 +446,8 @@ function ReviewsManager() {
               onDismiss={toggleToast}
             />
           )}
-           {/* Inline style block */}
-        <style>
-          {`
+          <style>
+            {`
             .custom-tabs-wrapper .Polaris-Tabs__Tab:not(.Polaris-Tabs__Tab--selected) {
               border: 1px solid #dcdcdc;
               border-radius: 8px;
@@ -477,7 +457,7 @@ function ReviewsManager() {
               background-color: #f9f9f9;
             }
           `}
-        </style>
+          </style>
         </Page>
       </Frame>
     </AppProvider>

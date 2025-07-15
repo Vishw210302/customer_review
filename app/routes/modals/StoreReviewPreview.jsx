@@ -1,3 +1,4 @@
+import { Button } from '@shopify/polaris';
 import { Eye, Palette, Settings, Type } from 'lucide-react';
 import { useState } from 'react';
 
@@ -75,120 +76,250 @@ function StoreReviewSettings() {
         ));
     };
 
-    const getPreviewStyles = () => ({
-        container: {
-            width: '100%',
-            backgroundColor: settings.backgroundColor,
-            boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
-            borderRadius: '0.5rem',
-            overflow: 'hidden',
-        },
-        headerSection: {
-            padding: '1.25rem',
-        },
-        headerContainer: {
-            display: 'flex',
-            flexDirection: "column",
-        },
-        headerTitle: {
-            fontSize: settings.titleFontSize,
-            fontWeight: 'bold',
-            color: settings.textColor,
-            margin: 0,
-            textAlign: "center",
-        },
-        starContainer: {
-            display: 'flex',
-            alignItems: 'center',
-            marginTop: '5px',
-            justifyContent: "center",
-        },
-        starSubtext: {
-            marginLeft: '0.5rem',
-            fontSize: '1.125rem',
-            fontWeight: 'bold',
-            color: settings.textColor
-        },
-        reviewCountText: {
-            fontSize: settings.subTitleFontSize,
-            color: settings.textColor,
-            marginTop: "5px",
-            textAlign: "center",
-        },
-        writeReviewButton: {
-            backgroundColor: settings.primaryColor,
-            color: settings.writeButtonTextColor,
-            padding: '0.625rem 1.25rem',
-            borderRadius: '50px',
-            border: 'none',
-            cursor: 'pointer',
-            fontWeight: '500',
-            marginTop: "5px",
-        },
-        reviewSection: {
-            padding: '1.25rem',
-            backgroundColor: '#f9fafb'
-        },
-        reviewsGrid: {
-            display: "grid",
-            gridTemplateColumns: "2fr 2fr",
-            gap: "1.5rem",
-            width: "100%"
-        },
-        reviewCard: {
-            backgroundColor: settings.backgroundColor,
-            boxShadow: "0px 8px 24px rgba(149, 157, 165, 0.2)",
-            padding: "1rem",
-            borderRadius: "0.5rem"
-        },
-        reviewName: {
-            fontWeight: 'bold',
-            color: settings.textColor,
-            fontSize: settings.reviewNameFontSize,
-            margin: '0 0 0.25rem 0'
-        },
-        emailName: {
-            fontSize: "13px",
-            color: "#6b7280",
-            fontWeight: "500",
-            margin: '0 0 5px 0'
-        },
-        reviewTitle: {
-            color: settings.titleColor,
-            fontWeight: "bold",
-            fontSize: settings.reviewTitleFontSize,
-            margin: '0 0 5px 0'
-        },
-        reviewMessage: {
-            color: settings.textColor,
-            fontSize: settings.reviewMessageFontSize,
-            margin: '0 0 10px 0',
-            lineHeight: '1.5'
-        },
-        productImage: {
-            width: '40%',
-            height: '120px',
-            objectFit: 'cover',
-            borderRadius: '0.375rem',
-            backgroundColor: '#f3f4f6',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            marginBottom: '0.75rem',
-            color: '#9ca3af',
-            fontSize: '0.875rem'
-        },
-        reviewDate: {
-            fontSize: settings.subTitleFontSize,
-            color: settings.dateColor,
-            margin: 0
-        }
-    });
+    const tabs = [
+        { id: 'general', label: 'General', icon: Settings },
+        { id: 'style', label: 'Style', icon: Palette },
+        { id: 'layout', label: 'Layout', icon: Type }
+    ];
 
-    const styles = getPreviewStyles();
+    const fontSizeOptions = [
+        { value: '12px', label: 'Extra Small (12px)' },
+        { value: '14px', label: 'Small (14px)' },
+        { value: '15px', label: 'Medium (15px)' },
+        { value: '16px', label: 'Large (16px)' },
+        { value: '18px', label: 'Extra Large (18px)' },
+        { value: '20px', label: 'Large (20px)' },
+        { value: '22px', label: 'Extra Large (22px)' }
+    ];
+
+    const starSizeOptions = [
+        { value: '16px', label: 'Small (16px)' },
+        { value: '18px', label: 'Medium (18px)' },
+        { value: '20px', label: 'Large (20px)' },
+        { value: '24px', label: 'Extra Large (24px)' },
+        { value: '28px', label: 'Huge (28px)' }
+    ];
+
+    const starSpacingOptions = [
+        { value: '0px', label: 'None (0px)' },
+        { value: '1px', label: 'Tight (1px)' },
+        { value: '2px', label: 'Normal (2px)' },
+        { value: '3px', label: 'Loose (3px)' },
+        { value: '4px', label: 'Extra Loose (4px)' }
+    ];
+
+    const InputField = ({ label, value, onChange, type = 'text', placeholder }) => (
+        <div>
+            <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '500' }}>
+                {label}
+            </label>
+            <input
+                type={type}
+                value={value}
+                onChange={onChange}
+                placeholder={placeholder}
+                style={{
+                    width: '100%',
+                    height: type === 'color' ? '40px' : 'auto',
+                    padding: '0.5rem',
+                    border: '1px solid #d1d5db',
+                    borderRadius: '0.375rem',
+                    fontSize: '0.875rem',
+                    boxSizing: 'border-box'
+                }}
+            />
+        </div>
+    );
+
+    const SelectField = ({ label, value, onChange, options }) => (
+        <div>
+            <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '500' }}>
+                {label}
+            </label>
+            <select
+                value={value}
+                onChange={onChange}
+                style={{
+                    width: '100%',
+                    padding: '0.5rem',
+                    border: '1px solid #d1d5db',
+                    borderRadius: '0.375rem',
+                    fontSize: '0.875rem'
+                }}
+            >
+                {options.map(option => (
+                    <option key={option.value} value={option.value}>
+                        {option.label}
+                    </option>
+                ))}
+            </select>
+        </div>
+    );
+
+    const CheckboxField = ({ label, checked, onChange }) => (
+        <div>
+            <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: '500' }}>
+                <input
+                    type="checkbox"
+                    checked={checked}
+                    onChange={onChange}
+                />
+                {label}
+            </label>
+        </div>
+    );
+
+    const renderGeneralTab = () => (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+            <InputField
+                label="Title"
+                value={settings.storeName}
+                onChange={(e) => updateSetting('storeName', e.target.value)}
+            />
+            <InputField
+                label="Total Reviews Text"
+                value={settings.totalReviewsBased}
+                onChange={(e) => updateSetting('totalReviewsBased', e.target.value)}
+            />
+            <InputField
+                label="Button Text"
+                value={settings.buttonText}
+                onChange={(e) => updateSetting('buttonText', e.target.value)}
+            />
+            <CheckboxField
+                label="Show Recent Reviews"
+                checked={settings.showRecentReviews}
+                onChange={(e) => updateSetting('showRecentReviews', e.target.checked)}
+            />
+            <CheckboxField
+                label="Show Review Dates"
+                checked={settings.showReviewDates}
+                onChange={(e) => updateSetting('showReviewDates', e.target.checked)}
+            />
+            <CheckboxField
+                label="Show Review Images"
+                checked={settings.showReviewImage}
+                onChange={(e) => updateSetting('showReviewImage', e.target.checked)}
+            />
+            <CheckboxField
+                label="Show Review Email"
+                checked={settings.showReviewEmail}
+                onChange={(e) => updateSetting('showReviewEmail', e.target.checked)}
+            />
+            <Button variant="primary">
+                Save Store Widget Settings
+            </Button>
+        </div>
+    );
+
+    const renderStyleTab = () => (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+            <InputField
+                label="Button Background"
+                value={settings.primaryColor}
+                onChange={(e) => updateSetting('primaryColor', e.target.value)}
+                type="color"
+            />
+            <InputField
+                label="Button Text Color"
+                value={settings.writeButtonTextColor}
+                onChange={(e) => updateSetting('writeButtonTextColor', e.target.value)}
+                type="color"
+            />
+            <InputField
+                label="Star Color"
+                value={settings.starColor}
+                onChange={(e) => updateSetting('starColor', e.target.value)}
+                type="color"
+            />
+            <InputField
+                label="Text Color"
+                value={settings.textColor}
+                onChange={(e) => updateSetting('textColor', e.target.value)}
+                type="color"
+            />
+            <InputField
+                label="Date Color"
+                value={settings.dateColor}
+                onChange={(e) => updateSetting('dateColor', e.target.value)}
+                type="color"
+            />
+            <InputField
+                label="Title Color"
+                value={settings.titleColor}
+                onChange={(e) => updateSetting('titleColor', e.target.value)}
+                type="color"
+            />
+            <InputField
+                label="Background Color"
+                value={settings.backgroundColor}
+                onChange={(e) => updateSetting('backgroundColor', e.target.value)}
+                type="color"
+            />
+        </div>
+    );
+
+    const renderLayoutTab = () => (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+            <SelectField
+                label="Title Font Size"
+                value={settings.titleFontSize}
+                onChange={(e) => updateSetting('titleFontSize', e.target.value)}
+                options={fontSizeOptions}
+            />
+            <SelectField
+                label="Subtitle Font Size"
+                value={settings.subTitleFontSize}
+                onChange={(e) => updateSetting('subTitleFontSize', e.target.value)}
+                options={fontSizeOptions}
+            />
+            <SelectField
+                label="Reviewer Name Font Size"
+                value={settings.reviewNameFontSize}
+                onChange={(e) => updateSetting('reviewNameFontSize', e.target.value)}
+                options={fontSizeOptions}
+            />
+            <SelectField
+                label="Review Title Font Size"
+                value={settings.reviewTitleFontSize}
+                onChange={(e) => updateSetting('reviewTitleFontSize', e.target.value)}
+                options={fontSizeOptions}
+            />
+            <SelectField
+                label="Review Message Font Size"
+                value={settings.reviewMessageFontSize}
+                onChange={(e) => updateSetting('reviewMessageFontSize', e.target.value)}
+                options={fontSizeOptions}
+            />
+            <SelectField
+                label="Star Size"
+                value={settings.starSize}
+                onChange={(e) => updateSetting('starSize', e.target.value)}
+                options={starSizeOptions}
+            />
+            <SelectField
+                label="Star Spacing"
+                value={settings.starSpacing}
+                onChange={(e) => updateSetting('starSpacing', e.target.value)}
+                options={starSpacingOptions}
+            />
+        </div>
+    );
+
+    const renderTabContent = () => {
+        switch (activeTab) {
+            case 'general':
+                return renderGeneralTab();
+            case 'style':
+                return renderStyleTab();
+            case 'layout':
+                return renderLayoutTab();
+            default:
+                return renderGeneralTab();
+        }
+    };
 
     return (
-
         <div style={{ display: 'flex', minHeight: '100vh', backgroundColor: '#f8fafc' }}>
             {/* Settings Panel */}
             <div style={{
@@ -218,11 +349,7 @@ function StoreReviewSettings() {
 
                 {/* Tab Navigation */}
                 <div style={{ display: 'flex', borderBottom: '1px solid #e5e7eb' }}>
-                    {[
-                        { id: 'general', label: 'General', icon: Settings },
-                        { id: 'style', label: 'Style', icon: Palette },
-                        { id: 'layout', label: 'Layout', icon: Type }
-                    ].map(tab => (
+                    {tabs.map(tab => (
                         <button
                             key={tab.id}
                             onClick={() => setActiveTab(tab.id)}
@@ -248,396 +375,7 @@ function StoreReviewSettings() {
                 </div>
 
                 <div style={{ padding: '1.5rem' }}>
-                    {activeTab === 'general' && (
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                            <div>
-                                <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '500' }}>
-                                    Title
-                                </label>
-                                <input
-                                    type="text"
-                                    value={settings.storeName}
-                                    onChange={(e) => updateSetting('storeName', e.target.value)}
-                                    style={{
-                                        width: '100%',
-                                        padding: '0.5rem',
-                                        border: '1px solid #d1d5db',
-                                        borderRadius: '0.375rem',
-                                        fontSize: '0.875rem',
-                                        boxSizing: 'border-box'
-                                    }}
-                                />
-                            </div>
-
-                            <div>
-                                <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '500' }}>
-                                    Total Reviews Text
-                                </label>
-                                <input
-                                    type="text"
-                                    value={settings.totalReviewsBased}
-                                    onChange={(e) => updateSetting('totalReviewsBased', e.target.value)}
-                                    style={{
-                                        width: '100%',
-                                        padding: '0.5rem',
-                                        border: '1px solid #d1d5db',
-                                        borderRadius: '0.375rem',
-                                        fontSize: '0.875rem',
-                                        boxSizing: 'border-box'
-                                    }}
-                                />
-                            </div>
-
-                            <div>
-                                <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '500' }}>
-                                    Button Text
-                                </label>
-                                <input
-                                    type="text"
-                                    value={settings.buttonText}
-                                    onChange={(e) => updateSetting('buttonText', e.target.value)}
-                                    style={{
-                                        width: '100%',
-                                        padding: '0.5rem',
-                                        border: '1px solid #d1d5db',
-                                        borderRadius: '0.375rem',
-                                        fontSize: '0.875rem',
-                                        boxSizing: 'border-box'
-                                    }}
-                                />
-                            </div>
-
-                            <div>
-                                <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: '500' }}>
-                                    <input
-                                        type="checkbox"
-                                        checked={settings.showRecentReviews}
-                                        onChange={(e) => updateSetting('showRecentReviews', e.target.checked)}
-                                    />
-                                    Show Recent Reviews
-                                </label>
-                            </div>
-
-                            <div>
-                                <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: '500' }}>
-                                    <input
-                                        type="checkbox"
-                                        checked={settings.showReviewDates}
-                                        onChange={(e) => updateSetting('showReviewDates', e.target.checked)}
-                                    />
-                                    Show Review Dates
-                                </label>
-                            </div>
-                            <div>
-                                <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: '500' }}>
-                                    <input
-                                        type="checkbox"
-                                        checked={settings.showReviewImage}
-                                        onChange={(e) => updateSetting('showReviewImage', e.target.checked)}
-                                    />
-                                    Show Review Images
-                                </label>
-                            </div>
-                            <div>
-                                <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: '500' }}>
-                                    <input
-                                        type="checkbox"
-                                        checked={settings.showReviewEmail}
-                                        onChange={(e) => updateSetting('showReviewEmail', e.target.checked)}
-                                    />
-                                    Show Review Email
-                                </label>
-                            </div>
-                        </div>
-                    )}
-
-                    {activeTab === 'style' && (
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                            <div>
-                                <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '500' }}>
-                                    Button Background
-                                </label>
-                                <input
-                                    type="color"
-                                    value={settings.primaryColor}
-                                    onChange={(e) => updateSetting('primaryColor', e.target.value)}
-                                    style={{
-                                        width: '100%',
-                                        height: '40px',
-                                        border: '1px solid #d1d5db',
-                                        borderRadius: '0.375rem'
-                                    }}
-                                />
-                            </div>
-
-                            <div>
-                                <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '500' }}>
-                                    Button Text Color
-                                </label>
-                                <input
-                                    type="color"
-                                    value={settings.writeButtonTextColor}
-                                    onChange={(e) => updateSetting('writeButtonTextColor', e.target.value)}
-                                    style={{
-                                        width: '100%',
-                                        height: '40px',
-                                        border: '1px solid #d1d5db',
-                                        borderRadius: '0.375rem'
-                                    }}
-                                />
-                            </div>
-
-                            <div>
-                                <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '500' }}>
-                                    Star Color
-                                </label>
-                                <input
-                                    type="color"
-                                    value={settings.starColor}
-                                    onChange={(e) => updateSetting('starColor', e.target.value)}
-                                    style={{
-                                        width: '100%',
-                                        height: '40px',
-                                        border: '1px solid #d1d5db',
-                                        borderRadius: '0.375rem'
-                                    }}
-                                />
-                            </div>
-
-                            <div>
-                                <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '500' }}>
-                                    Text Color
-                                </label>
-                                <input
-                                    type="color"
-                                    value={settings.textColor}
-                                    onChange={(e) => updateSetting('textColor', e.target.value)}
-                                    style={{
-                                        width: '100%',
-                                        height: '40px',
-                                        border: '1px solid #d1d5db',
-                                        borderRadius: '0.375rem'
-                                    }}
-                                />
-                            </div>
-
-                            <div>
-                                <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '500' }}>
-                                    Date Color
-                                </label>
-                                <input
-                                    type="color"
-                                    value={settings.dateColor}
-                                    onChange={(e) => updateSetting('dateColor', e.target.value)}
-                                    style={{
-                                        width: '100%',
-                                        height: '40px',
-                                        border: '1px solid #d1d5db',
-                                        borderRadius: '0.375rem'
-                                    }}
-                                />
-                            </div>
-
-                            <div>
-                                <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '500' }}>
-                                    Title Color
-                                </label>
-                                <input
-                                    type="color"
-                                    value={settings.titleColor}
-                                    onChange={(e) => updateSetting('titleColor', e.target.value)}
-                                    style={{
-                                        width: '100%',
-                                        height: '40px',
-                                        border: '1px solid #d1d5db',
-                                        borderRadius: '0.375rem'
-                                    }}
-                                />
-                            </div>
-
-                            <div>
-                                <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '500' }}>
-                                    Background Color
-                                </label>
-                                <input
-                                    type="color"
-                                    value={settings.backgroundColor}
-                                    onChange={(e) => updateSetting('backgroundColor', e.target.value)}
-                                    style={{
-                                        width: '100%',
-                                        height: '40px',
-                                        border: '1px solid #d1d5db',
-                                        borderRadius: '0.375rem'
-                                    }}
-                                />
-                            </div>
-                        </div>
-                    )}
-
-                    {activeTab === 'layout' && (
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                            <div>
-                                <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '500' }}>
-                                    Title Font Size
-                                </label>
-                                <select
-                                    value={settings.titleFontSize}
-                                    onChange={(e) => updateSetting('titleFontSize', e.target.value)}
-                                    style={{
-                                        width: '100%',
-                                        padding: '0.5rem',
-                                        border: '1px solid #d1d5db',
-                                        borderRadius: '0.375rem',
-                                        fontSize: '0.875rem'
-                                    }}
-                                >
-                                    <option value="14px">Extra Small (14px)</option>
-                                    <option value="16px">Small (16px)</option>
-                                    <option value="18px">Medium (18px)</option>
-                                    <option value="20px">Large (20px)</option>
-                                    <option value="22px">Extra Large (22px)</option>
-                                </select>
-                            </div>
-
-                            <div>
-                                <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '500' }}>
-                                    Subtitle Font Size
-                                </label>
-                                <select
-                                    value={settings.subTitleFontSize}
-                                    onChange={(e) => updateSetting('subTitleFontSize', e.target.value)}
-                                    style={{
-                                        width: '100%',
-                                        padding: '0.5rem',
-                                        border: '1px solid #d1d5db',
-                                        borderRadius: '0.375rem',
-                                        fontSize: '0.875rem'
-                                    }}
-                                >
-                                    <option value="12px">Extra Small (12px)</option>
-                                    <option value="14px">Small (14px)</option>
-                                    <option value="15px">Medium (15px)</option>
-                                    <option value="16px">Large (16px)</option>
-                                    <option value="18px">Extra Large (18px)</option>
-                                </select>
-                            </div>
-
-                            <div>
-                                <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '500' }}>
-                                    Reviewer Name Font Size
-                                </label>
-                                <select
-                                    value={settings.reviewNameFontSize}
-                                    onChange={(e) => updateSetting('reviewNameFontSize', e.target.value)}
-                                    style={{
-                                        width: '100%',
-                                        padding: '0.5rem',
-                                        border: '1px solid #d1d5db',
-                                        borderRadius: '0.375rem',
-                                        fontSize: '0.875rem'
-                                    }}
-                                >
-                                    <option value="12px">Extra Small (12px)</option>
-                                    <option value="14px">Small (14px)</option>
-                                    <option value="15px">Medium (15px)</option>
-                                    <option value="16px">Large (16px)</option>
-                                    <option value="18px">Extra Large (18px)</option>
-                                </select>
-                            </div>
-
-                            <div>
-                                <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '500' }}>
-                                    Review Title Font Size
-                                </label>
-                                <select
-                                    value={settings.reviewTitleFontSize}
-                                    onChange={(e) => updateSetting('reviewTitleFontSize', e.target.value)}
-                                    style={{
-                                        width: '100%',
-                                        padding: '0.5rem',
-                                        border: '1px solid #d1d5db',
-                                        borderRadius: '0.375rem',
-                                        fontSize: '0.875rem'
-                                    }}
-                                >
-                                    <option value="12px">Extra Small (12px)</option>
-                                    <option value="14px">Small (14px)</option>
-                                    <option value="15px">Medium (15px)</option>
-                                    <option value="16px">Large (16px)</option>
-                                    <option value="18px">Extra Large (18px)</option>
-                                </select>
-                            </div>
-
-                            <div>
-                                <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '500' }}>
-                                    Review Message Font Size
-                                </label>
-                                <select
-                                    value={settings.reviewMessageFontSize}
-                                    onChange={(e) => updateSetting('reviewMessageFontSize', e.target.value)}
-                                    style={{
-                                        width: '100%',
-                                        padding: '0.5rem',
-                                        border: '1px solid #d1d5db',
-                                        borderRadius: '0.375rem',
-                                        fontSize: '0.875rem'
-                                    }}
-                                >
-                                    <option value="12px">Extra Small (12px)</option>
-                                    <option value="14px">Small (14px)</option>
-                                    <option value="15px">Medium (15px)</option>
-                                    <option value="16px">Large (16px)</option>
-                                    <option value="18px">Extra Large (18px)</option>
-                                </select>
-                            </div>
-
-                            <div>
-                                <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '500' }}>
-                                    Star Size
-                                </label>
-                                <select
-                                    value={settings.starSize}
-                                    onChange={(e) => updateSetting('starSize', e.target.value)}
-                                    style={{
-                                        width: '100%',
-                                        padding: '0.5rem',
-                                        border: '1px solid #d1d5db',
-                                        borderRadius: '0.375rem',
-                                        fontSize: '0.875rem'
-                                    }}
-                                >
-                                    <option value="16px">Small (16px)</option>
-                                    <option value="18px">Medium (18px)</option>
-                                    <option value="20px">Large (20px)</option>
-                                    <option value="24px">Extra Large (24px)</option>
-                                    <option value="28px">Huge (28px)</option>
-                                </select>
-                            </div>
-
-                            <div>
-                                <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '500' }}>
-                                    Star Spacing
-                                </label>
-                                <select
-                                    value={settings.starSpacing}
-                                    onChange={(e) => updateSetting('starSpacing', e.target.value)}
-                                    style={{
-                                        width: '100%',
-                                        padding: '0.5rem',
-                                        border: '1px solid #d1d5db',
-                                        borderRadius: '0.375rem',
-                                        fontSize: '0.875rem'
-                                    }}
-                                >
-                                    <option value="0px">None (0px)</option>
-                                    <option value="1px">Tight (1px)</option>
-                                    <option value="2px">Normal (2px)</option>
-                                    <option value="3px">Loose (3px)</option>
-                                    <option value="4px">Extra Loose (4px)</option>
-                                </select>
-                            </div>
-                        </div>
-                    )}
+                    {renderTabContent()}
                 </div>
             </div>
 
@@ -664,34 +402,94 @@ function StoreReviewSettings() {
                 </div>
 
                 <div style={{ width: '100%' }}>
-                    <div style={styles.container}>
-                        <div style={styles.headerSection}>
-                            <div style={styles.headerContainer}>
+                    <div style={{
+                        width: '100%',
+                        backgroundColor: settings.backgroundColor,
+                        boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
+                        borderRadius: '0.5rem',
+                        overflow: 'hidden',
+                    }}>
+                        <div style={{ padding: '1.25rem' }}>
+                            <div style={{ display: 'flex', flexDirection: "column" }}>
                                 <div>
-                                    <h2 style={styles.headerTitle}>{settings.storeName}</h2>
-                                    <p style={styles.reviewCountText}>
+                                    <h2 style={{
+                                        fontSize: settings.titleFontSize,
+                                        fontWeight: 'bold',
+                                        color: settings.textColor,
+                                        margin: 0,
+                                        textAlign: "center",
+                                    }}>
+                                        {settings.storeName}
+                                    </h2>
+                                    <p style={{
+                                        fontSize: settings.subTitleFontSize,
+                                        color: settings.textColor,
+                                        marginTop: "5px",
+                                        textAlign: "center",
+                                    }}>
                                         {settings.totalReviewsBased}
                                     </p>
-                                    <div style={styles.starContainer}>
+                                    <div style={{
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        marginTop: '5px',
+                                        justifyContent: "center",
+                                    }}>
                                         {renderStars(4)}
                                     </div>
                                 </div>
-                                <button style={styles.writeReviewButton}>
+                                <button style={{
+                                    backgroundColor: settings.primaryColor,
+                                    color: settings.writeButtonTextColor,
+                                    padding: '0.625rem 1.25rem',
+                                    borderRadius: '50px',
+                                    border: 'none',
+                                    cursor: 'pointer',
+                                    fontWeight: '500',
+                                    marginTop: "5px",
+                                }}>
                                     {settings.buttonText}
                                 </button>
                             </div>
                         </div>
 
                         {settings.showRecentReviews && (
-                            <div style={styles.reviewSection}>
-                                <div style={styles.reviewsGrid}>
+                            <div style={{
+                                padding: '1.25rem',
+                                backgroundColor: '#f9fafb'
+                            }}>
+                                <div style={{
+                                    display: "grid",
+                                    gridTemplateColumns: "2fr 2fr",
+                                    gap: "1.5rem",
+                                    width: "100%"
+                                }}>
                                     {sampleReviews.map((review, index) => (
-                                        <div key={index} style={styles.reviewCard}>
+                                        <div key={index} style={{
+                                            backgroundColor: settings.backgroundColor,
+                                            boxShadow: "0px 8px 24px rgba(149, 157, 165, 0.2)",
+                                            padding: "1rem",
+                                            borderRadius: "0.5rem"
+                                        }}>
                                             <div>
-                                                <h4 style={styles.reviewName}>{review.name}</h4>
+                                                <h4 style={{
+                                                    fontWeight: 'bold',
+                                                    color: settings.textColor,
+                                                    fontSize: settings.reviewNameFontSize,
+                                                    margin: '0 0 0.25rem 0'
+                                                }}>
+                                                    {review.name}
+                                                </h4>
 
                                                 {settings.showReviewEmail && (
-                                                    <p style={styles.emailName}>{review.email}</p>
+                                                    <p style={{
+                                                        fontSize: "13px",
+                                                        color: "#6b7280",
+                                                        fontWeight: "500",
+                                                        margin: '0 0 5px 0'
+                                                    }}>
+                                                        {review.email}
+                                                    </p>
                                                 )}
 
                                                 <div style={{ marginBottom: '5px' }}>
@@ -699,23 +497,62 @@ function StoreReviewSettings() {
                                                 </div>
                                             </div>
 
-                                            <p style={styles.reviewTitle}>{review.title}</p>
-                                            <p style={styles.reviewMessage}>{review.message}</p>
+                                            <p style={{
+                                                color: settings.titleColor,
+                                                fontWeight: "bold",
+                                                fontSize: settings.reviewTitleFontSize,
+                                                margin: '0 0 5px 0'
+                                            }}>
+                                                {review.title}
+                                            </p>
+                                            <p style={{
+                                                color: settings.textColor,
+                                                fontSize: settings.reviewMessageFontSize,
+                                                margin: '0 0 10px 0',
+                                                lineHeight: '1.5'
+                                            }}>
+                                                {review.message}
+                                            </p>
 
                                             {settings.showReviewImage && (
                                                 <div style={{ display: "flex", flexWrap: "wrap", width: "100%", gap: "5px" }}>
-                                                    <div style={styles.productImage}>
+                                                    <div style={{
+                                                        width: '40%',
+                                                        height: '120px',
+                                                        borderRadius: '0.375rem',
+                                                        backgroundColor: '#f3f4f6',
+                                                        display: 'flex',
+                                                        alignItems: 'center',
+                                                        justifyContent: 'center',
+                                                        marginBottom: '0.75rem',
+                                                        color: '#9ca3af',
+                                                        fontSize: '0.875rem'
+                                                    }}>
                                                         Product Image
                                                     </div>
-
-                                                    <div style={styles.productImage}>
+                                                    <div style={{
+                                                        width: '40%',
+                                                        height: '120px',
+                                                        borderRadius: '0.375rem',
+                                                        backgroundColor: '#f3f4f6',
+                                                        display: 'flex',
+                                                        alignItems: 'center',
+                                                        justifyContent: 'center',
+                                                        marginBottom: '0.75rem',
+                                                        color: '#9ca3af',
+                                                        fontSize: '0.875rem'
+                                                    }}>
                                                         Product Image
                                                     </div>
                                                 </div>
                                             )}
 
                                             {settings.showReviewDates && (
-                                                <p style={styles.reviewDate}>
+                                                <p style={{
+                                                    fontSize: settings.subTitleFontSize,
+                                                    color: settings.dateColor,
+                                                    margin: 0
+                                                }}>
                                                     {review.date}
                                                 </p>
                                             )}

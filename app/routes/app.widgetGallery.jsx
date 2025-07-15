@@ -1,34 +1,28 @@
 import { json } from "@remix-run/node";
 import { useLoaderData, useNavigation } from "@remix-run/react";
-import { Card, Grid, Page, Spinner, Text, Tabs } from "@shopify/polaris";
-import React, { useEffect, useState } from "react";
+import { Card, Page, Spinner, Tabs, Text } from "@shopify/polaris";
+import { useEffect, useState } from "react";
 import { authenticate } from "../shopify.server";
 import GenericPreview from "./modals/GenericPreview";
 import ProductRatingWidget from "./modals/ProductRatingWidget";
 import StoreReviewPreview from "./modals/StoreReviewPreview";
 
-export const loader = async ({ request }) => {
-  const { session, admin } = await authenticate.admin(request);
-  const accessToken = session.accessToken;
-  const blockId = process.env.SHOPIFY_REVIEW_ID;
-  let themeNames = [];
-  let activeTheme = null;
-  let shopData = null;
-
-  const getActiveThemeQuery = `query {
-      themes(first: 20) {
-        edges {
-          node {
-            id
-            name
-            role
-          }
+const THEME_QUERY = `
+  query {
+    themes(first: 20) {
+      edges {
+        node {
+          id
+          name
+          role
         }
       }
     }
-  `;
+  }
+`;
 
-  const getShopDataQuery = `query {
+const SHOP_QUERY = `
+  query {
     shop {
       id
       name
@@ -43,195 +37,185 @@ export const loader = async ({ request }) => {
         shopifyPlus
       }
     }
-  }`;
-
-  try {
-    const themeResponse = await fetch(
-      `https://${session?.shop}/admin/api/2025-01/graphql.json`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "X-Shopify-Access-Token": accessToken,
-        },
-        body: JSON.stringify({
-          query: getActiveThemeQuery,
-        }),
-      },
-    );
-
-    const themeData = await themeResponse.json();
-
-    if (themeData?.data?.themes?.edges) {
-      themeNames = themeData.data.themes.edges;
-      activeTheme =
-        themeData.data.themes.edges.find((theme) => theme.node.role === "MAIN")
-          ?.node || null;
-    }
-
-    const shopResponse = await fetch(
-      `https://${session?.shop}/admin/api/2025-01/graphql.json`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "X-Shopify-Access-Token": accessToken,
-        },
-        body: JSON.stringify({
-          query: getShopDataQuery,
-        }),
-      },
-    );
-
-    const shopDataResponse = await shopResponse.json();
-    const shopData = shopDataResponse?.data?.shop;
-    const shopName = shopDataResponse?.data?.shop.myshopifyDomain;
-    const blockID = process.env.SHOPIFY_REVIEW_ID;
-
-    const metafieldUpdateResponse = await admin.graphql(`
-      mutation {
-        metafieldsSet(metafields: [
-          {
-             ownerId: "${shopData?.id}",
-             namespace: "accesstoken",
-             key: "token",
-             value: "${accessToken}",
-             type: "string"
-          },
-          {
-             ownerId: "${shopData?.id}",
-             namespace: "blockID",
-             key: "blockID",
-             value: "${blockID}",
-             type: "string"
-          },
-          {
-             ownerId: "${shopData?.id}",
-             namespace: "shopName",
-             key: "shopName",
-             value: "${shopName}",
-             type: "string"
-          },
-        ]) {
-          metafields {
-            id
-          }
-        }
-      }
-    `);
-
-    if (metafieldUpdateResponse.errors) {
-      console.error(
-        "Error updating metafields:",
-        metafieldUpdateResponse.errors,
-      );
-    }
-  } catch (error) {
-    console.log("error", error);
   }
+`;
 
-  return json({
-    themeNames,
-    activeTheme,
-    session,
-    blockId,
-    shopData,
+const makeGraphQLRequest = async (shop, accessToken, query) => {
+  const response = await fetch(`https://${shop}/admin/api/2025-01/graphql.json`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "X-Shopify-Access-Token": accessToken,
+    },
+    body: JSON.stringify({ query }),
   });
+  return response.json();
 };
 
-const ThemeStatus = () => {
-  const { activeTheme, session, blockId } = useLoaderData();
 
-  const [selectedTheme, setSelectedTheme] = useState(null);
-  const navigate = useNavigation();
-  const isPageLoading = navigate.state === "loading";
-const [selectedTab, setSelectedTab] = useState(0);
+const callRatingConfigAPI = async (storeName) => {
+  try {
+    const response = await fetch('https://13bb1e8952c2.ngrok-free.app/api/ratingConfig', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        storeName: storeName
+      }),
+    });
 
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      const storedTheme = localStorage.getItem("Activetheme");
-      if (storedTheme) {
-        setSelectedTheme(storedTheme);
-      } else if (activeTheme?.id) {
-        setSelectedTheme(activeTheme?.id);
-        localStorage.setItem("Activetheme", activeTheme?.id);
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error('Error calling rating config API:', error);
+    throw error;
+  }
+};
+
+export const loader = async ({ request }) => {
+  const { session, admin } = await authenticate.admin(request);
+  const { accessToken, shop } = session;
+  const blockId = process.env.SHOPIFY_REVIEW_ID;
+
+  try {
+
+    const [themeData, shopDataResponse] = await Promise.all([
+      makeGraphQLRequest(shop, accessToken, THEME_QUERY),
+      makeGraphQLRequest(shop, accessToken, SHOP_QUERY),
+    ]);
+
+    const themeNames = themeData?.data?.themes?.edges || [];
+    const activeTheme = themeNames.find(theme => theme.node.role === "MAIN")?.node || null;
+    const shopData = shopDataResponse?.data?.shop;
+
+    let ratingConfigData = null;
+    if (shopData?.myshopifyDomain) {
+      try {
+        ratingConfigData = await callRatingConfigAPI(shopData.myshopifyDomain);
+        console.log('Rating config API response:', ratingConfigData);
+      } catch (error) {
+        console.error('Failed to call rating config API:', error);
       }
     }
-  }, [activeTheme]);
 
-  if (isPageLoading) {
-    return (
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          background: "#e3e3e3",
-          height: "100vh",
-        }}
-      >
-        <Spinner accessibilityLabel="Loading widgets" size="large" />
-      </div>
-    );
+    if (shopData) {
+      const metafieldUpdateResponse = await admin.graphql(`
+        mutation {
+          metafieldsSet(metafields: [
+            {
+               ownerId: "${shopData.id}",
+               namespace: "accesstoken",
+               key: "token",
+               value: "${accessToken}",
+               type: "string"
+            },
+            {
+               ownerId: "${shopData.id}",
+               namespace: "blockID",
+               key: "blockID",
+               value: "${blockId}",
+               type: "string"
+            },
+            {
+               ownerId: "${shopData.id}",
+               namespace: "shopName",
+               key: "shopName",
+               value: "${shopData.myshopifyDomain}",
+               type: "string"
+            },
+          ]) {
+            metafields {
+              id
+            }
+          }
+        }
+      `);
+
+      if (metafieldUpdateResponse.errors) {
+        console.error("Error updating metafields:", metafieldUpdateResponse.errors);
+      }
+    }
+
+    return json({
+      themeNames,
+      activeTheme,
+      session,
+      blockId,
+      shopData,
+      ratingConfigData,
+    });
+  } catch (error) {
+    console.error("Loader error:", error);
+    return json({
+      themeNames: [],
+      activeTheme: null,
+      session,
+      blockId,
+      shopData: null,
+      ratingConfigData: null,
+    });
   }
+};
 
-  if (!selectedTheme) {
-    return (
-      <Page fullWidth>
-        <Card sectioned>
-          <h1
-            style={{
-              fontSize: "24px",
-              color: "#333",
-              marginBottom: "25px",
-              fontWeight: "bold",
-            }}
-          >
-            Widget Gallery
-          </h1>
-          <div
-            style={{
-              padding: "20px",
-              backgroundColor: "#fde8e8",
-              borderRadius: "8px",
-              color: "#c53030",
-              marginBottom: "20px",
-            }}
-          >
-            <p>
-              No active theme found. Please make sure your Shopify store has an
-              active theme.
-            </p>
-          </div>
-        </Card>
-      </Page>
-    );
+
+const TABS = [
+  { id: "generic", content: "Generic Widget" },
+  { id: "store-review", content: "Store Review Widget" },
+  { id: "product-rating", content: "Product Rating Widget" },
+];
+
+
+const WIDGET_CONFIGS = {
+  0: {
+    component: GenericPreview,
+    blockType: "custom-block",
+    target: "section",
+    template: "product"
+  },
+  1: {
+    component: StoreReviewPreview,
+    blockType: "store-review",
+    target: "body",
+    template: "product"
+  },
+  2: {
+    component: ProductRatingWidget,
+    blockType: "particular-product",
+    target: "mainSection",
+    template: "product"
   }
+};
 
-  const themeId = selectedTheme?.split("/").pop();
- 
-
-  const cardStyle = {
-    height: "100%",
+const styles = {
+  loadingContainer: {
     display: "flex",
-    flexDirection: "column",
-  };
-
-  const cardContentStyle = {
-    flex: 1,
-    display: "flex",
-    flexDirection: "column",
-    padding: "16px",
-  };
-
-  const buttonContainerStyle = {
+    justifyContent: "center",
+    alignItems: "center",
+    background: "#e3e3e3",
+    height: "100vh",
+  },
+  errorContainer: {
+    padding: "20px",
+    backgroundColor: "#fde8e8",
+    borderRadius: "8px",
+    color: "#c53030",
+    marginBottom: "20px",
+  },
+  titleStyle: {
+    marginBottom: "30px"
+  },
+  buttonContainer: {
     display: "flex",
     justifyContent: "center",
     marginTop: "auto",
     padding: "16px",
-  };
-
-  const buttonStyle = {
+  },
+  button: {
     backgroundColor: "#000000",
     color: "white",
     border: "none",
@@ -244,87 +228,145 @@ const [selectedTab, setSelectedTab] = useState(0);
     textDecoration: "none",
     display: "inline-block",
     textAlign: "center",
-  };
-const titleStyle = {
-  marginBottom: "30px"
+  },
+  tabContent: {
+    padding: "16px"
+  }
 };
+
+const ThemeStatus = () => {
+
+  const { activeTheme, session, blockId, shopData, ratingConfigData } = useLoaderData();
+  const [selectedTheme, setSelectedTheme] = useState(null);
+  const navigation = useNavigation();
+  const [selectedTab, setSelectedTab] = useState(0);
+  const isPageLoading = navigation.state === "loading";
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const storedTheme = localStorage.getItem("Activetheme");
+      if (storedTheme) {
+        setSelectedTheme(storedTheme);
+      } else if (activeTheme?.id) {
+        setSelectedTheme(activeTheme.id);
+        localStorage.setItem("Activetheme", activeTheme.id);
+      }
+    }
+  }, [activeTheme]);
+
+
+  const handleRatingConfigUpdate = async () => {
+    if (shopData?.myshopifyDomain) {
+      try {
+        const response = await fetch('https://13bb1e8952c2.ngrok-free.app/api/ratingConfig', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            storeName: shopData.myshopifyDomain
+          }),
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        console.log('Rating config updated:', data);
+        return data;
+      } catch (error) {
+        console.error('Error updating rating config:', error);
+      }
+    }
+  };
+
+  if (isPageLoading) {
+    return (
+      <div style={styles.loadingContainer}>
+        <Spinner accessibilityLabel="Loading widgets" size="large" />
+      </div>
+    );
+  }
+
+  if (!selectedTheme) {
+    return (
+      <Page fullWidth>
+        <Card sectioned>
+          <Text variant="headingLg" as="h1" style={styles.titleStyle}>
+            Widget Gallery
+          </Text>
+          <div style={styles.errorContainer}>
+            <p>
+              No active theme found. Please make sure your Shopify store has an
+              active theme.
+            </p>
+          </div>
+        </Card>
+      </Page>
+    );
+  }
+
+  const themeId = selectedTheme.split("/").pop();
+
+  const renderTabContent = () => {
+    const config = WIDGET_CONFIGS[selectedTab];
+    if (!config) return null;
+
+    const Component = config.component;
+    const installUrl = `https://${session?.shop}/admin/themes/${themeId}/editor?template=${config.template}&addAppBlockId=${blockId}/${config.blockType}&target=${config.target}`;
+
+    return (
+      <>
+        <Component />
+        <div style={styles.buttonContainer}>
+          <a
+            target="_blank"
+            href={installUrl}
+            style={styles.button}
+            rel="noopener noreferrer"
+            onClick={handleRatingConfigUpdate}
+          >
+            Install Widget
+          </a>
+        </div>
+      </>
+    );
+  };
+
   return (
     <Page fullWidth>
-  <Card sectioned>
-    <div style={titleStyle}>
-      <Text variant="headingLg" as="h5">
-        Widget Gallery
-      </Text>
-    </div>
-
-    <Tabs
-      tabs={[
-        { id: "generic", content: "Generic Widget" },
-        { id: "store-review", content: "Store Review Widget" },
-        { id: "product-rating", content: "Product Rating Widget" },
-      ]}
-      selected={selectedTab}
-      onSelect={setSelectedTab}
-    >
-      <style jsx>{`
-  .Polaris-Tabs{
-        gap:15px;
-  }
-    .Polaris-Tabs__Tab:not(.Polaris-Tabs__Tab--selected) {
-  border-bottom: 2px solid #ccc;
-}
-
-`}</style>
-      <div style={{ padding: "16px" }}>
-        {selectedTab === 0 && (
-          <>
-            <GenericPreview />
-            <div style={buttonContainerStyle}>
-              <a
-                target="_blank"
-                href={`https://${session?.shop}/admin/themes/${themeId}/editor?template=product&addAppBlockId=${blockId}/custom-block&target=section`}
-                style={buttonStyle}
-              >
-                Install Widget
-              </a>
+      <Card sectioned>
+        <div style={styles.titleStyle}>
+          <Text variant="headingLg" as="h5">
+            Widget Gallery
+          </Text>
+          {ratingConfigData && (
+            <div style={{ marginTop: "10px", fontSize: "14px", color: "#666" }}>
+              Rating Config: {JSON.stringify(ratingConfigData)}
             </div>
-          </>
-        )}
+          )}
+        </div>
 
-        {selectedTab === 1 && (
-          <>
-            <StoreReviewPreview />
-            <div style={buttonContainerStyle}>
-              <a
-                target="_blank"
-                href={`https://${session?.shop}/admin/themes/${themeId}/editor?template=product&addAppBlockId=${blockId}/store-review&target=body`}
-                style={buttonStyle}
-              >
-                Install Widget
-              </a>
-            </div>
-          </>
-        )}
-
-        {selectedTab === 2 && (
-          <>
-            <ProductRatingWidget />
-            <div style={buttonContainerStyle}>
-              <a
-                target="_blank"
-                href={`https://${session?.shop}/admin/themes/${themeId}/editor?template=product&addAppBlockId=${blockId}/particular-product&target=mainSection`}
-                style={buttonStyle}
-              >
-                Install Widget
-              </a>
-            </div>
-          </>
-        )}
-      </div>
-    </Tabs>
-  </Card>
-</Page>
-
+        <Tabs
+          tabs={TABS}
+          selected={selectedTab}
+          onSelect={setSelectedTab}
+        >
+          <style jsx>
+            {`.Polaris-Tabs {
+                gap: 15px;
+              }
+              .Polaris-Tabs__Tab:not(.Polaris-Tabs__Tab--selected) {
+                border-bottom: 2px solid #ccc;
+              }`}
+          </style>
+          <div style={styles.tabContent}>
+            {renderTabContent()}
+          </div>
+        </Tabs>
+      </Card>
+    </Page>
   );
 };
 

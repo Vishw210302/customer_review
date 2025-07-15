@@ -20,9 +20,6 @@ import { useCallback, useMemo, useState } from "react";
 
 function CardsOfDashboard({ data, storeReviewData }) {
 
-  console.log("datadatadatadata", data)
-  console.log("storeReviewData", storeReviewData)
-
   const navigation = useNavigation();
   const navigate = useNavigate();
   const isPageLoading = navigation.state === "loading";
