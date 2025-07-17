@@ -97,7 +97,6 @@ export const loader = async ({ request }) => {
     if (shopData?.myshopifyDomain) {
       try {
         ratingConfigData = await callRatingConfigAPI(shopData.myshopifyDomain);
-        console.log('Rating config API response:', ratingConfigData);
       } catch (error) {
         console.error('Failed to call rating config API:', error);
       }

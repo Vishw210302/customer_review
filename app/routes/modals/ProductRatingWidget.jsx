@@ -37,7 +37,7 @@ const SELECT_OPTIONS = {
         { value: '12px', label: 'Extra Large (12px)' }
     ],
     padding: [
-        { value: '8px', label: 'Small (8px)' },
+        { value: '0px', label: 'none' },
         { value: '12px', label: 'Medium (12px)' },
         { value: '16px', label: 'Large (16px)' },
         { value: '20px', label: 'Extra Large (20px)' }
@@ -49,10 +49,9 @@ const SELECT_OPTIONS = {
         { value: '700', label: 'Bold (700)' }
     ],
     alignment: [
-        { value: 'flex-start', label: 'Left' },
+        { value: 'left', label: 'Left' },
         { value: 'center', label: 'Center' },
-        { value: 'flex-end', label: 'Right' },
-        { value: 'space-between', label: 'Space Between' }
+        { value: 'right', label: 'Right' },
     ]
 };
 
@@ -168,7 +167,7 @@ function ProductRatingSettings() {
     const fetchRatingConfig = async () => {
         setFetchLoading(true);
         try {
-            const response = await fetch(`https://00baafa1fe1b.ngrok-free.app/api/ratingConfig/${storeName}`, {
+            const response = await fetch(`https://a7f770599965.ngrok-free.app/api/ratingConfig/${storeName}`, {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
@@ -192,7 +191,7 @@ function ProductRatingSettings() {
     const saveSettings = async () => {
         setLoading(true);
         try {
-            const response = await fetch(`https://00baafa1fe1b.ngrok-free.app/api/ratingConfig/${storeName}`, {
+            const response = await fetch(`https://a7f770599965.ngrok-free.app/api/ratingConfig/${storeName}`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
@@ -201,7 +200,6 @@ function ProductRatingSettings() {
                 },
                 body: JSON.stringify(settings)
             });
-            console.log("Response", response);
         } catch (error) {
             console.error('Error saving settings:', error);
         } finally {
@@ -320,7 +318,7 @@ function ProductRatingSettings() {
                         {renderFormField('color', 'emptyStarColor', 'Empty Star')}
                         {renderFormField('color', 'titleColor', 'Title')}
                         {renderFormField('color', 'countColor', 'Count')}
-                        {renderFormField('color', 'backgroundColor', 'Background')}
+                        {/* {renderFormField('color', 'backgroundColor', 'Background')} */}
                         <Button
                             variant="primary"
                             onClick={saveSettings}

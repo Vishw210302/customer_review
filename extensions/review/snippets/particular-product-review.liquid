@@ -1,5 +1,6 @@
 {% assign product_id = product.id %}
 {% assign shop_name = shop.metafields.shopName.shopName %}
+{{ 'particular-product-review.css' | asset_url | stylesheet_tag }}
 
 <div class="rating-container">
   <div class="rating-summary">
@@ -11,169 +12,7 @@
     </div>
     <span class="rating-count" id="rating-count">({{ product.metafields.reviews.rating_count | default: 0 }})</span>
   </div>
-  {{ shop_name }}sdfsfdsf
 </div>
-
-<style>
-  .rating-summary {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-
-  .rating-label {
-    font-weight: 600;
-    color: #2d3748;
-    letter-spacing: 0.01em;
-    font-size: 15px;
-  }
-
-  .stars-container {
-    display: inline-flex;
-    position: relative;
-    padding: 2px 0;
-  }
-
-  .star {
-    font-size: 20px;
-    padding: 0 2px;
-    position: relative;
-  }
-
-  .star.filled {
-    color: #ff9d2d;
-    text-shadow: 0 0 1px rgba(255, 215, 0, 0.4);
-  }
-
-  .star.empty {
-    color: #d1d5db;
-  }
-
-  .star.partial {
-    position: relative;
-    color: #d1d5db;
-  }
-
-  .star.partial::before {
-    content: '★';
-    position: absolute;
-    left: 2px;
-    top: 0;
-    color: #ff9d2d;
-    overflow: hidden;
-    width: var(--percent-filled);
-  }
-
-  .rating-count {
-    color: #4a5568;
-    font-size: 14px;
-    font-weight: 500;
-    padding: 3px 8px;
-    border-radius: 12px;
-    transition: background-color 0.2s ease;
-  }
-
-  .reviews-loading {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 16px;
-    color: #4a5568;
-    font-size: 14px;
-    font-weight: 500;
-  }
-
-  .reviews-loading::after {
-    content: '';
-    display: inline-block;
-    width: 18px;
-    height: 18px;
-    margin-left: 10px;
-    border: 2px solid rgba(79, 70, 229, 0.2);
-    border-radius: 50%;
-    border-top-color: #4f46e5;
-    animation: spin 0.8s linear infinite;
-  }
-
-  .no-reviews-message {
-    padding: 16px;
-    text-align: center;
-    color: #4a5568;
-    font-size: 14px;
-    background-color: #f8f9fa;
-    border-radius: 8px;
-    border-left: 3px solid #e53e3e;
-    width: 100%;
-  }
-
-  .review-item {
-    padding: 16px;
-    border-bottom: 1px solid #e2e8f0;
-    margin-bottom: 12px;
-  }
-
-  .review-header {
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 8px;
-  }
-
-  .review-author {
-    font-weight: 600;
-    color: #2d3748;
-  }
-
-  .review-date {
-    color: #718096;
-    font-size: 14px;
-  }
-
-  .review-rating {
-    margin-bottom: 8px;
-    color: #ffd700;
-  }
-
-  .review-content {
-    color: #4a5568;
-    line-height: 1.5;
-  }
-
-  .write-review-btn {
-    display: inline-block;
-    margin-top: 16px;
-    padding: 8px 16px;
-    background-color: #4f46e5;
-    color: white;
-    font-weight: 500;
-    border-radius: 6px;
-    text-decoration: none;
-    transition: background-color 0.2s ease;
-  }
-
-  .write-review-btn:hover {
-    background-color: #4338ca;
-  }
-
-  @keyframes spin {
-    to {
-      transform: rotate(360deg);
-    }
-  }
-
-  @media (max-width: 768px) {
-    .rating-container {
-      flex-direction: column;
-      align-items: flex-start;
-      gap: 12px;
-      padding: 12px;
-    }
-
-    .rating-summary {
-      width: 100%;
-      justify-content: space-between;
-    }
-  }
-</style>
 
 <script>
   document.addEventListener('DOMContentLoaded', function () {
@@ -181,8 +20,7 @@
     const ratingCountElement = document.getElementById('rating-count');
 
     const GET_REVIEWS_API = `https://checklist.codecrewinfotech.com/api/getReview/{{ shop_name }}/{{ product_id }}`;
-    const GET_RATING_CONFIG_API = `https://00baafa1fe1b.ngrok-free.app/api/ratingConfig/{{ shop_name }}`;
-
+    const GET_RATING_CONFIG_API = `https://a7f770599965.ngrok-free.app/api/ratingConfig/{{ shop_name }}`;
     fetchRatingConfig();
 
     async function fetchRatingConfig() {
@@ -190,19 +28,18 @@
         const response = await fetch(GET_RATING_CONFIG_API, {
           method: 'GET',
           headers: {
-            Accept: 'application/json',
             'Content-Type': 'application/json',
             'x-api-key': 'abcdefg',
             'ngrok-skip-browser-warning': 'true',
           },
         });
-
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
 
         const configData = await response.json();
-        applyRatingConfig(configData);
+        const dataOfConfig = configData?.data;
+        applyRatingConfig(dataOfConfig);
 
         fetchReviews();
       } catch (error) {
@@ -211,7 +48,7 @@
       }
     }
 
-    function applyRatingConfig(config) {
+    function applyRatingConfig(dataOfConfig) {
       const ratingContainer = document.querySelector('.rating-container');
       const ratingSummary = document.querySelector('.rating-summary');
       const ratingLabel = document.querySelector('.rating-label');
@@ -219,54 +56,53 @@
       const ratingCount = document.querySelector('.rating-count');
 
       if (ratingContainer) {
-        ratingContainer.style.backgroundColor = config.backgroundColor || '#ffffff';
-        ratingContainer.style.padding = config.padding || '12px';
-        ratingContainer.style.textAlign = config.alignment || 'center';
+        ratingContainer.style.padding = dataOfConfig?.padding || '12px';
+        ratingContainer.style.textAlign = dataOfConfig?.alignment || 'center';
       }
 
       if (ratingSummary) {
-        ratingSummary.style.gap = config.gap || '8px';
-        if (config.alignment === 'center') {
+        ratingSummary.style.gap = dataOfConfig?.gap || '8px';
+        if (dataOfConfig?.alignment === 'center') {
           ratingSummary.style.justifyContent = 'center';
-        } else if (config.alignment === 'right') {
-          ratingSummary.style.justifyContent = 'flex-end';
+        } else if (dataOfConfig?.alignment === 'left') {
+          ratingSummary.style.justifyContent = 'left';
         } else {
-          ratingSummary.style.justifyContent = 'flex-start';
+          ratingSummary.style.justifyContent = 'right';
         }
       }
 
       if (ratingLabel) {
-        ratingLabel.textContent = config.titleText || 'Customer Rating';
-        ratingLabel.style.color = config.titleColor || '#2d3748';
-        ratingLabel.style.fontSize = config.titleFontSize || '15px';
-        ratingLabel.style.fontWeight = config.titleWeight || '600';
+        ratingLabel.textContent = dataOfConfig?.titleText || 'Customer Rating';
+        ratingLabel.style.color = dataOfConfig?.titleColor || '#2d3748';
+        ratingLabel.style.fontSize = dataOfConfig?.titleFontSize || '15px';
+        ratingLabel.style.fontWeight = dataOfConfig?.titleWeight || '600';
       }
 
       const stars = document.querySelectorAll('.star');
       stars.forEach((star) => {
-        star.style.fontSize = config.starSize || '20px';
+        star.style.fontSize = dataOfConfig?.starSize || '20px';
       });
 
       if (ratingCount) {
-        ratingCount.style.color = config.countColor || '#4a5568';
-        ratingCount.style.fontSize = config.countFontSize || '14px';
-        ratingCount.style.fontWeight = config.countWeight || '500';
+        ratingCount.style.color = dataOfConfig?.countColor || '#4a5568';
+        ratingCount.style.fontSize = dataOfConfig?.countFontSize || '14px';
+        ratingCount.style.fontWeight = dataOfConfig?.countWeight || '500';
       }
 
       const style = document.createElement('style');
       style.textContent = `
         .star.filled {
-          color: ${config.starColor || '#ff9d2d'} !important;
+          color: ${dataOfConfig?.starColor || '#ff9d2d'} !important;
           text-shadow: 0 0 1px rgba(255, 215, 0, 0.4);
         }
         .star.empty {
-          color: ${config.emptyStarColor || '#d1d5db'} !important;
+          color: ${dataOfConfig?.emptyStarColor || '#d1d5db'} !important;
         }
         .star.partial {
-          color: ${config.emptyStarColor || '#d1d5db'} !important;
+          color: ${dataOfConfig?.emptyStarColor || '#d1d5db'} !important;
         }
         .star.partial::before {
-          color: ${config.starColor || '#ff9d2d'} !important;
+          color: ${dataOfConfig?.starColor || '#ff9d2d'} !important;
         }
       `;
       document.head.appendChild(style);

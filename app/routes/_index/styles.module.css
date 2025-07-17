@@ -8,6 +8,10 @@
   padding: 1rem;
 }
 
+.product__title {
+  margin: 0px !important;
+}
+
 .heading,
 .text {
   padding: 0;
@@ -57,7 +61,7 @@
   gap: 2rem;
 }
 
-.list > li {
+.list>li {
   max-width: 20rem;
   text-align: left;
 }
@@ -67,7 +71,7 @@
     display: block;
   }
 
-  .list > li {
+  .list>li {
     padding-bottom: 1rem;
   }
 }
