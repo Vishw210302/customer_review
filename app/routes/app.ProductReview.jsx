@@ -1,4 +1,4 @@
-import { useLoaderData, useNavigation } from "@remix-run/react";
+import { useNavigation } from "@remix-run/react";
 import {
   AppProvider,
   Badge,

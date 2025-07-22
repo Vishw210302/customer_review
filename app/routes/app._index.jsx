@@ -21,7 +21,7 @@ import {
   CaretDownIcon,
   CaretUpIcon,
 } from "@shopify/polaris-icons";
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { authenticate } from "../shopify.server";
 
 export const loader = async ({ request }) => {
@@ -450,17 +450,6 @@ const Index = () => {
             </BlockStack>
           </Card>
         </Layout.Section>
-
-        {/* <CalloutCard
-          title="Are you enjoing the app?"
-          illustration={ratingImage}
-          primaryAction={{
-            content: "Write Review",
-            url: "#",
-          }}
-        >
-          <p>We work around the clock to create smooth and animated effects. Your feedback is really important to us, and we would greatly appreciate it if you could take a moment to leave a review.Thank you!</p>
-        </CalloutCard> */}
 
         <Layout.Section>
           <Box paddingBlockEnd="500">

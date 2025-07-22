@@ -256,6 +256,9 @@ function StoreReviewSettings() {
                 onChange={(e) => updateSetting('backgroundColor', e.target.value)}
                 type="color"
             />
+            <Button variant="primary">
+                Save Store Widget Settings
+            </Button>
         </div>
     );
 
@@ -303,6 +306,9 @@ function StoreReviewSettings() {
                 onChange={(e) => updateSetting('starSpacing', e.target.value)}
                 options={starSpacingOptions}
             />
+            <Button variant="primary">
+                Save Store Widget Settings
+            </Button>
         </div>
     );
 

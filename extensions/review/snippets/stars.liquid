@@ -155,16 +155,12 @@
     </div>
   </div>
 
-  <!-- Add this new section for the no reviews message -->
   <div id="no-reviews-message" class="no-reviews-message" style="display: none;">
     <div class="stars">☆☆☆☆☆</div>
     <p>Be the first to write a review</p>
 
     <button class="write-review-button">Write a Review</button>
   </div>
-
-  <!-- Your existing reviews container -->
-  <div id="reviews-container" class="reviews-list"></div>
 </div>
 
 <div id="toast" class="toast" role="alert">
@@ -198,7 +194,6 @@
   });
 
   document.addEventListener('DOMContentLoaded', function () {
-    // DOM element references
     const modal = document.getElementById('review-modal');
     const openButton = document.querySelector('.write-review-button');
     const closeButton = document.querySelector('.close-modal');
@@ -225,14 +220,11 @@
     const ratingBars = document.querySelectorAll('.rating-bar');
     const overlay = document.querySelector('.review-popup-opener');
 
-    // API endpoints
     const ADD_REVIEW_API = 'https://checklist.codecrewinfotech.com/api/addReview';
     const GET_REVIEWS_API = `https://checklist.codecrewinfotech.com/api/getReview/{{ shop_name }}/{{ product_id }}`;
 
-    // Initialize
     fetchReviews();
 
-    // Event listener for no-reviews-message button
     const noReviewsButton = document.querySelector('#no-reviews-message .write-review-button');
     if (noReviewsButton) {
       noReviewsButton.addEventListener('click', function () {
@@ -245,7 +237,6 @@
       });
     }
 
-    // Event listener for main open button
     if (openButton) {
       openButton.addEventListener('click', function () {
         if (modal && overlay) {
@@ -470,7 +461,7 @@
         renderReviews(data.reviews);
       } catch (error) {
         console.error('Error fetching reviews:', error);
-        // Handle error gracefully
+
         const noReviewsMessage = document.getElementById('no-reviews-message');
         const reviewsContainer = document.getElementById('reviews-container');
 
@@ -486,12 +477,10 @@
       const noReviewsMessage = document.getElementById('no-reviews-message');
       const reviewsContainer = document.getElementById('reviews-container');
 
-      // Show/hide based on whether there are reviews
       if (data.totalReviews === 0) {
         if (noReviewsMessage) noReviewsMessage.style.display = 'block';
         if (reviewsContainer) reviewsContainer.style.display = 'none';
 
-        // Hide the summary section when there are no reviews
         const reviewsSummary = document.querySelector('.reviews-summary');
         if (reviewsSummary) reviewsSummary.style.display = 'none';
       } else {
@@ -501,13 +490,11 @@
         const reviewsSummary = document.querySelector('.reviews-summary');
         if (reviewsSummary) reviewsSummary.style.display = 'flex';
 
-        // Update rating display
         const formattedRating = data.averageRating?.toFixed(2);
         if (starsElement) starsElement.innerHTML = generateStars(data.averageRating);
         if (ratingNumberElement) ratingNumberElement.textContent = `${formattedRating} out of 5`;
         if (reviewCountElement) reviewCountElement.textContent = `Based on ${data.totalReviews} reviews`;
 
-        // Update rating bars
         const ratingCounts = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
 
         if (data.reviews && Array.isArray(data.reviews)) {
@@ -545,7 +532,6 @@
     }
 
     function renderReviews(reviews) {
-      // Get fresh reference to reviews container
       const reviewsContainer = document.getElementById('reviews-container');
 
       if (!reviewsContainer) {
@@ -565,7 +551,6 @@
           const reviewElement = document.createElement('div');
           reviewElement.className = 'review-item';
 
-          // Create review HTML structure
           reviewElement.innerHTML = `
             <div class="review-header">
               <div class="review-author">${review.name || 'Anonymous'}</div>
