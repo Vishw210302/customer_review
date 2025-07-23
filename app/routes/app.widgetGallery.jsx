@@ -54,7 +54,7 @@ const makeGraphQLRequest = async (shop, accessToken, query) => {
 
 const callRatingConfigAPI = async (storeName) => {
   try {
-    const response = await fetch('https://c14f59ca361f.ngrok-free.app/api/ratingConfig', {
+    const response = await fetch('https://def94b3b3985.ngrok-free.app/api/ratingConfig', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -80,7 +80,7 @@ const callRatingConfigAPI = async (storeName) => {
 
 const callStoreReviewSettingAPI = async (storeName) => {
   try {
-    const response = await fetch('https://c14f59ca361f.ngrok-free.app/api/storeReviewSetting', {
+    const response = await fetch('https://def94b3b3985.ngrok-free.app/api/storeReviewSetting', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -104,6 +104,32 @@ const callStoreReviewSettingAPI = async (storeName) => {
   }
 };
 
+const callReviewSettingsAPI = async (storeName) => {
+  try {
+    const response = await fetch('https://def94b3b3985.ngrok-free.app/api/reviewSettings', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': 'abcdefg',
+        'ngrok-skip-browser-warning': true,
+      },
+      body: JSON.stringify({
+        storeName: storeName
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error('Error calling review settings API:', error);
+    throw error;
+  }
+};
+
 export const loader = async ({ request }) => {
   const { session, admin } = await authenticate.admin(request);
   const { accessToken, shop } = session;
@@ -122,15 +148,18 @@ export const loader = async ({ request }) => {
 
     let ratingConfigData = null;
     let storeReviewSettingData = null;
+    let reviewSettingsData = null;
 
     if (shopData?.myshopifyDomain) {
       try {
-        const [ratingConfig, storeReviewSetting] = await Promise.all([
+        const [ratingConfig, storeReviewSetting, reviewSettings] = await Promise.all([
           callRatingConfigAPI(shopData.myshopifyDomain),
           callStoreReviewSettingAPI(shopData.myshopifyDomain),
+          callReviewSettingsAPI(shopData.myshopifyDomain),
         ]);
         ratingConfigData = ratingConfig;
         storeReviewSettingData = storeReviewSetting;
+        reviewSettingsData = reviewSettings;
       } catch (error) {
         console.error('Failed to call API(s):', error);
       }
@@ -182,6 +211,7 @@ export const loader = async ({ request }) => {
       shopData,
       ratingConfigData,
       storeReviewSettingData,
+      reviewSettingsData,
     });
   } catch (error) {
     console.error("Loader error:", error);
@@ -193,6 +223,7 @@ export const loader = async ({ request }) => {
       shopData: null,
       ratingConfigData: null,
       storeReviewSettingData: null,
+      reviewSettingsData: null,
     });
   }
 };
@@ -269,7 +300,7 @@ const styles = {
 
 const ThemeStatus = () => {
 
-  const { activeTheme, session, blockId, shopData, ratingConfigData, storeReviewSettingData } = useLoaderData();
+  const { activeTheme, session, blockId, shopData, ratingConfigData, storeReviewSettingData, reviewSettingsData } = useLoaderData();
   const [selectedTheme, setSelectedTheme] = useState(null);
   const navigation = useNavigation();
   const [selectedTab, setSelectedTab] = useState(0);
@@ -290,7 +321,7 @@ const ThemeStatus = () => {
   const handleRatingConfigUpdate = async () => {
     if (shopData?.myshopifyDomain) {
       try {
-        const response = await fetch('https://c14f59ca361f.ngrok-free.app/api/ratingConfig', {
+        const response = await fetch('https://def94b3b3985.ngrok-free.app/api/ratingConfig', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -307,7 +338,6 @@ const ThemeStatus = () => {
         }
 
         const data = await response.json();
-        console.log('Rating config updated:', data);
         return data;
       } catch (error) {
         console.error('Error updating rating config:', error);
@@ -318,7 +348,7 @@ const ThemeStatus = () => {
   const handleStoreReviewSettingUpdate = async () => {
     if (shopData?.myshopifyDomain) {
       try {
-        const response = await fetch('https://c14f59ca361f.ngrok-free.app/api/storeReviewSetting', {
+        const response = await fetch('https://def94b3b3985.ngrok-free.app/api/storeReviewSetting', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -335,10 +365,36 @@ const ThemeStatus = () => {
         }
 
         const data = await response.json();
-        console.log('Store review setting updated:', data);
         return data;
       } catch (error) {
         console.error('Error updating store review setting:', error);
+      }
+    }
+  };
+
+  const handleReviewSettingsUpdate = async () => {
+    if (shopData?.myshopifyDomain) {
+      try {
+        const response = await fetch('https://def94b3b3985.ngrok-free.app/api/reviewSettings', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'x-api-key': 'abcdefg',
+            'ngrok-skip-browser-warning': true,
+          },
+          body: JSON.stringify({
+            storeName: shopData.myshopifyDomain
+          }),
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        return data;
+      } catch (error) {
+        console.error('Error updating review settings:', error);
       }
     }
   };
@@ -349,6 +405,7 @@ const ThemeStatus = () => {
     if (shopData?.myshopifyDomain) {
       promises.push(handleRatingConfigUpdate());
       promises.push(handleStoreReviewSettingUpdate());
+      promises.push(handleReviewSettingsUpdate());
     }
 
     try {
@@ -426,6 +483,11 @@ const ThemeStatus = () => {
           {storeReviewSettingData && (
             <div style={{ marginTop: "10px", fontSize: "14px", color: "#666" }}>
               Store Review Setting: {JSON.stringify(storeReviewSettingData)}
+            </div>
+          )}
+          {reviewSettingsData && (
+            <div style={{ marginTop: "10px", fontSize: "14px", color: "#666" }}>
+              Review Settings: {JSON.stringify(reviewSettingsData)}
             </div>
           )}
         </div>

@@ -27,6 +27,26 @@
     const mainCardReviewContent = document.querySelector('.main-card-review-content');
     const API_BASE_URL = 'https://checklist.codecrewinfotech.com';
     const ADD_STORE_REVIEW_API = `${API_BASE_URL}/api/storeReview`;
+    const GET_STORE_REVIEW_API = `https://def94b3b3985.ngrok-free.app/api/storeReviewSetting/{{ shop_name }}`;
+
+    fetchStoreReviewRating();
+
+    async function fetchStoreReviewRating() {
+      try {
+        const response = await fetch(GET_STORE_REVIEW_API, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'x-api-key': 'abcdefg',
+            'ngrok-skip-browser-warning': 'true',
+          },
+        });
+        const storeReviewData = await response.json();
+        const storeReviewDataConfig = storeReviewData?.data;
+      } catch (error) {
+        console.error('Error fetching rating config:', error);
+      }
+    }
 
     let userRating = 0;
     let formFields = [
@@ -42,7 +62,6 @@
     let totalPages = 1;
     let isLoading = false;
 
-    // Initialize the application
     function initializeApp() {
       const cardReviewContent = document.querySelector('.card-store-review');
       const firstPageBtn = document.querySelector('.first-page');
@@ -157,7 +176,6 @@
     }
 
     function setupEventListeners() {
-      // Form field validation
       if (formFields.every((field) => field.element)) {
         formFields.forEach((field) => {
           if (field.element) {
@@ -169,7 +187,6 @@
         });
       }
 
-      // Character count for review message
       if (reviewMessage && charCount) {
         reviewMessage.addEventListener('input', () => {
           const count = reviewMessage.value.length;
@@ -183,7 +200,6 @@
         });
       }
 
-      // Store rating click to open modal
       if (storeRating && reviewModal) {
         storeRating.addEventListener('click', () => {
           reviewModal.style.display = 'flex';
@@ -191,14 +207,12 @@
         });
       }
 
-      // Close modal
       if (closeModal) {
         closeModal.addEventListener('click', () => {
           closeReviewModal();
         });
       }
 
-      // Modal background click and escape key
       if (reviewModal) {
         window.addEventListener('click', (e) => {
           if (e.target === reviewModal) {
@@ -213,7 +227,6 @@
         });
       }
 
-      // Add review button
       if (addReviewBtn && reviewForm) {
         addReviewBtn.addEventListener('click', () => {
           reviewForm.classList.toggle('review-open');
@@ -227,7 +240,6 @@
         });
       }
 
-      // Cancel button
       if (cancelBtn && reviewForm && addReviewBtn) {
         cancelBtn.addEventListener('click', () => {
           reviewForm.classList.remove('review-open');
@@ -237,7 +249,6 @@
         });
       }
 
-      // Emoji rating system
       if (emojis && emojis.length > 0) {
         emojis.forEach((emoji) => {
           emoji.addEventListener('mouseover', () => {
@@ -272,7 +283,6 @@
         });
       }
 
-      // File input for images
       if (reviewImage) {
         reviewImage.addEventListener('change', function (e) {
           const fileInput = e.target;
@@ -291,7 +301,6 @@
         });
       }
 
-      // Submit button
       if (submitBtn) {
         submitBtn.addEventListener('click', submitReview);
       }
@@ -708,8 +717,6 @@
           }
         });
     }
-
-    // Initialize the app
     initializeApp();
     setupEventListeners();
   });

@@ -135,8 +135,8 @@
     width: 100%;
     padding: 16px;
     background-color: #000000;
+    border: 1px solid black;
     color: white;
-    border: none;
     border-radius: 12px;
     font-size: 16px;
     font-weight: 600;
@@ -727,8 +727,9 @@
 }
 
 .total-pages {
-    color: #6c757d;
-    font-size: 14px;
+    font-weight: bold;
+    color: #000000;
+    font-size: 16px;
 }
 
 @media (max-width: 480px) {

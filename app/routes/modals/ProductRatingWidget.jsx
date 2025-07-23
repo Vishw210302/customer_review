@@ -167,7 +167,7 @@ function ProductRatingSettings() {
     const fetchRatingConfig = async () => {
         setFetchLoading(true);
         try {
-            const response = await fetch(`https://c14f59ca361f.ngrok-free.app/api/ratingConfig/${storeName}`, {
+            const response = await fetch(`https://def94b3b3985.ngrok-free.app/api/ratingConfig/${storeName}`, {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
@@ -191,7 +191,7 @@ function ProductRatingSettings() {
     const saveSettings = async () => {
         setLoading(true);
         try {
-            const response = await fetch(`https://c14f59ca361f.ngrok-free.app/ratingConfig/${storeName}`, {
+            await fetch(`https://def94b3b3985.ngrok-free.app/api/ratingConfig/${storeName}`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',

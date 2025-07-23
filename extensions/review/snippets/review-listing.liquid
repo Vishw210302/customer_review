@@ -3,7 +3,6 @@
   <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Fixed Review List</title>
 
     <style>
       .review-slider-container {
@@ -135,8 +134,10 @@
   <body>
     <div class="review-slider-container">
       <div class="review-header-main" id="review-header">
-        <h1 style="margin: 0; text-align:center;">What Our Customers Say</h1>
-        <p style="margin: 0; text-align:center;">Discover Vishw our customers love our products and services</p>
+        <h1 class="mainTitle" style="margin: 0; text-align:center;">What Our Customers Say</h1>
+        <p class="main_subtitle" style="margin: 0; text-align:center;">
+          Discover why our customers love our products and services
+        </p>
       </div>
 
       <div class="review-slider" id="dynamic-reviews">
@@ -167,8 +168,10 @@
         let currentDisplayCount = 5;
         const reviewsPerPage = 5;
         const initialDisplayCount = 5;
+        let reviewSettings = {};
 
         fetchReviews();
+        fetchReviewSettings();
 
         async function fetchReviews() {
           try {
@@ -212,6 +215,160 @@
           }
         }
 
+        async function fetchReviewSettings() {
+          try {
+            const shopName = '{{ shop.metafields.shopName.shopName }}';
+            const API_ENDPOINT = `https://def94b3b3985.ngrok-free.app/api/reviewSettings/${shopName}`;
+
+            const response = await fetch(API_ENDPOINT, {
+              method: 'GET',
+              headers: {
+                Accept: 'application/json',
+                'ngrok-skip-browser-warning': 'true',
+              },
+            });
+
+            if (!response.ok) {
+              throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const reviewSettingsResponse = await response.json();
+            reviewSettings = reviewSettingsResponse.data || reviewSettingsResponse;
+            console.log('Review Settings Data:', reviewSettings);
+
+            applyDynamicStyling(reviewSettings);
+          } catch (error) {
+            console.error('Error fetching review settings:', error);
+            applyDynamicStyling({});
+          }
+        }
+
+        function applyDynamicStyling(data) {
+          const titleMain = document.querySelector('.mainTitle');
+          if (titleMain) {
+            titleMain.textContent = data?.mainTitle || 'What Our Customers Say';
+            if (data.titleFontSize) {
+              titleMain.style.fontSize = data.titleFontSize;
+            }
+            if (data.textColor) {
+              titleMain.style.color = data.textColor;
+            }
+          }
+
+          // Fixed the config reference to use reviewSettings/data instead
+          if (data.showOverallReviews === false) {
+            const reviewsSummary = document.querySelector('.review-slider-container');
+            if (reviewsSummary) {
+              reviewsSummary.style.display = 'none';
+            }
+          }
+
+          const subtitleMain = document.querySelector('.main_subtitle');
+          if (subtitleMain) {
+            subtitleMain.textContent =
+              data?.mainSubtitle || 'Discover why our customers love our products and services';
+            if (data.subTitleFontSize) {
+              subtitleMain.style.fontSize = data.subTitleFontSize;
+            }
+            if (data.textColor) {
+              subtitleMain.style.color = data.textColor;
+            }
+          }
+
+          if (data.primaryColor) {
+            const style = document.createElement('style');
+            style.textContent = `
+              .review-rating {
+                color: ${data.primaryColor} !important;
+              }
+              .spinner {
+                border-top-color: ${data.primaryColor} !important;
+              }
+            `;
+            document.head.appendChild(style);
+          }
+
+          if (data.buttonBackground || data.writeButtonText || data.buttonText) {
+            const buttonStyle = document.createElement('style');
+            let buttonCSS = '';
+
+            if (data.buttonBackground) {
+              buttonCSS += `
+                .view-more-btn,
+                .view-less-btn {
+                  background-color: ${data.buttonBackground} !important;
+                }
+              `;
+            }
+
+            if (data.writeButtonText) {
+              buttonCSS += `
+                .view-more-btn,
+                .view-less-btn {
+                  color: ${data.writeButtonText} !important;
+                }
+              `;
+            }
+
+            buttonStyle.textContent = buttonCSS;
+            document.head.appendChild(buttonStyle);
+
+            viewMoreBtn.text(data.buttonText || 'View More Reviews');
+            viewLessBtn.text(data.writeButtonText || 'View Less');
+          }
+
+          if (data.borderRadius) {
+            const radiusStyle = document.createElement('style');
+            radiusStyle.textContent = `
+              .review-card {
+                border-radius: ${data.borderRadius}px !important;
+              }
+              .view-more-btn,
+              .view-less-btn {
+                border-radius: ${data.borderRadius}px !important;
+              }
+            `;
+            document.head.appendChild(radiusStyle);
+          }
+
+          if (data.starSize || data.starSpacing) {
+            const starStyle = document.createElement('style');
+            let starCSS = '';
+
+            if (data.starSize) {
+              starCSS += `
+                .review-rating {
+                  font-size: ${data.starSize} !important;
+                }
+              `;
+            }
+
+            if (data.starSpacing) {
+              starCSS += `
+                .review-rating {
+                  letter-spacing: ${data.starSpacing} !important;
+                }
+              `;
+            }
+
+            starStyle.textContent = starCSS;
+            document.head.appendChild(starStyle);
+          }
+
+          if (data.textColor) {
+            const textStyle = document.createElement('style');
+            textStyle.textContent = `
+              .review-author {
+                color: ${data.textColor} !important;
+              }
+              .review-text {
+                color: ${data.textColor} !important;
+              }
+            `;
+            document.head.appendChild(textStyle);
+          }
+        }
+
         function renderReviews() {
           dynamicReviewsContainer.html('');
 
@@ -228,19 +385,19 @@
             )}/${date.getFullYear()}`;
 
             reviewsHtml += `
-                    <div class="review-list">
-                    <div class="review-card">
-                        <div class="Date">
-                        <h3 class="review-author">${review.name || 'Anonymous'}</h3>
-                        <div>
-                            <h3 class="review-date">${formattedDate}</h3>
-                        </div>
-                        </div>
-                    </div>
-                    <div class="review-rating">${stars}</div>
-                    <p class="review-text">${review.reviewText || 'No comment provided'}</p>
-                    </div>
-                `;
+              <div class="review-list">
+              <div class="review-card">
+                  <div class="Date">
+                  <h3 class="review-author">${review.name || 'Anonymous'}</h3>
+                  <div>
+                      <h3 class="review-date">${formattedDate}</h3>
+                  </div>
+                  </div>
+              </div>
+              <div class="review-rating">${stars}</div>
+              <p class="review-text">${review.reviewText || 'No comment provided'}</p>
+              </div>
+            `;
           });
 
           dynamicReviewsContainer.html(reviewsHtml);
