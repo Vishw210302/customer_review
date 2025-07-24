@@ -18,7 +18,7 @@ export async function loader({ request }) {
 
   const APIURL = process.env.API_URL;
   const url = new URL(request.url);
-  const { session, admin } = await authenticate.admin(request);
+  const { session } = await authenticate.admin(request);
   const shopName = session.shop;
   const reviewType = url.searchParams.get("reviewType") || "product";
   const searchQuery = url.searchParams.get("searchQuery") || "";
@@ -99,8 +99,6 @@ export async function loader({ request }) {
       storeReviewFilterParams.append("limit", "10");
       const { session } = await authenticate.admin(request);
       const shopName = session.shop;
-
-      const products = await admin.graphql(``)
 
       const storeReviewEndpoint = `${APIURL}/api/storeReview/${shopName}?${storeReviewFilterParams.toString()}`;
 

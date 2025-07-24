@@ -10,7 +10,7 @@ const ReviewWidgetSettings = () => {
   const [isFetchingSettings, setIsFetchingSettings] = useState(true);
   const [toast, setToast] = useState({ show: false, message: '', type: '' });
   const staticWidths = ["90%", "70%", "50%", "30%", "10%"];
-  const { shopData } = useLoaderData();
+  const { shopData, apiUrl } = useLoaderData();
   const storeName = shopData?.myshopifyDomain;
   const [settings, setSettings] = useState({});
 
@@ -74,9 +74,15 @@ const ReviewWidgetSettings = () => {
   };
 
   const fetchRatingConfig = async () => {
+    if (!apiUrl) {
+      showToast('API URL not configured', 'error');
+      setIsFetchingSettings(false);
+      return;
+    }
+
     setIsFetchingSettings(true);
     try {
-      const response = await fetch(`https://def94b3b3985.ngrok-free.app/api/reviewSettings/${storeName}`, {
+      const response = await fetch(`${apiUrl}/api/reviewSettings/${storeName}`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -101,12 +107,17 @@ const ReviewWidgetSettings = () => {
   };
 
   const saveSettings = async () => {
+    if (!apiUrl) {
+      showToast('API URL not configured', 'error');
+      return;
+    }
+
     setIsLoading(true);
     try {
 
       const { _id, __v, createdAt, updatedAt, ...settingsToSave } = settings;
 
-      const response = await fetch(`https://def94b3b3985.ngrok-free.app/api/reviewSettings/${storeName}`, {
+      const response = await fetch(`${apiUrl}/api/reviewSettings/${storeName}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -378,7 +389,7 @@ const ReviewWidgetSettings = () => {
   );
 
   return (
-    <div style={{ display: 'flex', gap: '20px', padding: '20px', minHeight: '100vh', backgroundColor: '#f8f9fa' }}>
+    <div className='generic-preview' style={{ display: 'flex', gap: '20px', minHeight: '100vh', backgroundColor: '#f8f9fa' }}>
       {toast.show && (
         <Toast
           message={toast.message}
@@ -391,11 +402,7 @@ const ReviewWidgetSettings = () => {
         width: '400px',
         backgroundColor: 'white',
         padding: '20px',
-        borderRadius: '12px',
         boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
-        height: 'fit-content',
-        position: 'sticky',
-        top: '20px',
         position: 'relative'
       }}>
         {isFetchingSettings && <LoadingOverlay />}

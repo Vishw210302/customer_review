@@ -160,14 +160,20 @@ function ProductRatingSettings() {
     const [activeTab, setActiveTab] = useState('general');
     const [loading, setLoading] = useState(false);
     const [fetchLoading, setFetchLoading] = useState(false);
-    const { shopData } = useLoaderData();
+    const { shopData, apiUrl } = useLoaderData();
     const [settings, setSettings] = useState({});
     const storeName = shopData?.myshopifyDomain;
 
     const fetchRatingConfig = async () => {
+        if (!apiUrl) {
+            console.error('API URL not configured');
+            setFetchLoading(false);
+            return;
+        }
+
         setFetchLoading(true);
         try {
-            const response = await fetch(`https://def94b3b3985.ngrok-free.app/api/ratingConfig/${storeName}`, {
+            const response = await fetch(`${apiUrl}/api/ratingConfig/${storeName}`, {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
@@ -189,9 +195,14 @@ function ProductRatingSettings() {
     }, []);
 
     const saveSettings = async () => {
+        if (!apiUrl) {
+            console.error('API URL not configured');
+            return;
+        }
+
         setLoading(true);
         try {
-            await fetch(`https://def94b3b3985.ngrok-free.app/api/ratingConfig/${storeName}`, {
+            await fetch(`${apiUrl}/api/ratingConfig/${storeName}`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
@@ -318,7 +329,6 @@ function ProductRatingSettings() {
                         {renderFormField('color', 'emptyStarColor', 'Empty Star')}
                         {renderFormField('color', 'titleColor', 'Title')}
                         {renderFormField('color', 'countColor', 'Count')}
-                        {/* {renderFormField('color', 'backgroundColor', 'Background')} */}
                         <Button
                             variant="primary"
                             onClick={saveSettings}
@@ -360,7 +370,7 @@ function ProductRatingSettings() {
     const previewStyles = getPreviewStyles();
 
     return (
-        <div style={STYLES.container}>
+        <div className='product-rating-widgets' style={STYLES.container}>
             <div style={STYLES.settingsPanel}>
                 <div style={STYLES.header}>
                     <h2 style={STYLES.headerTitle}>

@@ -128,7 +128,7 @@ function StoreReviewSettings() {
     const [settings, setSettings] = useState({ data: {} });
     const [isLoading, setIsLoading] = useState(false);
     const [saveMessage, setSaveMessage] = useState('');
-    const { shopData } = useLoaderData();
+    const { shopData, apiUrl } = useLoaderData();
     const storeName = shopData?.myshopifyDomain;
     const [activeTab, setActiveTab] = useState('general');
 
@@ -158,10 +158,13 @@ function StoreReviewSettings() {
     }, [settings.data?.starColor, settings.data?.starSize, settings.data?.starSpacing]);
 
     const fetchRatingConfig = useCallback(async () => {
-        if (!storeName) return;
+        if (!storeName || !apiUrl) {
+            console.error('Store name or API URL not found');
+            return;
+        }
 
         try {
-            const response = await fetch(`https://def94b3b3985.ngrok-free.app/api/storeReviewSetting/${storeName}`, {
+            const response = await fetch(`${apiUrl}/api/storeReviewSetting/${storeName}`, {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
@@ -176,7 +179,7 @@ function StoreReviewSettings() {
         } catch (error) {
             console.error('Error fetching rating config:', error);
         }
-    }, [storeName]);
+    }, [storeName, apiUrl]);
 
     const saveSettings = async () => {
         if (!storeName) {
@@ -184,11 +187,16 @@ function StoreReviewSettings() {
             return;
         }
 
+        if (!apiUrl) {
+            setSaveMessage('Error: API URL not configured');
+            return;
+        }
+
         setIsLoading(true);
         setSaveMessage('');
 
         try {
-            const response = await fetch(`https://def94b3b3985.ngrok-free.app/api/storeReviewSetting/${storeName}`, {
+            const response = await fetch(`${apiUrl}/api/storeReviewSetting/${storeName}`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
@@ -227,11 +235,6 @@ function StoreReviewSettings() {
                 onChange={(e) => updateSetting('title', e.target.value)}
             />
             <InputField
-                label="Total Reviews Text"
-                value={settings.data?.totalReviewsBased}
-                onChange={(e) => updateSetting('totalReviewsBased', e.target.value)}
-            />
-            <InputField
                 label="Button Text"
                 value={settings.data?.buttonText}
                 onChange={(e) => updateSetting('buttonText', e.target.value)}
@@ -257,7 +260,6 @@ function StoreReviewSettings() {
                 onChange={(e) => updateSetting('showReviewEmail', e.target.checked)}
             />
 
-            {/* Save Message */}
             {saveMessage && (
                 <div style={{
                     padding: '0.75rem',
@@ -326,7 +328,6 @@ function StoreReviewSettings() {
                 type="color"
             />
 
-            {/* Save Message */}
             {saveMessage && (
                 <div style={{
                     padding: '0.75rem',
@@ -395,7 +396,6 @@ function StoreReviewSettings() {
                 options={STAR_SPACING_OPTIONS}
             />
 
-            {/* Save Message */}
             {saveMessage && (
                 <div style={{
                     padding: '0.75rem',
@@ -434,7 +434,6 @@ function StoreReviewSettings() {
 
     return (
         <div style={{ display: 'flex', minHeight: '100vh', backgroundColor: '#f8fafc' }}>
-            {/* Settings Panel */}
             <div style={{
                 width: '400px',
                 backgroundColor: 'white',
@@ -460,7 +459,6 @@ function StoreReviewSettings() {
                     </h2>
                 </div>
 
-                {/* Tab Navigation */}
                 <div style={{ display: 'flex', borderBottom: '1px solid #e5e7eb' }}>
                     {TABS.map(tab => (
                         <button
@@ -492,7 +490,6 @@ function StoreReviewSettings() {
                 </div>
             </div>
 
-            {/* Preview Panel */}
             <div style={{
                 flex: 1,
                 padding: '2rem',

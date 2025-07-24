@@ -1,4 +1,5 @@
 {% assign product_id = product.id %}
+{% assign product_title = product.title %}
 {% assign shop_name = shop.metafields.shopName.shopName %}
 {{ 'starLiquid.css' | asset_url | stylesheet_tag }}
 
@@ -12,6 +13,7 @@
     </div>
     <form id="review-form" class="review-form">
       <input type="hidden" id="product-id" name="productId" value="{{ product_id }}">
+      <input type="hidden" id="product-title" name="productTitle" value="{{ product_title }}">
       <input type="hidden" id="shop-name" name="storeName" value="{{ shop_name }}">
 
       <div class="form-group">
@@ -180,7 +182,7 @@
   class ReviewSystem {
     constructor() {
       this.API_BASE = 'https://checklist.codecrewinfotech.com/api';
-      this.SETTINGS_API = 'https://def94b3b3985.ngrok-free.app/api/reviewSettings';
+      this.SETTINGS_API = 'https://checklist.codecrewinfotech.com/api/reviewSettings';
       this.elements = this.initElements();
       this.config = {};
       this.init();

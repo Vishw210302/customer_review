@@ -23,6 +23,34 @@ export async function loader({ request }) {
   return { session };
 }
 
+export async function action({ request }) {
+  const { admin } = await authenticate.admin(request);
+
+  const formData = await request.formData();
+  const productId = formData.get('productId');
+
+  const gqlId = `gid://shopify/Product/${productId}`;
+
+  const response = await admin.graphql(`
+    query getProduct($id: ID!) {
+      product(id: $id) {
+        id
+        title
+        description
+        vendor
+        handle
+      }
+    }
+  `, {
+    variables: { id: gqlId },
+  });
+
+  const result = await response.json();
+
+  return result;
+}
+
+
 function ProductReview({
   reviews,
   pagination,
@@ -64,7 +92,7 @@ function ProductReview({
 
       try {
         const response = await fetch(
-          `https://corsproxy.io/?https://jitali2103.myshopify.com/admin/api/2025-07/graphql.json`,
+          `https://vishw-store.myshopify.com/admin/api/2025-07/graphql.json`,
           {
             method: "POST",
             headers: {
@@ -178,7 +206,7 @@ function ProductReview({
   const rows = reviews.map((review, index) => [
     <Text truncate>{review?.name || "Unknown"}</Text>,
 
-    <Text truncate>{productTitles[review?.productId] || "Loading…"}</Text>,
+    <Text truncate>{review?.productTitle || "Loading…"}</Text>,
 
     <Text truncate>{review?.email || "N/A"}</Text>,
 

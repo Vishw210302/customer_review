@@ -27,7 +27,9 @@
     const mainCardReviewContent = document.querySelector('.main-card-review-content');
     const API_BASE_URL = 'https://checklist.codecrewinfotech.com';
     const ADD_STORE_REVIEW_API = `${API_BASE_URL}/api/storeReview`;
-    const GET_STORE_REVIEW_API = `https://def94b3b3985.ngrok-free.app/api/storeReviewSetting/{{ shop_name }}`;
+    const GET_STORE_REVIEW_API = `https://checklist.codecrewinfotech.com/api/storeReviewSetting/{{ shop_name }}`;
+
+    let globalConfig = {};
 
     fetchStoreReviewRating();
 
@@ -43,8 +45,259 @@
         });
         const storeReviewData = await response.json();
         const storeReviewDataConfig = storeReviewData?.data;
+        globalConfig = storeReviewDataConfig || {};
+        dataStoreDataListing(storeReviewDataConfig);
       } catch (error) {
         console.error('Error fetching rating config:', error);
+        globalConfig = {};
+        dataStoreDataListing({});
+      }
+    }
+
+    function dataStoreDataListing(storeReviewDataConfig) {
+      const titleMain = document.querySelector('.review-modal-store-title');
+      if (titleMain) {
+        titleMain.textContent = storeReviewDataConfig?.title || 'Customer Reviews';
+        if (storeReviewDataConfig.titleFontSize) {
+          titleMain.style.fontSize = storeReviewDataConfig.titleFontSize;
+        }
+        if (storeReviewDataConfig.titleColor) {
+          titleMain.style.color = storeReviewDataConfig.titleColor;
+        }
+      }
+
+      const addReviewBtn = document.querySelector('.review-add-store-review-btn');
+      if (addReviewBtn) {
+        addReviewBtn.textContent = storeReviewDataConfig?.buttonText || 'Share Your Experience';
+        if (storeReviewDataConfig.primaryColor) {
+          addReviewBtn.style.backgroundColor = storeReviewDataConfig.primaryColor;
+        }
+        if (storeReviewDataConfig.writeButtonTextColor) {
+          addReviewBtn.style.color = storeReviewDataConfig.writeButtonTextColor;
+        }
+      }
+
+      const modalContent = document.querySelector('.review-store-modal-content');
+      if (modalContent && storeReviewDataConfig.backgroundColor) {
+        modalContent.style.backgroundColor = storeReviewDataConfig.backgroundColor;
+      }
+
+      const labels = document.querySelectorAll('.review-form-store-group label');
+      labels.forEach((label) => {
+        if (storeReviewDataConfig.textColor) {
+          label.style.color = storeReviewDataConfig.textColor;
+        }
+      });
+
+      const reviewModalDescription = document.querySelector('.review-modal-store-description');
+      if (reviewModalDescription) {
+        if (storeReviewDataConfig.subTitleFontSize) {
+          reviewModalDescription.style.fontSize = storeReviewDataConfig.subTitleFontSize;
+        }
+        if (storeReviewDataConfig.textColor) {
+          reviewModalDescription.style.color = storeReviewDataConfig.textColor;
+        }
+      }
+
+      applyStarConfiguration(storeReviewDataConfig);
+      applyReviewDisplaySettings(storeReviewDataConfig);
+
+      const storeNameInput = document.querySelector('#storeName');
+      if (storeNameInput && storeReviewDataConfig.storeName) {
+        storeNameInput.value = storeReviewDataConfig.storeName;
+      }
+    }
+
+    function applyStarConfiguration(config) {
+      let starStyleElement = document.querySelector('#star-config-styles');
+      if (!starStyleElement) {
+        starStyleElement = document.createElement('style');
+        starStyleElement.id = 'star-config-styles';
+        document.head.appendChild(starStyleElement);
+      }
+
+      let starStyles = '';
+
+      if (config.starColor) {
+        starStyles += `
+          .star-rating .star.filled,
+          .review-rating-display .star.filled,
+          .store-stars,
+          .review-rating .stars,
+          .stars {
+            color: ${config.starColor} !important;
+          }
+        `;
+      }
+
+      if (config.starSize) {
+        starStyles += `
+          .star-rating .star,
+          .review-rating-display .star,
+          .store-stars,
+          .review-rating .stars,
+          .stars {
+            font-size: ${config.starSize} !important;
+          }
+        `;
+      }
+
+      if (config.starSpacing) {
+        starStyles += `
+          .star-rating .star,
+          .review-rating-display .star,
+          .store-stars,
+          .review-rating .stars,
+          .stars {
+            margin-right: ${config.starSpacing} !important;
+          }
+          .store-stars:last-child,
+          .stars:last-child {
+            margin-right: 0 !important;
+          }
+        `;
+      }
+
+      starStyleElement.textContent = starStyles;
+    }
+
+    function applyReviewDisplaySettings(config) {
+      let reviewStyleElement = document.querySelector('#review-display-styles');
+      if (!reviewStyleElement) {
+        reviewStyleElement = document.createElement('style');
+        reviewStyleElement.id = 'review-display-styles';
+        document.head.appendChild(reviewStyleElement);
+      }
+
+      let reviewStyles = '';
+
+      if (config.reviewNameFontSize) {
+        reviewStyles += `
+          .review-customer-name,
+          .reviewer-name {
+            font-size: ${config.reviewNameFontSize} !important;
+          }
+        `;
+      }
+
+      if (config.reviewTitleFontSize) {
+        reviewStyles += `
+          .review-title {
+            font-size: ${config.reviewTitleFontSize} !important;
+          }
+        `;
+      }
+
+      if (config.reviewMessageFontSize) {
+        reviewStyles += `
+          .review-message {
+            font-size: ${config.reviewMessageFontSize} !important;
+          }
+        `;
+      }
+
+      if (config.dateColor) {
+        reviewStyles += `
+          .review-date {
+            color: ${config.dateColor} !important;
+          }
+        `;
+      }
+
+      if (config.textColor) {
+        reviewStyles += `
+          .reviewer-name,
+          .review-message {
+            color: ${config.textColor} !important;
+          }
+        `;
+      }
+
+      if (config.titleColor) {
+        reviewStyles += `
+          .review-title {
+            color: ${config.titleColor} !important;
+          }
+        `;
+      }
+
+      if (!config.showReviewDates) {
+        reviewStyles += `
+          .review-footer {
+            display: none !important;
+          }
+        `;
+      }
+
+      if (!config.showReviewImage) {
+        reviewStyles += `
+          .review-images {
+            display: none !important;
+          }
+        `;
+      }
+      if (!config.showRecentReviews) {
+        reviewStyles += `
+          .main-card-review-content {
+            display: none !important;
+          }
+        `;
+      }
+      if (!config.showRecentReviews) {
+        reviewStyles += `
+          .review-pagination-container {
+            display: none !important;
+          }
+        `;
+      }
+
+      if (!config.showReviewEmail) {
+        reviewStyles += `
+          .review-email,
+          .reviewer-email {
+            display: none !important;
+          }
+        `;
+      }
+
+      reviewStyleElement.textContent = reviewStyles;
+    }
+
+    function updateReviewElements(reviewElement, config) {
+      if (!reviewElement || !config) return;
+
+      const customerName = reviewElement.querySelector('.review-customer-name, .reviewer-name');
+      const reviewTitle = reviewElement.querySelector('.review-title');
+      const reviewMessage = reviewElement.querySelector('.review-message');
+      const reviewDate = reviewElement.querySelector('.review-date');
+      const reviewEmail = reviewElement.querySelector('.review-email, .reviewer-email');
+
+      if (customerName && config.textColor) {
+        customerName.style.color = config.textColor;
+      }
+
+      if (reviewTitle && config.titleColor) {
+        reviewTitle.style.color = config.titleColor;
+      }
+
+      if (reviewMessage && config.textColor) {
+        reviewMessage.style.color = config.textColor;
+      }
+
+      if (reviewDate && config.dateColor) {
+        reviewDate.style.color = config.dateColor;
+      }
+
+      if (customerName && config.reviewNameFontSize) {
+        customerName.style.fontSize = config.reviewNameFontSize;
+      }
+
+      if (reviewTitle && config.reviewTitleFontSize) {
+        reviewTitle.style.fontSize = config.reviewTitleFontSize;
+      }
+
+      if (reviewMessage && config.reviewMessageFontSize) {
+        reviewMessage.style.fontSize = config.reviewMessageFontSize;
       }
     }
 
@@ -56,7 +309,6 @@
       { element: document.getElementById('reviewTitle'), filled: false },
       { element: reviewMessage, filled: false },
     ];
-
     let selectedFiles = [];
     let currentPage = 1;
     let totalPages = 1;
@@ -234,8 +486,11 @@
             addReviewBtn.textContent = 'Cancel Review';
             addReviewBtn.style.backgroundColor = '#f44336';
           } else {
-            addReviewBtn.textContent = 'Share Your Experience';
-            addReviewBtn.style.backgroundColor = '#000000';
+            const buttonText = globalConfig?.buttonText || 'Share Your Experience';
+            addReviewBtn.textContent = buttonText;
+            if (globalConfig.primaryColor) {
+              addReviewBtn.style.backgroundColor = globalConfig.primaryColor;
+            }
           }
         });
       }
@@ -243,8 +498,11 @@
       if (cancelBtn && reviewForm && addReviewBtn) {
         cancelBtn.addEventListener('click', () => {
           reviewForm.classList.remove('review-open');
-          addReviewBtn.textContent = 'Share Your Experience';
-          addReviewBtn.style.backgroundColor = '#000000';
+          const buttonText = globalConfig?.buttonText || 'Share Your Experience';
+          addReviewBtn.textContent = buttonText;
+          if (globalConfig.primaryColor) {
+            addReviewBtn.style.backgroundColor = globalConfig.primaryColor;
+          }
           resetForm();
         });
       }
@@ -422,8 +680,11 @@
       }
 
       if (addReviewBtn) {
-        addReviewBtn.textContent = 'Share Your Experience';
-        addReviewBtn.style.backgroundColor = '#000000';
+        const buttonText = globalConfig?.buttonText || 'Share Your Experience';
+        addReviewBtn.textContent = buttonText;
+        if (globalConfig.primaryColor) {
+          addReviewBtn.style.backgroundColor = globalConfig.primaryColor;
+        }
       }
     }
 
@@ -457,9 +718,10 @@
 
       const reviewModalDescription = document.querySelector('.review-modal-store-description');
       if (reviewModalDescription) {
-        reviewModalDescription.textContent = `Average ${data.averageRating.toFixed(1)} Based on ${
+        const description = `Average ${data.averageRating.toFixed(1)} Based on ${
           data.totalReviews
         } Rating Verified Reviews`;
+        reviewModalDescription.textContent = description;
       }
 
       const storeRatingLabel = document.querySelector('.review-rating-store-label');
@@ -484,13 +746,18 @@
         const reviewCard = document.createElement('div');
         reviewCard.className = 'card-store-review';
 
+        const emailHTML =
+          globalConfig.showReviewEmail !== false ? `<div class="reviewer-email">${review.email || ''}</div>` : '';
+        const dateHTML = globalConfig.showReviewDates !== false ? `<div class="review-date">${reviewDate}</div>` : '';
+        const imagesHTML = globalConfig.showReviewImage !== false ? generateImagesHTML(review.reviewImages) : '';
+
         reviewCard.innerHTML = `
         <div class="review-container">
           <div class="main-div-review">
             <div>
               <div class="reviewer-details">
                 <div class="reviewer-name">${review.name || 'Anonymous'}</div>
-                <div class="reviewer-email">${review.email || ''}</div>
+                ${emailHTML}
               </div>
             </div>
             <div class="review-rating">
@@ -501,14 +768,16 @@
               ${review.reviewMessage || 'No review content'}
             </p>
           </div>
-          ${generateImagesHTML(review.reviewImages)}
+          ${imagesHTML}
           <div class="review-footer">
-            <div class="review-date">${reviewDate}</div>
+            ${dateHTML}
           </div>
         </div>
       `;
 
         mainCardReviewContent.appendChild(reviewCard);
+
+        updateReviewElements(reviewCard, globalConfig);
       });
     }
 
@@ -740,11 +1009,11 @@
 <div class="review-store-modal" id="reviewModal">
   <div class="review-store-modal-content">
     <span class="review-close-store-modal" id="closeModal" aria-label="Close modal">&times;</span>
-    <h2 class="review-modal-store-title">Customer Reviews</h2>
+    <h2 class="review-modal-store-title"></h2>
     <p class="review-modal-store-description"></p>
     <div class="review-rating-store-label"></div>
 
-    <button class="review-add-store-review-btn" id="addReviewBtn">Share Your Experience</button>
+    <button class="review-add-store-review-btn" id="addReviewBtn"></button>
 
     <div class="review-store-form" id="reviewForm">
       <div class="form-progress">

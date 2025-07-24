@@ -52,9 +52,9 @@ const makeGraphQLRequest = async (shop, accessToken, query) => {
   return response.json();
 };
 
-const callRatingConfigAPI = async (storeName) => {
+const callRatingConfigAPI = async (storeName, apiUrl) => {
   try {
-    const response = await fetch('https://def94b3b3985.ngrok-free.app/api/ratingConfig', {
+    const response = await fetch(`${apiUrl}/api/ratingConfig`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -78,9 +78,9 @@ const callRatingConfigAPI = async (storeName) => {
   }
 };
 
-const callStoreReviewSettingAPI = async (storeName) => {
+const callStoreReviewSettingAPI = async (storeName, apiUrl) => {
   try {
-    const response = await fetch('https://def94b3b3985.ngrok-free.app/api/storeReviewSetting', {
+    const response = await fetch(`${apiUrl}/api/storeReviewSetting`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -104,9 +104,9 @@ const callStoreReviewSettingAPI = async (storeName) => {
   }
 };
 
-const callReviewSettingsAPI = async (storeName) => {
+const callReviewSettingsAPI = async (storeName, apiUrl) => {
   try {
-    const response = await fetch('https://def94b3b3985.ngrok-free.app/api/reviewSettings', {
+    const response = await fetch(`${apiUrl}/api/reviewSettings`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -134,6 +134,7 @@ export const loader = async ({ request }) => {
   const { session, admin } = await authenticate.admin(request);
   const { accessToken, shop } = session;
   const blockId = process.env.SHOPIFY_REVIEW_ID;
+  const apiUrl = process.env.API_URL;
 
   try {
 
@@ -150,12 +151,12 @@ export const loader = async ({ request }) => {
     let storeReviewSettingData = null;
     let reviewSettingsData = null;
 
-    if (shopData?.myshopifyDomain) {
+    if (shopData?.myshopifyDomain && apiUrl) {
       try {
         const [ratingConfig, storeReviewSetting, reviewSettings] = await Promise.all([
-          callRatingConfigAPI(shopData.myshopifyDomain),
-          callStoreReviewSettingAPI(shopData.myshopifyDomain),
-          callReviewSettingsAPI(shopData.myshopifyDomain),
+          callRatingConfigAPI(shopData.myshopifyDomain, apiUrl),
+          callStoreReviewSettingAPI(shopData.myshopifyDomain, apiUrl),
+          callReviewSettingsAPI(shopData.myshopifyDomain, apiUrl),
         ]);
         ratingConfigData = ratingConfig;
         storeReviewSettingData = storeReviewSetting;
@@ -212,6 +213,7 @@ export const loader = async ({ request }) => {
       ratingConfigData,
       storeReviewSettingData,
       reviewSettingsData,
+      apiUrl,
     });
   } catch (error) {
     console.error("Loader error:", error);
@@ -224,6 +226,7 @@ export const loader = async ({ request }) => {
       ratingConfigData: null,
       storeReviewSettingData: null,
       reviewSettingsData: null,
+      apiUrl: process.env.API_URL || '',
     });
   }
 };
@@ -300,7 +303,7 @@ const styles = {
 
 const ThemeStatus = () => {
 
-  const { activeTheme, session, blockId, shopData, ratingConfigData, storeReviewSettingData, reviewSettingsData } = useLoaderData();
+  const { activeTheme, session, blockId, shopData, ratingConfigData, storeReviewSettingData, reviewSettingsData, apiUrl } = useLoaderData();
   const [selectedTheme, setSelectedTheme] = useState(null);
   const navigation = useNavigation();
   const [selectedTab, setSelectedTab] = useState(0);
@@ -319,9 +322,9 @@ const ThemeStatus = () => {
   }, [activeTheme]);
 
   const handleRatingConfigUpdate = async () => {
-    if (shopData?.myshopifyDomain) {
+    if (shopData?.myshopifyDomain && apiUrl) {
       try {
-        const response = await fetch('https://def94b3b3985.ngrok-free.app/api/ratingConfig', {
+        const response = await fetch(`${apiUrl}/api/ratingConfig`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -346,9 +349,9 @@ const ThemeStatus = () => {
   };
 
   const handleStoreReviewSettingUpdate = async () => {
-    if (shopData?.myshopifyDomain) {
+    if (shopData?.myshopifyDomain && apiUrl) {
       try {
-        const response = await fetch('https://def94b3b3985.ngrok-free.app/api/storeReviewSetting', {
+        const response = await fetch(`${apiUrl}/api/storeReviewSetting`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -373,9 +376,9 @@ const ThemeStatus = () => {
   };
 
   const handleReviewSettingsUpdate = async () => {
-    if (shopData?.myshopifyDomain) {
+    if (shopData?.myshopifyDomain && apiUrl) {
       try {
-        const response = await fetch('https://def94b3b3985.ngrok-free.app/api/reviewSettings', {
+        const response = await fetch(`${apiUrl}/api/reviewSettings`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -402,7 +405,7 @@ const ThemeStatus = () => {
   const handleWidgetInstallClick = async () => {
     const promises = [];
 
-    if (shopData?.myshopifyDomain) {
+    if (shopData?.myshopifyDomain && apiUrl) {
       promises.push(handleRatingConfigUpdate());
       promises.push(handleStoreReviewSettingUpdate());
       promises.push(handleReviewSettingsUpdate());
@@ -503,7 +506,8 @@ const ThemeStatus = () => {
               }
               .Polaris-Tabs__Tab:not(.Polaris-Tabs__Tab--selected) {
                 border-bottom: 2px solid #ccc;
-              }`}
+              }`
+            }
           </style>
           <div style={styles.tabContent}>
             {renderTabContent()}

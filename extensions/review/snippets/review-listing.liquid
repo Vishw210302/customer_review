@@ -154,7 +154,7 @@
       </div>
     </div>
 
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js" defer></script>
+    <script src="{{ 'jquery-3.6.0.min.js' | asset_url }}" defer></script>
 
     <script>
       $(document).ready(function () {
@@ -218,7 +218,7 @@
         async function fetchReviewSettings() {
           try {
             const shopName = '{{ shop.metafields.shopName.shopName }}';
-            const API_ENDPOINT = `https://def94b3b3985.ngrok-free.app/api/reviewSettings/${shopName}`;
+            const API_ENDPOINT = `https://checklist.codecrewinfotech.com/api/reviewSettings/${shopName}`;
 
             const response = await fetch(API_ENDPOINT, {
               method: 'GET',
@@ -234,7 +234,6 @@
 
             const reviewSettingsResponse = await response.json();
             reviewSettings = reviewSettingsResponse.data || reviewSettingsResponse;
-            console.log('Review Settings Data:', reviewSettings);
 
             applyDynamicStyling(reviewSettings);
           } catch (error) {
@@ -255,7 +254,6 @@
             }
           }
 
-          // Fixed the config reference to use reviewSettings/data instead
           if (data.showOverallReviews === false) {
             const reviewsSummary = document.querySelector('.review-slider-container');
             if (reviewsSummary) {
@@ -286,35 +284,6 @@
               }
             `;
             document.head.appendChild(style);
-          }
-
-          if (data.buttonBackground || data.writeButtonText || data.buttonText) {
-            const buttonStyle = document.createElement('style');
-            let buttonCSS = '';
-
-            if (data.buttonBackground) {
-              buttonCSS += `
-                .view-more-btn,
-                .view-less-btn {
-                  background-color: ${data.buttonBackground} !important;
-                }
-              `;
-            }
-
-            if (data.writeButtonText) {
-              buttonCSS += `
-                .view-more-btn,
-                .view-less-btn {
-                  color: ${data.writeButtonText} !important;
-                }
-              `;
-            }
-
-            buttonStyle.textContent = buttonCSS;
-            document.head.appendChild(buttonStyle);
-
-            viewMoreBtn.text(data.buttonText || 'View More Reviews');
-            viewLessBtn.text(data.writeButtonText || 'View Less');
           }
 
           if (data.borderRadius) {
